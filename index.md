@@ -11,8 +11,9 @@ title: secemp Blog
 {% assign featured = sorted_posts[0] %}
 {% assign rest = sorted_posts | slice: 1, N %}
 
+{% if featured %}
 <div class="featured-post">
-  <a class="card-link" href="{{ featured.url | relative_url }}">
+  <a class="card-link" href="{{ featured.url | relative_url }}" aria-label="Read featured post: {{ featured.title }}">
     <div class="card-title">{{ featured.title }}</div>
     <div class="card-date">{{ featured.date | date: "%B %d, %Y" }}</div>
     <div class="card-excerpt">{{ featured.excerpt | strip_html | truncate: 180 }}</div>
@@ -23,6 +24,7 @@ title: secemp Blog
     {% endif %}
   </a>
 </div>
+{% endif %}
 
 <div class="blog-list">
   {% for post in rest %}
