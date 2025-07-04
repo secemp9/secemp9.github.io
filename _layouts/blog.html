@@ -31,9 +31,9 @@
         </div>
         <nav aria-label="Main navigation">
           <ul>
-            <li><a href="{{ "/" | relative_url }}" {% if page.url == '/' %}class="active" aria-current="page"{% endif %}>Home</a></li>
-            <li><a href="{{ "/posts/" | relative_url }}" {% if page.url contains '/posts' %}class="active" aria-current="page"{% endif %}>Posts</a></li>
-            <li><a href="{{ "/about/" | relative_url }}" {% if page.url contains '/about' %}class="active" aria-current="page"{% endif %}>About</a></li>
+            <li><a href="{{ "/" | relative_url }}" {% if page.url == '/' %}class="active" aria-current="page"{% endif %} aria-label="Home">Home</a></li>
+            <li><a href="{{ "/posts/" | relative_url }}" {% if page.url contains '/posts' %}class="active" aria-current="page"{% endif %} aria-label="Posts">Posts</a></li>
+            <li><a href="{{ "/about/" | relative_url }}" {% if page.url contains '/about' %}class="active" aria-current="page"{% endif %} aria-label="About">About</a></li>
           </ul>
         </nav>
         <div class="social-icons">
@@ -56,7 +56,7 @@
   <footer>
     <div class="footer-content">
       <div>&copy; {{ site.time | date: '%Y' }} secemp | researcher | swe | data scraper</div>
-      <a class="back-to-top" href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Back to top &uarr;</a>
+      <a class="back-to-top" href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Back to top">Back to top &uarr;</a>
     </div>
   </footer>
 </body>

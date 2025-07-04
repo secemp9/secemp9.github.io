@@ -36,8 +36,8 @@
         </div>
         <nav>
           <ul>
-            <li><a href="{{ "/" | relative_url }}">Home</a></li>
-            <li><a href="{{ "/about/" | relative_url }}">About</a></li>
+            <li><a href="{{ "/" | relative_url }}" aria-label="Home">Home</a></li>
+            <li><a href="{{ "/about/" | relative_url }}" aria-label="About">About</a></li>
           </ul>
         </nav>
         <div class="social-icons">
@@ -60,13 +60,13 @@
         {{ content }}
       </div>
       <div class="post-nav">
-        <a href="{{ '/' | relative_url }}">&larr; Back to Blog</a>
+        <a href="{{ '/' | relative_url }}" aria-label="Back to Blog">&larr; Back to Blog</a>
         <span style="flex:1"></span>
         {% if page.previous.url %}
-          <a href="{{ page.previous.url | relative_url }}">&larr; Previous</a>
+          <a href="{{ page.previous.url | relative_url }}" aria-label="Previous Post">&larr; Previous</a>
         {% endif %}
         {% if page.next.url %}
-          <a href="{{ page.next.url | relative_url }}">Next &rarr;</a>
+          <a href="{{ page.next.url | relative_url }}" aria-label="Next Post">Next &rarr;</a>
         {% endif %}
       </div>
     </main>
