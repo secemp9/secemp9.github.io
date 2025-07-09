@@ -335,17 +335,14 @@ footer {
     width: 100%;
 }
 .featured-post .card-title {
-    color: #fff;
     font-size: 2em;
     margin-bottom: 10px;
 }
 .featured-post .card-date {
-    color: #f5f5dc;
     font-size: 1.1em;
     margin-bottom: 14px;
 }
 .featured-post .card-excerpt {
-    color: #fff;
     font-size: 1.15em;
     margin-bottom: 18px;
     opacity: 0.98;
