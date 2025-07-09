@@ -316,7 +316,7 @@ footer {
 
 /* Featured post */
 .featured-post {
-    background: linear-gradient(90deg, var(--primary-color) 0%, var(--card-bg) 100%);
+    background: var(--card-bg);
     color: #fff;
     border-radius: 12px;
     box-shadow: 0 6px 24px rgba(212,175,55,0.10);
@@ -326,6 +326,7 @@ footer {
     flex-direction: column;
     align-items: flex-start;
     animation: fadein 0.8s;
+    border: 2.5px solid var(--primary-color);
 }
 .featured-post .card-title {
     color: #fff;
