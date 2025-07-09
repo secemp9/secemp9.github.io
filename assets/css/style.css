@@ -328,6 +328,12 @@ footer {
     animation: fadein 0.8s;
     border: 2.5px solid var(--primary-color);
 }
+.featured-post > .card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
 .featured-post .card-title {
     color: #fff;
     font-size: 2em;

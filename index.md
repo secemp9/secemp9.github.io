@@ -14,14 +14,16 @@ title: secemp Blog
 {% if featured %}
 <div class="featured-post">
   <a class="card-link" href="{{ featured.url | relative_url }}" aria-label="Read featured post: {{ featured.title }}">
-    <div class="card-title">{{ featured.title }}</div>
-    <div class="card-date">{{ featured.date | date: "%B %d, %Y" }}</div>
-    <div class="card-excerpt">{{ featured.excerpt | strip_html | truncate: 180 }}</div>
-    {% if featured.tags and featured.tags.size > 0 %}
-    <div class="card-tags">
-      {% for tag in featured.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+    <div class="card-content">
+      <div class="card-title">{{ featured.title }}</div>
+      <div class="card-date">{{ featured.date | date: "%B %d, %Y" }}</div>
+      <div class="card-excerpt">{{ featured.excerpt | strip_html | truncate: 180 }}</div>
+      {% if featured.tags and featured.tags.size > 0 %}
+      <div class="card-tags">
+        {% for tag in featured.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+      </div>
+      {% endif %}
     </div>
-    {% endif %}
   </a>
 </div>
 {% endif %}
