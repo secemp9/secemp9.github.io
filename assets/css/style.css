@@ -49,6 +49,7 @@ header {
     flex-direction: row;
     align-items: center;
     gap: 20px;
+    width: 100%;
 }
 .header-left {
     display: flex;
@@ -86,6 +87,7 @@ nav {
     display: flex;
     justify-content: center;
     margin-left: 30px;
+    min-width: 0;
 }
 nav ul {
     list-style: none;
@@ -310,6 +312,7 @@ main {
     gap: 8px;
     flex-shrink: 0;
     margin-right: 12px;
+    margin-left: auto;
 }
 .social-icon {
     width: 28px;
