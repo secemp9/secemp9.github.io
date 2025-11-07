@@ -1,0 +1,741 @@
+/* Blog Theme for Obsidian - 1:1 Match with Website */
+/* Force override Obsidian's default theme */
+
+:root {
+  --bg-color: #2c1e12 !important;
+  --text-color: #f5f5dc !important;
+  --primary-color: #D4AF37 !important;
+  --secondary-color: #B8860B !important;
+  --accent-color: #DAA520 !important;
+  --header-bg: #1a110a !important;
+  --card-bg: #3d2b1f !important;
+  --code-bg: #1f160f !important;
+  --code-text: #f0e6d2 !important;
+  --border-color: #5a452f !important;
+  --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+  --font-code: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace !important;
+  --container-width: 900px !important;
+  --content-padding-v: 32px !important;
+  --content-padding-h: 36px !important;
+}
+
+/* Force override Obsidian theme variables */
+.theme-dark,
+body,
+html {
+  --background-primary: #2c1e12 !important;
+  --background-primary-alt: #1a110a !important;
+  --background-secondary: #3d2b1f !important;
+  --background-secondary-alt: #1a110a !important;
+  --background-modifier-border: #5a452f !important;
+  --background-modifier-form-field: #3d2b1f !important;
+  --text-normal: #f5f5dc !important;
+  --text-muted: #c7b299 !important;
+  --text-faint: #8a7a5e !important;
+  --text-on-accent: #fff !important;
+  --accent: #D4AF37 !important;
+  --accent-2: #B8860B !important;
+  --interactive-normal: #DAA520 !important;
+  --interactive-hover: #D4AF37 !important;
+  --interactive-active: #D4AF37 !important;
+  --border-color: #5a452f !important;
+  --border-color-2: #5a452f !important;
+  --file-line-width: calc(var(--container-width) - (var(--content-padding-h) * 2)) !important;
+  background-color: #2c1e12 !important;
+  color: #f5f5dc !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+  line-height: 1.7 !important;
+  font-size: 17px !important;
+}
+
+/* Main app background */
+.app-container,
+.workspace,
+.workspace-split,
+.workspace-split.mod-horizontal .workspace-leaf,
+.workspace-split.mod-vertical .workspace-leaf {
+  background-color: #2c1e12 !important;
+}
+
+/* Editor background - exact match */
+.markdown-source-view.mod-cm6 .cm-editor,
+.markdown-source-view.mod-cm6 .cm-scroller,
+.cm-editor,
+.cm-scroller,
+.cm-content,
+.view-content {
+  background-color: #2c1e12 !important;
+  color: #f5f5dc !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+  line-height: 1.7 !important;
+  font-size: 17px !important;
+}
+
+/* Editor padding and column width to match website */
+.markdown-source-view.mod-cm6 .cm-scroller {
+  padding: var(--content-padding-v) var(--content-padding-h) !important;
+}
+
+.markdown-source-view.mod-cm6 .cm-sizer,
+.markdown-source-view.is-readable-line-width.mod-cm6 .cm-sizer {
+  max-width: calc(var(--container-width) - (var(--content-padding-h) * 2)) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Preview mode - exact match with website .markdown-content */
+.markdown-preview-view {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+  padding: var(--content-padding-v) var(--content-padding-h) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13) !important;
+  margin-top: 36px !important;
+  font-size: 1.13em !important;
+  line-height: 1.8 !important;
+  letter-spacing: 0.01em !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+  max-width: var(--container-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+.markdown-preview-section {
+  background-color: transparent !important;
+}
+
+/* Preview text column width = container - horizontal padding */
+.markdown-preview-view .markdown-preview-sizer,
+.markdown-preview-view.is-readable-line-width .markdown-preview-sizer {
+  max-width: calc(var(--container-width) - (var(--content-padding-h) * 2)) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Headings - exact match */
+.markdown-preview-view h1,
+.markdown-preview-view h2,
+.markdown-preview-view h3,
+.markdown-preview-view h4,
+.markdown-preview-view h5,
+.markdown-preview-view h6,
+.cm-header,
+.cm-header.cm-header-1,
+.cm-header.cm-header-2,
+.cm-header.cm-header-3,
+.cm-header.cm-header-4,
+.cm-header.cm-header-5,
+.cm-header.cm-header-6 {
+  color: #D4AF37 !important;
+  margin-top: 1.7em !important;
+  margin-bottom: 0.8em !important;
+  line-height: 1.3 !important;
+  font-weight: bold !important;
+}
+
+.markdown-preview-view h1,
+.cm-header.cm-header-1 { font-size: 2.3em !important; }
+
+.markdown-preview-view h2,
+.cm-header.cm-header-2 { 
+  font-size: 1.7em !important; 
+  border-bottom: 1px solid #5a452f !important;
+  padding-bottom: 0.3em !important;
+}
+
+.markdown-preview-view h3,
+.cm-header.cm-header-3 { font-size: 1.3em !important; }
+
+.markdown-preview-view h4,
+.cm-header.cm-header-4 { font-size: 1.1em !important; }
+
+/* Paragraphs - exact match */
+.markdown-preview-view p,
+.cm-line {
+  color: #f5f5dc !important;
+  margin-bottom: 1.3em !important;
+}
+
+/* Links - exact match */
+.markdown-preview-view a,
+.cm-link,
+.internal-link,
+.external-link {
+  color: #DAA520 !important;
+  text-decoration: none !important;
+  transition: color 0.3s ease, border-bottom 0.3s ease !important;
+  border-bottom: 1px dotted #DAA520 !important;
+}
+
+.markdown-preview-view a:hover,
+.cm-link:hover,
+.internal-link:hover,
+.external-link:hover {
+  color: #D4AF37 !important;
+  border-bottom: 1px solid #D4AF37 !important;
+}
+
+/* Code blocks - exact match */
+.markdown-preview-view pre,
+pre,
+.cm-codeBlock {
+  background-color: #1f160f !important;
+  color: #f0e6d2 !important;
+  padding: 18px !important;
+  border-radius: 6px !important;
+  font-size: 1em !important;
+  margin-bottom: 1.7em !important;
+  border: 1px solid #5a452f !important;
+}
+
+/* Inline code - exact match */
+.markdown-preview-view code:not(pre code),
+code:not(pre code),
+.cm-inlineCode {
+  background-color: #1f160f !important;
+  color: #DAA520 !important;
+  padding: 0.22em 0.45em !important;
+  border-radius: 3px !important;
+  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace !important;
+  font-size: 0.98em !important;
+}
+
+/* Blockquotes - exact match */
+.markdown-preview-view blockquote,
+blockquote,
+.cm-blockquote {
+  border-left: 4px solid #B8860B !important;
+  padding-left: 18px !important;
+  margin-bottom: 1.3em !important;
+  color: #c7b299 !important;
+  font-style: italic !important;
+  background-color: transparent !important;
+}
+
+/* Lists - exact match */
+.markdown-preview-view ul,
+.markdown-preview-view ol,
+ul,
+ol {
+  margin-left: 24px !important;
+  margin-bottom: 1.2em !important;
+  color: #f5f5dc !important;
+}
+
+.markdown-preview-view li,
+li {
+  margin-bottom: 0.5em !important;
+  color: #f5f5dc !important;
+}
+
+/* Images - exact match */
+.markdown-preview-view img,
+img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 5px !important;
+  margin: 1.5em 0 !important;
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  border: 1px solid #5a452f !important;
+}
+
+/* Sidebar - dark brown header */
+.sidebar,
+.workspace-sidebar,
+.side-dock,
+.side-dock-ribbon {
+  background-color: #1a110a !important;
+}
+
+.nav-folder-title,
+.nav-file-title {
+  background-color: #1a110a !important;
+  color: #f5f5dc !important;
+}
+
+.nav-folder-title:hover,
+.nav-file-title:hover {
+  background-color: #3d2b1f !important;
+}
+
+.nav-file-title.is-active {
+  background-color: #3d2b1f !important;
+}
+
+.nav-file-title.is-active .nav-file-title-content {
+  color: #D4AF37 !important;
+}
+
+.nav-folder-title-content,
+.nav-file-title-content {
+  color: #f5f5dc !important;
+}
+
+/* Status bar */
+.status-bar {
+  background-color: #1a110a !important;
+  border-top: 1px solid #5a452f !important;
+  color: #f5f5dc !important;
+}
+
+.status-bar-item {
+  color: #f5f5dc !important;
+}
+
+/* Title bar */
+.titlebar,
+.titlebar-inner {
+  background-color: #1a110a !important;
+  color: #f5f5dc !important;
+}
+
+/* Ribbon icons */
+.workspace-ribbon,
+.workspace-ribbon.mod-left,
+.workspace-ribbon.mod-right {
+  background-color: #1a110a !important;
+  border-right: 1px solid #5a452f !important;
+}
+
+.workspace-ribbon.mod-right {
+  border-left: 1px solid #5a452f !important;
+  border-right: none !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar-thumb {
+  background-color: #5a452f !important;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #1a110a !important;
+}
+
+/* Selection */
+::selection {
+  background-color: #D4AF37 !important;
+  color: #fff !important;
+}
+
+/* Tags - exact match */
+.tag {
+  background: #DAA520 !important;
+  color: #fff !important;
+  border-radius: 3px !important;
+  padding: 2px 10px !important;
+  font-size: 0.88em !important;
+  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace !important;
+  letter-spacing: 0.02em !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
+}
+
+/* Tables */
+.markdown-preview-view table,
+table {
+  border: 1px solid #5a452f !important;
+}
+
+.markdown-preview-view th,
+th,
+.cm-tableHeader {
+  background-color: #1a110a !important;
+  color: #D4AF37 !important;
+}
+
+.markdown-preview-view td,
+td,
+.cm-tableCell {
+  border: 1px solid #5a452f !important;
+  color: #f5f5dc !important;
+}
+
+/* Horizontal rules */
+.markdown-preview-view hr,
+hr,
+.cm-hr {
+  border-color: #5a452f !important;
+}
+
+/* Checkboxes */
+.markdown-preview-view input[type="checkbox"],
+input[type="checkbox"] {
+  accent-color: #D4AF37 !important;
+}
+
+/* MathJax styling */
+.MathJax {
+  color: #f5f5dc !important;
+}
+
+/* Search highlights */
+.markdown-preview-view mark,
+mark,
+.cm-searchMatch {
+  background-color: #D4AF37 !important;
+  color: #fff !important;
+}
+
+/* Frontmatter */
+.cm-frontmatter,
+.cm-frontmatter.cm-atom {
+  color: #B8860B !important;
+}
+
+/* Editor line numbers */
+.cm-lineNumbers .cm-gutterElement {
+  color: #c7b299 !important;
+}
+
+/* Cursor */
+.cm-cursor {
+  border-left-color: #D4AF37 !important;
+}
+
+/* Active line highlight */
+.cm-activeLine {
+  background-color: rgba(212, 175, 55, 0.08) !important;
+}
+
+.cm-activeLineGutter {
+  background-color: rgba(212, 175, 55, 0.08) !important;
+}
+
+/* Selection */
+.cm-selectionBackground,
+.cm-selectionMatch {
+  background-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+/* Focus outline */
+.cm-focused {
+  outline: 1px solid #D4AF37 !important;
+}
+
+/* Button styling */
+button.mod-cta,
+button {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+  border: 1px solid #5a452f !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+}
+
+button.mod-cta {
+  background-color: #D4AF37 !important;
+  color: #fff !important;
+}
+
+button.mod-cta:hover,
+button:hover {
+  background-color: #DAA520 !important;
+  color: #fff !important;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="search"],
+textarea,
+.search-input-container input {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+  border: 1px solid #5a452f !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+textarea:focus {
+  border-color: #D4AF37 !important;
+  outline: 1px solid #D4AF37 !important;
+}
+
+/* Modal dialogs */
+.modal,
+.modal-container {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+  border: 1px solid #5a452f !important;
+}
+
+.modal-title {
+  color: #D4AF37 !important;
+  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace !important;
+  font-weight: bold !important;
+}
+
+/* Menu items */
+.menu-item {
+  color: #f5f5dc !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+}
+
+.menu-item:hover {
+  background-color: rgba(218, 165, 32, 0.08) !important;
+  color: #DAA520 !important;
+}
+
+.menu-item.is-selected {
+  background-color: rgba(212, 175, 55, 0.08) !important;
+  color: #D4AF37 !important;
+  font-weight: bold !important;
+}
+
+/* Syntax highlighting in code blocks - exact match */
+.hljs {
+  display: block !important;
+  overflow-x: auto !important;
+  padding: 1em !important;
+  background: #1f160f !important;
+  color: #f0e6d2 !important;
+}
+
+.hljs-keyword { color: #cda869 !important; }
+.hljs-string { color: #b7a882 !important; }
+.hljs-comment { color: #8a7a5e !important; font-style: italic !important; }
+.hljs-number { color: #d4b785 !important; }
+.hljs-function .hljs-title { color: #e0d0b0 !important; }
+
+/* Graph view */
+.graph-view-color-fill {
+  color: #D4AF37 !important;
+}
+
+.graph-view-color-line {
+  color: #5a452f !important;
+}
+
+/* Backlinks panel */
+.backlink-pane {
+  background-color: #1a110a !important;
+}
+
+/* File tree */
+.tree-item {
+  color: #f5f5dc !important;
+}
+
+.tree-item:hover {
+  background-color: #3d2b1f !important;
+}
+
+.tree-item.is-selected {
+  background-color: #3d2b1f !important;
+  color: #D4AF37 !important;
+}
+
+/* Settings page */
+.vertical-tab-content {
+  background-color: #2c1e12 !important;
+  color: #f5f5dc !important;
+}
+
+.setting-item-name {
+  color: #f5f5dc !important;
+}
+
+.setting-item-description {
+  color: #c7b299 !important;
+}
+
+/* Command palette */
+.prompt {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+}
+
+.suggestion-item {
+  color: #f5f5dc !important;
+}
+
+.suggestion-item.is-selected {
+  background-color: #3d2b1f !important;
+  color: #D4AF37 !important;
+}
+
+/* Tabs */
+.workspace-tab-header {
+  background-color: #1a110a !important;
+  color: #f5f5dc !important;
+}
+
+.workspace-tab-header.is-active {
+  background-color: #3d2b1f !important;
+  color: #D4AF37 !important;
+}
+
+.workspace-tab-header-inner {
+  color: #f5f5dc !important;
+}
+
+.workspace-tab-header.is-active .workspace-tab-header-inner {
+  color: #D4AF37 !important;
+}
+
+/* Empty state */
+.empty-state {
+  color: #c7b299 !important;
+}
+
+/* Strong/bold text */
+strong,
+.cm-strong {
+  color: #D4AF37 !important;
+  font-weight: bold !important;
+}
+
+/* Emphasis/italic */
+em,
+.cm-emphasis {
+  color: #f5f5dc !important;
+  font-style: italic !important;
+}
+
+/* Strikethrough */
+del,
+.cm-strikethrough {
+  color: #8a7a5e !important;
+}
+
+/* Task list */
+.markdown-preview-view .task-list-item-checkbox {
+  accent-color: #D4AF37 !important;
+}
+
+/* Callouts/admonitions */
+.callout {
+  background-color: #3d2b1f !important;
+  border-left: 4px solid #D4AF37 !important;
+  color: #f5f5dc !important;
+}
+
+.callout-title {
+  color: #D4AF37 !important;
+  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace !important;
+  font-weight: 700 !important;
+}
+
+/* Footnotes */
+.footnote-ref {
+  color: #DAA520 !important;
+}
+
+/* Embed blocks */
+.markdown-embed {
+  background-color: #1a110a !important;
+  border: 1px solid #5a452f !important;
+  border-radius: 6px !important;
+}
+
+/* Canvas */
+.canvas-wrapper {
+  background-color: #2c1e12 !important;
+}
+
+.canvas-node-content {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+  border: 1px solid #5a452f !important;
+}
+
+/* Calendar plugin */
+.calendar {
+  background-color: #1a110a !important;
+}
+
+.calendar-day {
+  color: #f5f5dc !important;
+}
+
+.calendar-day.is-today {
+  color: #D4AF37 !important;
+}
+
+/* Daily notes */
+.daily-note {
+  background-color: #2c1e12 !important;
+}
+
+/* Search results */
+.search-result-file-match {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+}
+
+.search-result-file-match:hover {
+  background-color: #5a452f !important;
+}
+
+/* Plugin panels */
+.vertical-tab-content {
+  background-color: #2c1e12 !important;
+}
+
+/* Override any white backgrounds */
+[style*="background-color: white"],
+[style*="background-color: #fff"],
+[style*="background-color: #ffffff"] {
+  background-color: #2c1e12 !important;
+}
+
+/* Override any black text */
+[style*="color: black"],
+[style*="color: #000"],
+[style*="color: #000000"] {
+  color: #f5f5dc !important;
+}
+
+/* Ensure font consistency */
+* {
+  font-family: inherit;
+}
+
+body,
+.markdown-preview-view,
+.cm-editor {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+}
+
+code,
+pre,
+.cm-codeBlock,
+.cm-inlineCode,
+.tag,
+.modal-title,
+.callout-title {
+  font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace !important;
+}
+
+/* Plugin autocomplete/hints - match website theme */
+.CodeMirror-hints {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+  border: 1px solid #5a452f !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13) !important;
+}
+
+.CodeMirror-hint {
+  background: transparent !important;
+  color: #f5f5dc !important;
+}
+
+li.CodeMirror-hint-active {
+  background: #D4AF37 !important;
+  color: #fff !important;
+}
+
+/* CM6 tooltip autocomplete parity */
+.cm-tooltip,
+.cm-tooltip-autocomplete {
+  background-color: #3d2b1f !important;
+  color: #f5f5dc !important;
+  border: 1px solid #5a452f !important;
+}
+
+.cm-tooltip-autocomplete ul > li[aria-selected="true"] {
+  background: rgba(212, 175, 55, 0.08) !important;
+  color: #D4AF37 !important;
+}

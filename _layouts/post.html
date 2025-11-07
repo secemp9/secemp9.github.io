@@ -9,6 +9,22 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material-darker.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="{{ "/assets/css/style.css" | relative_url }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <!-- MathJax for LaTeX support -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <script>
     // Reading progress bar
     document.addEventListener('DOMContentLoaded', function() {
@@ -76,11 +92,5 @@
       </div>
     </main>
   </div>
-  <footer>
-    <div class="footer-content">
-      <div>&copy; {{ site.time | date: '%Y' }} secemp | researcher | swe | data scraper</div>
-      <a class="back-to-top" href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Back to top &uarr;</a>
-    </div>
-  </footer>
 </body>
 </html> 

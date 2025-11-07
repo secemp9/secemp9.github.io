@@ -1,0 +1,39 @@
+{
+  "command_timeout": 5,
+  "templates_folder": "Templates",
+  "templates_pairs": [
+    [
+      "",
+      ""
+    ]
+  ],
+  "trigger_on_file_creation": true,
+  "auto_jump_to_cursor": true,
+  "enable_system_commands": false,
+  "shell_path": "",
+  "user_templates_folder": "Templates",
+  "user_scripts_folder": "scripts",
+  "enable_folder_templates": true,
+  "folder_templates": [
+    {
+      "folder": "_posts",
+      "template": "Templates/blog-post.md"
+    }
+  ],
+  "enable_creation_templates": true,
+  "creation_templates": [
+    {
+      "folder": "_posts",
+      "template": "Templates/blog-post.md"
+    }
+  ],
+  "enable_file_templates": false,
+  "file_templates": [],
+  "enable_ribbon_icon": true,
+  "enable_status_bar": true,
+  "enable_editor_menu": true,
+  "startup_templates": [],
+  "enable_quick_switcher": true,
+  "enable_command_palette": true
+}
+

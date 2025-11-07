@@ -1,0 +1,21 @@
+{
+  "templater-obsidian:create-new-note-from-template": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "n"
+    }
+  ],
+  "templater-obsidian:run-templater-user-script": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "b"
+    }
+  ]
+}
+

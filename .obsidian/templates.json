@@ -1,0 +1,13 @@
+{
+  "folder": "Templates",
+  "dateFormat": "YYYY-MM-DD",
+  "timeFormat": "HH:mm",
+  "triggerOnNewFile": false,
+  "templates": [
+    {
+      "name": "blog-post",
+      "enabled": true
+    }
+  ]
+}
+

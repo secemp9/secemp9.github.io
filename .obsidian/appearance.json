@@ -1,0 +1,9 @@
+{
+  "theme": "obsidian",
+  "baseFontSize": 16,
+  "accentColor": "#D4AF37",
+  "cssTheme": "",
+  "enabledCssSnippets": [
+    "blog-theme"
+  ]
+}

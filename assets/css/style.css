@@ -13,14 +13,19 @@
     --font-code: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
     --container-width: 900px;
 }
+html {
+    background-color: var(--bg-color) !important;
+    min-height: 100% !important;
+}
 body {
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background-color: var(--bg-color);
+    background-color: var(--bg-color) !important;
     color: var(--text-color);
     line-height: 1.7;
     font-size: 17px;
+    min-height: 100vh !important;
 }
 .container {
     max-width: var(--container-width);
@@ -99,6 +104,7 @@ nav a:hover {
 }
 main {
     padding-bottom: 40px;
+    min-height: calc(100vh - 200px) !important;
 }
 .markdown-content {
     background-color: var(--card-bg);
@@ -199,6 +205,9 @@ main {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 32px;
     margin-top: 32px;
+    background-color: transparent !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
 }
 .blog-card {
     background-color: var(--card-bg);
@@ -275,14 +284,6 @@ main {
     font-weight: 600;
     box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
-footer {
-    text-align: center;
-    color: var(--secondary-color);
-    font-size: 0.95em;
-    margin-top: 40px;
-    margin-bottom: 20px;
-}
-
 /* Social icons */
 .social-icons {
     display: flex;
@@ -321,6 +322,7 @@ footer {
     border-radius: 12px;
     box-shadow: 0 6px 24px rgba(212,175,55,0.10);
     margin-bottom: 36px;
+    margin-top: 0 !important;
     padding: 32px 28px 28px 28px;
     display: flex;
     flex-direction: column;
@@ -407,18 +409,18 @@ footer {
 }
 .post-nav a {
     color: var(--primary-color);
-    background: var(--header-bg);
+    background: transparent;
     padding: 8px 18px;
     border-radius: 6px;
     text-decoration: none;
     font-weight: 600;
     font-family: var(--font-code);
     transition: background 0.2s, color 0.2s;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    box-shadow: none;
 }
 .post-nav a:hover {
-    background: var(--primary-color);
-    color: #fff;
+    background: rgba(218, 165, 32, 0.08);
+    color: var(--primary-color);
 }
 
 /* About page profile card */
@@ -457,59 +459,11 @@ footer {
     margin-top: 8px;
 }
 
-/* Modern sticky footer */
-footer {
-    background: var(--header-bg);
-    color: var(--secondary-color);
-    text-align: center;
-    padding: 18px 0 10px 0;
-    margin-top: 60px;
-    font-size: 1em;
-    border-top: 2px solid var(--primary-color);
-    position: sticky;
-    bottom: 0;
-    width: 100%;
-    z-index: 50;
-}
-footer .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-footer .footer-social {
-    margin: 0 auto 6px auto;
-}
-footer .footer-social .social-icon {
-    margin: 0 4px;
-}
-footer a {
-    color: var(--accent-color);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--accent-color);
-    transition: color 0.2s, border-bottom 0.2s;
-}
-footer a:hover {
-    color: var(--primary-color);
-    border-bottom: 1px solid var(--primary-color);
-}
-footer .back-to-top {
-    display: inline-block;
-    margin-top: 6px;
-    color: var(--primary-color);
-    font-size: 0.98em;
-    cursor: pointer;
-    text-decoration: underline;
-}
 
 @media (max-width: 600px) {
     .profile-card {
         padding: 14px 6px 10px 6px;
         max-width: 98vw;
-    }
-    footer {
-        font-size: 0.98em;
-        padding: 10px 0 6px 0;
     }
 }
 
@@ -539,6 +493,8 @@ footer .back-to-top {
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.13);
     margin-top: 36px;
+    margin-bottom: 0 !important;
+    padding-bottom: 32px !important;
     font-size: 1.13em;
     line-height: 1.8;
     letter-spacing: 0.01em;
@@ -558,3 +514,27 @@ footer .back-to-top {
     color: var(--primary-color);
     border-bottom: 1px solid var(--primary-color);
 } 
+
+/* Footer - completely hide to prevent dark band with Dark Reader */
+footer {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    background: var(--bg-color) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    opacity: 0 !important;
+}
+footer * {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Simple fix for Dark Reader dark band */
+html, body {
+    background-color: var(--bg-color) !important;
+}
