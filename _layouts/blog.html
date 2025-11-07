@@ -41,10 +41,14 @@
   <a href="#main-content" class="skip-link" style="position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:999;">Skip to main content</a>
   <div class="container">
     <header>
-      <div class="header-content" style="flex-direction:column;align-items:center;gap:10px;">
-        <img src="{{ '/assets/img/profile.webp' | relative_url }}" alt="Profile Picture" class="profile-pic-header" width="64" height="64" loading="lazy">
-        <div class="logo">
-          <a href="{{ "/" | relative_url }}">secemp's Blog</a>
+      <div class="header-content">
+        <div class="header-left">
+          <a href="{{ "/" | relative_url }}" class="logo-link">
+            <img src="{{ '/assets/img/profile.webp' | relative_url }}" alt="Profile Picture" class="profile-pic-header" width="40" height="40" loading="lazy">
+            <div class="logo">
+              <span>secemp's Blog</span>
+            </div>
+          </a>
         </div>
         <nav aria-label="Main navigation">
           <ul>

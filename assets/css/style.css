@@ -39,33 +39,53 @@ header {
     top: 0;
     z-index: 100;
     background-color: var(--header-bg);
-    padding-top: 15px;
+    padding: 10px 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     margin-bottom: 30px;
     transition: box-shadow 0.3s;
 }
 .header-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    padding-bottom: 15px;
+    gap: 20px;
+}
+.header-left {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+.logo-link {
+    display: flex;
+    align-items: center;
     gap: 10px;
+    text-decoration: none;
+    color: inherit;
 }
 .profile-pic-header {
-    width: 64px;
-    height: 64px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: 2px solid var(--primary-color);
     object-fit: cover;
-    margin-right: 10px;
     background: var(--card-bg);
+    flex-shrink: 0;
 }
-.logo a {
+.logo {
     color: var(--primary-color);
-    text-decoration: none;
-    font-size: 1.8em;
+    font-size: 1.4em;
     font-weight: bold;
     font-family: var(--font-code);
+    white-space: nowrap;
+}
+.logo-link:hover .logo {
+    color: var(--accent-color);
+}
+nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin-left: 30px;
 }
 nav ul {
     list-style: none;
@@ -287,8 +307,9 @@ main {
 /* Social icons */
 .social-icons {
     display: flex;
-    gap: 12px;
-    margin-top: 8px;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-right: 12px;
 }
 .social-icon {
     width: 28px;
@@ -362,11 +383,31 @@ main {
 /* Responsive header */
 @media (max-width: 600px) {
     .header-content {
-        flex-direction: column;
-        gap: 8px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .header-left {
+        flex: 1 1 auto;
+    }
+    nav {
+        order: 3;
+        flex: 1 1 100%;
+        justify-content: center;
     }
     nav ul {
         gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .social-icons {
+        gap: 6px;
+    }
+    .logo {
+        font-size: 1.2em;
+    }
+    .profile-pic-header {
+        width: 36px;
+        height: 36px;
     }
     .blog-list {
         grid-template-columns: 1fr;
