@@ -8,6 +8,36 @@ LR_START=35729
 LR_END=35749
 PORT=""
 LIVE_RELOAD_PORT=""
+VERBOSE=false
+TRACE=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -v|--verbose)
+      VERBOSE=true
+      shift
+      ;;
+    -t|--trace)
+      TRACE=true
+      VERBOSE=true
+      shift
+      ;;
+    -h|--help)
+      echo "Usage: $0 [OPTIONS]"
+      echo "Options:"
+      echo "  -v, --verbose   Show verbose output"
+      echo "  -t, --trace     Show trace output (includes verbose)"
+      echo "  -h, --help      Show this help message"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage information"
+      exit 1
+      ;;
+  esac
+done
 
 is_port_in_use() {
   local host="$1"
@@ -49,9 +79,36 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 cd "$(dirname "$0")"
+
+# Build Jekyll command with appropriate flags
+JEKYLL_CMD="bundle exec jekyll serve --port $PORT --host $HOST"
+
 if [ -n "$LIVE_RELOAD_PORT" ]; then
-  bundle exec jekyll serve --port "$PORT" --livereload --livereload-port "$LIVE_RELOAD_PORT" --host "$HOST"
+  JEKYLL_CMD="$JEKYLL_CMD --livereload --livereload-port $LIVE_RELOAD_PORT"
 else
-  bundle exec jekyll serve --port "$PORT" --no-livereload --host "$HOST"
+  JEKYLL_CMD="$JEKYLL_CMD --no-livereload"
+fi
+
+if [ "$VERBOSE" = true ]; then
+  JEKYLL_CMD="$JEKYLL_CMD --verbose"
+fi
+
+if [ "$TRACE" = true ]; then
+  JEKYLL_CMD="$JEKYLL_CMD --trace"
+fi
+
+# Run Jekyll and ensure errors are visible
+echo "Running: $JEKYLL_CMD"
+echo ""
+# Use eval to properly execute the command with all arguments
+# 2>&1 ensures both stdout and stderr are visible
+eval "$JEKYLL_CMD" 2>&1
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "ERROR: Jekyll server failed to start (exit code: $EXIT_CODE)!"
+  echo "Check the error messages above for details."
+  exit $EXIT_CODE
 fi
 
