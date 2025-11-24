@@ -12,6 +12,9 @@ tags:
 
 > _“Reward hacking is when there’s a discrepancy between what you wanted, and what the reward actually implements.”_
 
+![](ChatGPT%20Image%20Nov%2024,%202025,%2006_02_18%20AM%202.png)
+
+
 Anthropic's recent research on reward hacking and emergent misalignment, titled ["Natural emergent misalignment from reward hacking in production RL"](https://assets.anthropic.com/m/74342f2c96095771/original/Natural-emergent-misalignment-from-reward-hacking-paper.pdf) raises important questions about model behavior, but I find several aspects of their methodology worth commenting on.
 
 In the paper, they:

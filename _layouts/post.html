@@ -98,12 +98,13 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Fix Obsidian "Pasted image..." links by pointing them to the shared assets folder.
+      // Fix Obsidian-exported local image links (e.g. "Pasted image..." or "ChatGPT Image...") by pointing them to the shared assets folder.
       var assetBase = "{{ '/assets/img/' | relative_url }}";
       if (!assetBase.endsWith('/')) {
         assetBase += '/';
       }
       var externalPattern = /^(?:[a-z]+:)?\/\//i;
+      var obsidianPatterns = ['pasted image', 'chatgpt image'];
 
       document.querySelectorAll('.markdown-content img').forEach(function(img) {
         var originalSrc = img.getAttribute('src');
@@ -111,7 +112,11 @@
         if (externalPattern.test(originalSrc) || originalSrc.startsWith('/')) return;
 
         var decoded = decodeURIComponent(originalSrc);
-        if (decoded.toLowerCase().indexOf('pasted image') === -1) return;
+        var lower = decoded.toLowerCase();
+        var matchesObsidian = obsidianPatterns.some(function(pattern) {
+          return lower.indexOf(pattern) !== -1;
+        });
+        if (!matchesObsidian) return;
 
         var filename = originalSrc.split('/').pop();
         if (!filename) return;
