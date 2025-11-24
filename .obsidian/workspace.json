@@ -4,67 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "f621fd5947934e8b",
+        "id": "3dfbcb6fad0ba1f5",
         "type": "tabs",
         "children": [
           {
-            "id": "a1c1a5ce52035626",
+            "id": "e8751bda225a1754",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "about.md",
+                "file": "_posts/2025-11-24-on-emergent-misalignment-from-reward-hacking.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "about"
-            }
-          },
-          {
-            "id": "012c631e1f34bd14",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "about.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "about"
-            }
-          },
-          {
-            "id": "1c7bbf8b12865019",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "about.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "about"
-            }
-          },
-          {
-            "id": "08c1caf559be8a84",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "_posts/2025-11-08-anything-could-work.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "2025-11-08-anything-could-work"
+              "title": "2025-11-24-on-emergent-misalignment-from-reward-hacking"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -137,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "_posts/2025-11-08-test.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -146,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for 2025-11-08-test"
             }
           },
           {
@@ -210,31 +168,40 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "08c1caf559be8a84",
+  "active": "e8751bda225a1754",
   "lastOpenFiles": [
+    "_posts/2025-11-08-test.md",
+    "_posts/2025-11-24-on-emergent-misalignment-from-reward-hacking.md",
+    "_site/assets/img/Pasted image 20251124050309.png",
+    "assets/img/Pasted image 20251124050309.png",
+    "_site/assets/img/Pasted image 20251124045344.png",
+    "assets/img/Pasted image 20251124045344.png",
+    "_site/assets/img/Pasted image 20251124045002.png",
+    "assets/img/Pasted image 20251124045002.png",
+    "_site/assets/img/Pasted image 20251124044149.png",
+    "assets/img/Pasted image 20251124044149.png",
+    "about.md",
+    "_posts/2025-11-23-untitled-post.md",
+    "_site/2025/11/24/on-emergent-misalignment-from-reward-hacking/index.html",
+    "_site/2025/11/24/on-emergent-misalignment-from-reward-hacking",
+    "_site/2025/11/24",
+    "_site/assets/img/Pasted image 20251124014418.png",
+    "assets/img/Pasted image 20251124014418.png",
+    "_site/2025/11/23/untitled-post/index.html",
+    "_site/2025/11/23/untitled-post",
+    "_site/2025/11/23",
+    "Untitled 1",
+    "Untitled",
     "_site/2025/11/08/anything-could-work/index.html",
     "_site/2025/11/08/anything-could-work",
-    "about.md",
     "_posts/2025-11-08-anything-could-work.md",
-    "_posts/2025-11-08-test.md",
-    "_site/posts/index.html",
-    "_site/posts",
     "posts.md",
     "_site/posts.md",
-    "_site/2025/11/08/test/index.html",
-    "_site/2025/11/08/test",
-    "_site/2025/11/08",
-    "_site/2025/11",
-    "_site/2025",
-    "_posts",
     "2025-11-08-test.md",
     "Untitled 1.md",
     "Untitled.md",
     "_site/Untitled 1.md",
-    "_site/Untitled 1/index.html",
     "_site/Untitled.md",
-    "_site/favicon.png",
-    "_site/assets/img/profile.webp",
     "_site/README.md",
     "_site/Templates/blog-post.md",
     "_posts/2025-11-07-test-again.md",

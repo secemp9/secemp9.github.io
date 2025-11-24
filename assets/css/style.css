@@ -1,17 +1,18 @@
 :root {
-    --bg-color: #2c1e12;
-    --text-color: #f5f5dc;
-    --primary-color: #D4AF37;
-    --secondary-color: #B8860B;
-    --accent-color: #DAA520;
-    --header-bg: #1a110a;
-    --card-bg: #3d2b1f;
-    --code-bg: #1f160f;
-    --code-text: #f0e6d2;
-    --border-color: #5a452f;
-    --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    --font-code: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-    --container-width: 900px;
+   --bg-color: #2c1e12;
+   --text-color: #f5f5dc;
+   --primary-color: #D4AF37;
+   --secondary-color: #B8860B;
+   --accent-color: #DAA520;
+   --header-bg: #1a110a;
+   --card-bg: #3d2b1f;
+   --code-bg: #1f160f;
+   --code-text: #f0e6d2;
+   --border-color: #5a452f;
+   --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+   --font-code: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+   --container-width: 900px;
+   --article-width: 1100px;
 }
 html {
     background-color: var(--bg-color) !important;
@@ -33,6 +34,9 @@ body {
     padding: 0 20px;
     width: 100%;
     box-sizing: border-box;
+}
+.post-page .container {
+    max-width: min(var(--article-width), calc(100vw - 32px));
 }
 header {
     position: sticky;

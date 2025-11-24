@@ -1,9 +1,10 @@
 {
-  "theme": "obsidian",
+  "theme": "moonstone",
   "baseFontSize": 16,
-  "accentColor": "#D4AF37",
+  "accentColor": "#ffea00",
   "cssTheme": "",
   "enabledCssSnippets": [
     "blog-theme"
-  ]
+  ],
+  "nativeMenus": false
 }

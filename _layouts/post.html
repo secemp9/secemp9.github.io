@@ -42,7 +42,7 @@
     document.addEventListener('DOMContentLoaded', function(){hljs.highlightAll();});
   </script>
 </head>
-<body>
+<body class="post-page">
   <div id="reading-progress" class="reading-progress"></div>
   <div class="container">
     <header>
@@ -96,5 +96,32 @@
       </div>
     </main>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fix Obsidian "Pasted image..." links by pointing them to the shared assets folder.
+      var assetBase = "{{ '/assets/img/' | relative_url }}";
+      if (!assetBase.endsWith('/')) {
+        assetBase += '/';
+      }
+      var externalPattern = /^(?:[a-z]+:)?\/\//i;
+
+      document.querySelectorAll('.markdown-content img').forEach(function(img) {
+        var originalSrc = img.getAttribute('src');
+        if (!originalSrc) return;
+        if (externalPattern.test(originalSrc) || originalSrc.startsWith('/')) return;
+
+        var decoded = decodeURIComponent(originalSrc);
+        if (decoded.toLowerCase().indexOf('pasted image') === -1) return;
+
+        var filename = originalSrc.split('/').pop();
+        if (!filename) return;
+
+        img.setAttribute('src', assetBase + filename);
+        if (!img.hasAttribute('loading')) {
+          img.setAttribute('loading', 'lazy');
+        }
+      });
+    });
+  </script>
 </body>
 </html> 
