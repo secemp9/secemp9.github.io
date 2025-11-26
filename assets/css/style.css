@@ -47,13 +47,14 @@ header {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     margin-bottom: 30px;
     transition: box-shadow 0.3s;
+    width: 100%;
+    /* Needed for progress bar positioning */
 }
 .header-content {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 20px;
-    width: 100%;
 }
 .header-left {
     display: flex;
@@ -342,6 +343,18 @@ main {
 .social-icon:hover svg {
     fill: #fff;
 }
+/* Hugging Face icon - preserve original colors even with Dark Reader */
+.hf-icon svg {
+    fill: none !important;
+    filter: none !important;
+    isolation: isolate;
+}
+.hf-icon svg path {
+    filter: none !important;
+}
+.hf-icon:hover svg {
+    fill: none !important;
+}
 
 /* Featured post */
 .featured-post {
@@ -436,15 +449,15 @@ main {
     }
 }
 
-/* Reading progress bar */
+/* Reading progress bar - positioned at bottom of sticky header */
 .reading-progress {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    bottom: 0;
     left: 0;
     width: 0;
     height: 4px;
     background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-    z-index: 9999;
+    z-index: 101;
     transition: width 0.2s;
 }
 

@@ -10,6 +10,7 @@ PORT=""
 LIVE_RELOAD_PORT=""
 VERBOSE=false
 TRACE=false
+CLEAN=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -23,9 +24,14 @@ while [[ $# -gt 0 ]]; do
       VERBOSE=true
       shift
       ;;
+    -c|--clean)
+      CLEAN=true
+      shift
+      ;;
     -h|--help)
       echo "Usage: $0 [OPTIONS]"
       echo "Options:"
+      echo "  -c, --clean     Clean cache before building (removes _site, .jekyll-cache)"
       echo "  -v, --verbose   Show verbose output"
       echo "  -t, --trace     Show trace output (includes verbose)"
       echo "  -h, --help      Show this help message"
@@ -80,11 +86,21 @@ echo ""
 
 cd "$(dirname "$0")"
 
+# Clean cache if requested
+if [ "$CLEAN" = true ]; then
+  echo "Cleaning Jekyll cache..."
+  bundle exec jekyll clean
+  echo ""
+fi
+
 # Build Jekyll command with appropriate flags
-JEKYLL_CMD="bundle exec jekyll serve --port $PORT --host $HOST"
+# --incremental: only rebuild changed files (faster, more reliable with livereload)
+# --force_polling: more reliable file change detection across editors/platforms
+JEKYLL_CMD="bundle exec jekyll serve --port $PORT --host $HOST --incremental --force_polling"
 
 if [ -n "$LIVE_RELOAD_PORT" ]; then
-  JEKYLL_CMD="$JEKYLL_CMD --livereload --livereload-port $LIVE_RELOAD_PORT"
+  # --livereload-min-delay: wait 500ms after file change before reloading (debounce rapid saves)
+  JEKYLL_CMD="$JEKYLL_CMD --livereload --livereload-port $LIVE_RELOAD_PORT --livereload-min-delay 500"
 else
   JEKYLL_CMD="$JEKYLL_CMD --no-livereload"
 fi
