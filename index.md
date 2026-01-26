@@ -7,7 +7,7 @@ title: secemp Blog
   <div class="hero-content">
     <div class="hero-greeting">Hi, I'm</div>
     <h1 class="hero-name"><span class="highlight">secemp</span></h1>
-    <p class="hero-bio">Security researcher and developer. Writing about AI safety, security, and the intersection of machine learning and cybersecurity.</p>
+    <p class="hero-bio">ML researcher and pragmatic optimist. Writing about ideas and scaling.</p>
     <a href="mailto:secemp9@gmail.com" class="corner-btn">
       <span class="corner tl"></span>
       <span class="corner tr"></span>
