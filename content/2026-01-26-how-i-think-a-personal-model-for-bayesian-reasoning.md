@@ -4,7 +4,9 @@ Category: misc
 Slug: how-i-think-a-personal-model-for-bayesian-reasoning
 Image: images/rd7loe.png
 
-So here's the thing. I'm making this blog because I keep finding myself having to explain how I think (surprisingly). Not because people ask directly, but because it comes up. Someone doesn't understand something, or they believe something I don't, and I can't just explain my intuition. The only thing that comes to mind is explaining my entire thinking process from scratch. So now I can just send them this link instead.
+The goal isn't to be right. It's to be wrong faster.
+
+That's how I think. I keep finding myself having to explain this, so I'm just gonna write it down once.
 
 The way I think isn't some grand theory. It's more like a muscle that formed over time. Not planned, just...life happening. Through desperation, through living, through everything. You just can't help but think, and this is the result.
 
@@ -20,7 +22,23 @@ Basically, I scale how much wrong and right I could be, and why, and then act ba
 
 The goal isn't to be right. It's to be wrong ***faster***. Scaling being wrong and right such that next time, I'm hopefully converging on the optimal outcome. And if I end up actually really wrong? I just update my priors and do it again. That's it. That's the whole thing.
 
-Or I could draw it - picture me as a circle, with two arrows going outward, left and right. Wrong and right. Then more arrows branching from each end. States. Possible states. Wait, I already did that earlier. [image]
+Or I could draw it - picture me as a circle, with two arrows going outward, left and right. Wrong and right. Then more arrows branching from each end. States. Possible states. Actually, let me just give you a real example.
+
+So I was doing rerollouts on a dataset - basically regenerating the same data with a different model to mess with the distribution, get more tokens, whatever. Before I even touched code, I just... ran it in my head.
+
+First thing: context dependency. You can't parallelize turns in a conversation or you lose the hierarchy. That's not a guess, that's just... obvious? Like I didn't even try it, I just knew.
+
+Second: what if the model is retarded. I was using DeepSeek 3.2, probably not a complete dimwit, but still. What if it can't do tool calling properly? So I did this thing I called tool forcing - make it use tools N times to match the original, but let it figure out the arguments. And if it's *really* stupid? Force the structure too. Belt and suspenders type thing.
+
+Third thing I didn't even predict: some samples had no system prompt. Model started hallucinating nonsense. Had to add a fallback. That one got me.
+
+Then I had to scale this whole thing. Started with async in Python. Simple, works, but I already knew - this breaks the moment I need more than one node. Shipped it anyway. Why? Because I needed to know if the rerollout logic even worked first. No point scaling broken code.
+
+Once it worked, I was like okay, slurm or ray? Ray is flexible but... vibes said it would hang on something. Don't ask me how I knew, I just did. So I built the resume flag before I needed it. Checkpoint every N samples.
+
+Sure enough. Ray hung. Something about actor cleanup, I don't know, didn't debug it. Just restarted from checkpoint. Moved on.
+
+That's the loop. Branch, act, fail, update. 3/4 predictions correct, one surprised me. Updated my priors on "always check for missing fields." That's it.
 
 Come to think of it, this is basically a [world model](https://www.youtube.com/watch?v=DokLw1tILlw). You know, like the ones [LeCun](https://en.wikipedia.org/wiki/Yann_LeCun) talks about. Same idea, I just do it through vibes instead of gradients.
 
@@ -38,6 +56,4 @@ This way of thinking works great for me. But it's not something I'd ever show to
 
 ---
 
-The hard part is that this way of thinking doesn't translate well. It's like trying to describe a color to someone who's never seen it. I can describe it, but you can't really understand it unless you're running my world model. And even reading this, you're probably thinking I'm some kind of lunatic. Take it with a grain of salt either way.
-
-So yeah. That's how I think. I don't think it's the right way to think. It's probably overkill. But it gives me the kind of critical thinking I need. And maybe it'll work for someone else too, or maybe you'll just understand why I am the way I am. Either way, at least now we both know.
+So yeah. That's how I think. Probably overkill. But now we both know.
