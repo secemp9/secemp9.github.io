@@ -169,7 +169,7 @@ main {
     right: 0;
     bottom: 0;
     width: 70%;
-    background-image: url('/assets/img/hero-bg.png');
+    background-image: url('/images/hero-bg.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -907,4 +907,26 @@ footer * {
 /* Simple fix for Dark Reader dark band */
 html, body {
     background-color: var(--bg-color) !important;
+}
+/* Article hero image */
+.article-hero-image {
+    margin: var(--spacing-md) 0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.article-hero-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Heading anchor links */
+.headerlink {
+    color: var(--primary-color);
+    text-decoration: none;
+    margin-left: 0.5em;
+    font-size: 0.8em;
+}
+.headerlink:hover {
+    color: var(--accent-color);
 }

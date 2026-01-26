@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-greeting">Hi, I'm</div>
+    <h1 class="hero-name"><span class="highlight">secemp</span></h1>
+    <p class="hero-bio">{{ SITESUBTITLE }}</p>
+    <a href="mailto:secemp9@gmail.com" class="corner-btn">
+      <span class="corner tl"></span>
+      <span class="corner tr"></span>
+      <span class="corner bl"></span>
+      <span class="corner br"></span>
+      Contact
+    </a>
+  </div>
+</div>
+
+<div class="section-header">
+  <div class="section-title">> Latest Posts</div>
+  <a href="/posts/" class="section-link">See all posts</a>
+</div>
+
+<div class="blog-list">
+  {% for article in articles[:6] %}
+    <div class="blog-card">
+      <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
+        <div class="card-content">
+          <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
+          <div class="card-title">{{ article.title }}</div>
+          <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
+          {% if article.tags %}
+          <div class="card-tags">
+            {% for tag in article.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </a>
+    </div>
+  {% endfor %}
+</div>
+
+{% if articles_paginator.num_pages > 1 %}
+<div class="pagination">
+  {% if articles_page.has_previous() %}
+    <a href="{{ SITEURL }}/{{ articles_previous_page.url }}">&laquo; Newer</a>
+  {% endif %}
+  <span>Page {{ articles_page.number }} of {{ articles_paginator.num_pages }}</span>
+  {% if articles_page.has_next() %}
+    <a href="{{ SITEURL }}/{{ articles_next_page.url }}">Older &raquo;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

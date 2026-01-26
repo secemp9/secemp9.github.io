@@ -1,4 +1,4 @@
-// Templater User Script: Create Blog Post with Auto-Date
+// Templater User Script: Create Blog Post with Auto-Date (Pelican)
 // This version works WITHOUT requiring an active editor
 // Usage: Run via Command Palette -> "Templater: Run templater user script" -> select "create-blog-post"
 
@@ -13,15 +13,15 @@ module.exports = async function(tp) {
     } else if (this && this.app) {
       app = this.app;
     }
-    
+
     if (!app) {
       new Notice("Error: Could not access Obsidian app. Please open any file first.");
       return;
     }
-    
+
     const vault = app.vault;
     const workspace = app.workspace;
-    const postsFolder = "_posts";
+    const postsFolder = "content";
 
     const titleInput = await tp.system.prompt("Post title");
     const title = titleInput ? titleInput.trim() : "";
@@ -40,6 +40,7 @@ module.exports = async function(tp) {
     }
 
     const datePrefix = tp.date.now("YYYY-MM-DD");
+    const timeStr = tp.date.now("HH:mm");
     const rawSlug = slugify(title);
     const baseSlug = rawSlug || "post";
     let filename = `${datePrefix}-${baseSlug}`;
@@ -69,12 +70,17 @@ module.exports = async function(tp) {
       suffix += 1;
     }
 
-    const frontmatter = `---\nlayout: post\ntitle: "${title}"\ndate: ${tp.date.now("YYYY-MM-DD HH:mm:ss +0000")}\ntags: []\n---\n\n`;
-    const body = "Write your post content here in markdown!\n";
-    const content = frontmatter + body;
+    // Pelican metadata format (Key: Value, no YAML delimiters)
+    const content = `Title: ${title}
+Date: ${datePrefix} ${timeStr}
+Tags:
+Slug: ${baseSlug}
+
+Write your post content here in markdown!
+`;
 
     const file = await vault.create(filepath, content);
-    
+
     // Open file in a new leaf (works without active editor)
     const leaf = workspace.getLeaf(true);
     await leaf.openFile(file);

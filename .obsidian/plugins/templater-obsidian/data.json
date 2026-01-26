@@ -16,14 +16,14 @@
   "enable_folder_templates": true,
   "folder_templates": [
     {
-      "folder": "_posts",
+      "folder": "content",
       "template": "Templates/blog-post.md"
     }
   ],
   "enable_creation_templates": true,
   "creation_templates": [
     {
-      "folder": "_posts",
+      "folder": "content",
       "template": "Templates/blog-post.md"
     }
   ],

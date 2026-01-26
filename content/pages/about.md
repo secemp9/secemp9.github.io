@@ -1,7 +1,7 @@
----
-layout: post
-title: About
----
+Title: About
+Slug: about
+Status: published
+
 Hi, I'm secemp/secemp9.
 
 I'm an independent researcher interested in everything ML, CS, and Math (and related fields).

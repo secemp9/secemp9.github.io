@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ SITENAME }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ SITESUBTITLE }}{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ SITENAME }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ SITESUBTITLE }}{% endblock %}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ SITEURL }}/{% block og_url %}{% endblock %}">
+  <meta property="og:image" content="{{ OG_IMAGE }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}{{ SITENAME }}{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}{{ SITESUBTITLE }}{% endblock %}">
+  <meta name="twitter:image" content="{{ OG_IMAGE }}">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material-darker.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/theme/css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <!-- MathJax for LaTeX support -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', function(){hljs.highlightAll();});</script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body{% block body_class %}{% endblock %}>
+  <a href="#main-content" class="skip-link" style="position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:999;">Skip to main content</a>
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        {% block reading_progress %}{% endblock %}
+        <div class="header-content">
+          <div class="header-left">
+            <a href="{{ SITEURL }}/" class="logo-link">
+              <img src="/theme/img/profile.webp" alt="Profile Picture" class="profile-pic-header" width="40" height="40" loading="lazy">
+              <div class="logo">
+                <span>secemp</span>
+              </div>
+            </a>
+          </div>
+          <nav aria-label="Main navigation">
+            <ul>
+              <li><a href="{{ SITEURL }}/"{% if not article and not page %} class="active" aria-current="page"{% endif %} aria-label="Home">Home</a></li>
+              <li><a href="/posts/" aria-label="Posts">Posts</a></li>
+              <li><a href="{{ SITEURL }}/about/"{% if page and page.slug == 'about' %} class="active" aria-current="page"{% endif %} aria-label="About">About</a></li>
+            </ul>
+          </nav>
+          <div class="social-icons">
+            <a class="social-icon" href="mailto:secemp9@gmail.com" title="Email" aria-label="Email">
+              <svg viewBox="0 0 24 24"><path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z"/></svg>
+            </a>
+            <a class="social-icon" href="https://github.com/secemp9" target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
+              <svg viewBox="0 0 24 24"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.42 7.86 10.96.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.36-1.3-1.72-1.3-1.72-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.74-1.56-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 2.92-.39c.99 0 1.99.13 2.92.39 2.22-1.49 3.2-1.18 3.2-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.41-5.27 5.7.42.36.79 1.09.79 2.2 0 1.59-.01 2.87-.01 3.26 0 .31.21.68.8.56C20.71 21.44 24 17.12 24 12.02 24 5.74 18.27.5 12 .5z"/></svg>
+            </a>
+            <a class="social-icon" href="https://x.com/secemp9" target="_blank" rel="noopener" title="X (Twitter)" aria-label="X (Twitter)">
+              <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a class="social-icon hf-icon" href="https://huggingface.co/secemp9" target="_blank" rel="noopener" title="Hugging Face" aria-label="Hugging Face">
+              <img src="/theme/img/huggingface.svg" alt="Hugging Face" width="18" height="18">
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <div class="main-container">
+      <main id="main-content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

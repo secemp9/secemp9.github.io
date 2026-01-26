@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} - {{ SITENAME }}{% endblock %}
+{% block description %}{{ article.summary|striptags|truncate(160) }}{% endblock %}
+{% block og_title %}{{ article.title }}{% endblock %}
+{% block og_description %}{{ article.summary|striptags|truncate(160) }}{% endblock %}
+{% block og_url %}{{ article.url }}{% endblock %}
+{% block twitter_title %}{{ article.title }}{% endblock %}
+{% block twitter_description %}{{ article.summary|striptags|truncate(160) }}{% endblock %}
+
+{% block body_class %} class="post-page"{% endblock %}
+
+{% block reading_progress %}
+<div id="reading-progress" class="reading-progress"></div>
+{% endblock %}
+
+{% block content %}
+<div class="back-link">
+  <a href="{{ SITEURL }}/" aria-label="Back to Blog">&larr; Back</a>
+</div>
+<div class="page-header">
+  <h1 class="page-title">{{ article.title }}</h1>
+  <div class="page-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
+</div>
+{% if article.image %}
+<div class="article-hero-image">
+  <img src="{{ SITEURL }}/{{ article.image }}" alt="{{ article.title }}" loading="lazy">
+</div>
+{% endif %}
+<div class="page-content">
+  {{ article.content }}
+</div>
+{% if article.prev_article or article.next_article %}
+<div class="post-nav">
+  {% if article.prev_article %}
+    <a href="{{ SITEURL }}/{{ article.prev_article.url }}" aria-label="Previous Post">&larr; Prev</a>
+  {% endif %}
+  <span style="flex:1"></span>
+  {% if article.next_article %}
+    <a href="{{ SITEURL }}/{{ article.next_article.url }}" aria-label="Next Post">Next &rarr;</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Reading progress bar
+  document.addEventListener('DOMContentLoaded', function() {
+    var bar = document.getElementById('reading-progress');
+    if (!bar) return;
+    function updateBar() {
+      var scrollTop = window.scrollY;
+      var docHeight = document.body.scrollHeight - window.innerHeight;
+      var percent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      bar.style.width = percent + '%';
+    }
+    window.addEventListener('scroll', updateBar);
+    updateBar();
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Fix Obsidian-exported local image links
+    var assetBase = "{{ SITEURL }}/images/";
+    var externalPattern = /^(?:[a-z]+:)?\/\//i;
+    var obsidianPatterns = ['pasted image', 'chatgpt image'];
+
+    document.querySelectorAll('.page-content img').forEach(function(img) {
+      var originalSrc = img.getAttribute('src');
+      if (!originalSrc) return;
+      if (externalPattern.test(originalSrc) || originalSrc.startsWith('/')) return;
+
+      var decoded = decodeURIComponent(originalSrc);
+      var lower = decoded.toLowerCase();
+      var matchesObsidian = obsidianPatterns.some(function(pattern) {
+        return lower.indexOf(pattern) !== -1;
+      });
+      if (!matchesObsidian) return;
+
+      var filename = originalSrc.split('/').pop();
+      if (!filename) return;
+
+      img.setAttribute('src', assetBase + filename);
+      if (!img.hasAttribute('loading')) {
+        img.setAttribute('loading', 'lazy');
+      }
+    });
+  });
+</script>
+{% endblock %}
