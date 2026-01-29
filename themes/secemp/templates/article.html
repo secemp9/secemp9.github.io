@@ -15,44 +15,45 @@
 {% endblock %}
 
 {% block content %}
-<div class="article-layout">
-  <div class="article-main">
-    <div class="back-link">
-      <a href="{{ SITEURL }}/" aria-label="Back to Blog">&larr; Back</a>
-    </div>
-    <div class="page-header">
-      <h1 class="page-title">{{ article.title }}</h1>
-      <div class="page-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
-    </div>
-    {% if article.image %}
-    <div class="article-hero-image">
-      <img src="{{ SITEURL }}/{{ article.image }}" alt="{{ article.title }}" loading="lazy">
-    </div>
-    {% endif %}
-    <div class="page-content">
-      {{ article.content }}
-    </div>
-    {% if article.prev_article or article.next_article %}
-    <div class="post-nav">
-      {% if article.prev_article %}
-        <a href="{{ SITEURL }}/{{ article.prev_article.url }}" aria-label="Previous Post">&larr; Prev</a>
-      {% endif %}
-      <span style="flex:1"></span>
-      {% if article.next_article %}
-        <a href="{{ SITEURL }}/{{ article.next_article.url }}" aria-label="Next Post">Next &rarr;</a>
-      {% endif %}
-    </div>
-    {% endif %}
-  </div>
-  <aside class="toc-sidebar">
-    <div class="toc-container">
-      <div class="toc-header">On this page</div>
-      <nav class="toc-nav" aria-label="Table of contents">
-        <ul id="toc-list"></ul>
-      </nav>
-    </div>
-  </aside>
+<div class="back-link">
+  <a href="{{ SITEURL }}/" aria-label="Back to Blog">&larr; Back</a>
 </div>
+<div class="page-header">
+  <h1 class="page-title">{{ article.title }}</h1>
+  <div class="page-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
+</div>
+{% if article.image %}
+<div class="article-hero-image">
+  <img src="{{ SITEURL }}/{{ article.image }}" alt="{{ article.title }}" loading="lazy">
+</div>
+{% endif %}
+<div class="page-content">
+  {{ article.content }}
+</div>
+{% if article.prev_article or article.next_article %}
+<div class="post-nav">
+  {% if article.prev_article %}
+    <a href="{{ SITEURL }}/{{ article.prev_article.url }}" aria-label="Previous Post">&larr; Prev</a>
+  {% endif %}
+  <span style="flex:1"></span>
+  {% if article.next_article %}
+    <a href="{{ SITEURL }}/{{ article.next_article.url }}" aria-label="Next Post">Next &rarr;</a>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Fixed TOC Sidebar -->
+<aside class="toc-sidebar" id="toc-sidebar">
+  <div class="toc-container">
+    <div class="toc-header">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg>
+      <span>On this page</span>
+    </div>
+    <nav class="toc-nav" aria-label="Table of contents">
+      <ul id="toc-list"></ul>
+    </nav>
+  </div>
+</aside>
 {% endblock %}
 
 {% block extra_js %}

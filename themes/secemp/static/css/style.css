@@ -48,7 +48,7 @@ body {
     padding: 0;
 }
 .post-page .container {
-    max-width: 1200px;
+    max-width: var(--container-width);
 }
 .post-page .main-container {
     padding: 0 var(--spacing-md);
@@ -931,37 +931,37 @@ html, body {
     color: var(--accent-color);
 }
 
-/* Table of Contents Sidebar */
-.article-layout {
-    display: flex;
-    gap: var(--spacing-lg);
-    position: relative;
-}
-.article-main {
-    flex: 1;
-    min-width: 0;
-}
+/* Table of Contents Sidebar - Fixed Position */
 .toc-sidebar {
+    position: fixed;
+    right: 20px;
+    top: 100px;
     width: 220px;
-    flex-shrink: 0;
-    position: relative;
+    max-height: calc(100vh - 120px);
+    z-index: 50;
 }
 .toc-container {
-    position: sticky;
-    top: 100px;
-    max-height: calc(100vh - 120px);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: var(--spacing-sm);
+    max-height: calc(100vh - 140px);
     overflow-y: auto;
-    padding-right: var(--spacing-sm);
 }
 .toc-header {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
     color: var(--text-muted);
     margin-bottom: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
     border-bottom: 1px solid var(--border-color);
+}
+.toc-header svg {
+    flex-shrink: 0;
+    opacity: 0.7;
 }
 .toc-nav ul {
     list-style: none;
@@ -969,7 +969,7 @@ html, body {
     margin: 0;
 }
 .toc-item {
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 .toc-item.toc-h3 {
     padding-left: 12px;
@@ -979,28 +979,24 @@ html, body {
     font-size: 0.8rem;
     color: var(--text-muted);
     text-decoration: none;
-    padding: 4px 0;
+    padding: 4px 8px;
     line-height: 1.4;
-    border-left: 2px solid transparent;
-    padding-left: 10px;
-    margin-left: -10px;
-    transition: color 0.2s, border-color 0.2s;
+    border-radius: 3px;
+    transition: color 0.15s, background-color 0.15s;
 }
 .toc-link:hover {
     color: var(--text-color);
+    background: var(--card-bg);
 }
 .toc-link.active {
     color: var(--primary-color);
-    border-left-color: var(--primary-color);
+    background: rgba(212, 175, 55, 0.1);
 }
 
-/* Hide TOC on smaller screens */
-@media (max-width: 1200px) {
+/* Hide TOC on smaller screens or when not enough space */
+@media (max-width: 1400px) {
     .toc-sidebar {
         display: none;
-    }
-    .article-layout {
-        display: block;
     }
 }
 
