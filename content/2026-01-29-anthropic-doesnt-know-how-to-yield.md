@@ -1,4 +1,4 @@
-Title: Anthropic Doesn't Know How to Yield: Reverse-Engineering and Fixing Claude Code's UI Freeze
+Title: Anthropic Doesn't Know How to Yield
 Date: 2026-01-29 17:30:00
 Category: reverse-engineering
 Slug: anthropic-doesnt-know-how-to-yield
@@ -20,7 +20,7 @@ If you've used Claude Code version on recent versions (2.1.23 and lower), you've
 
 ---
 
-## What This Post Will Show You
+## What You'll See
 
 In this deep-dive, I'll walk you through:
 
@@ -33,7 +33,7 @@ In this deep-dive, I'll walk you through:
 
 ---
 
-## Part 1: The Irony
+## The Irony
 
 Here's my tweet that started this investigation:
 
@@ -63,11 +63,11 @@ This is a perfect example of how most models/llm can understand a problem superf
 
 ---
 
-## Part 2: Extracting the Code
+## Extracting the Code
 
 Claude Code is distributed as an npm package, but you can't just read the source - it's bundled into a single 11MB minified JavaScript blob. Here's how I extracted it.
 
-### Step 1: Get the Package Without Installing
+### Getting the Package
 
 ```bash
 npm pack @anthropic-ai/claude-code --pack-destination .
@@ -77,7 +77,7 @@ tar -xzf anthropic-ai-claude-code-2.1.23.tgz
 You now have `package/cli.js` - an 11.09 MB wall of minified code. Not really readable as it is.
 Unless you think outside the box (wdym there is no box?)
 
-### Step 2: AST-Based Splitting
+### AST Splitting
 
 I maintain a toolkit called `ast-deobf-tools` for exactly this situation. (It's held together with duct tape and prayer - I built it over several weekends for various reverse engineering projects, and it breaks on edge cases constantly. But it worked here.) The key tool is `generic-dependency-splitter.js`, which:
 
@@ -108,7 +108,7 @@ Done! Split into 4728 files
 ```
 and there you go
 
-### Step 3: Hash Verification
+### Hash Verification
 
 Here's the critical question: **how do you know the split is correct?**
 
@@ -132,7 +132,7 @@ Identical behavior. The split worked.
 
 ---
 
-## Part 3: Finding the Smoking Gun
+## The Smoking Gun
 
 With readable code, I searched for subagent handling:
 
@@ -178,7 +178,7 @@ That fourth point is the subtle killer. Or at least, I *think* it is - this is t
 
 ---
 
-## Part 4: The Event Loop Phase Problem
+## The Event Loop Problem
 
 *This section is my best attempt at explaining what I observed. If you know Node.js internals better than I do, I'd welcome corrections.*
 
@@ -199,11 +199,11 @@ Node.js processes callbacks in phases:
 
 React/Ink (Claude Code's terminal UI) uses a **32ms throttle implemented with `setTimeout`**. Renders are scheduled in the **timers phase**.
 
-### What I Initially Thought (Partially Wrong)
+### My Initial (Wrong) Theory
 
 I initially believed that `setImmediate` yields could "starve" the timers phase by running consecutively in phase 5. But that's not quite right - the event loop cycles through ALL phases each iteration: 1→2→3→4→5→6→1→... You can't get permanently stuck in one phase.
 
-### What's Actually Happening
+### What's Really Happening
 
 The key insight comes from [this Stack Overflow discussion](https://stackoverflow.com/questions/24117267/nodejs-settimeoutfn-0-vs-setimmediatefn/24119936#24119936) about `setTimeout` vs `setImmediate` performance:
 
@@ -226,11 +226,11 @@ This is still my best interpretation. The behavior matches, the fix works, but I
 
 ---
 
-## Part 5: The Fix
+## The Fix
 
 I applied seven fixes. Some of these might be overkill - I was being paranoid after spending too long debugging:
 
-### Fix 1: setTimeout Instead of setImmediate
+### setTimeout over setImmediate
 
 ```javascript
 // BEFORE (too fast - ~1ms, minimal breathing room):
@@ -240,7 +240,7 @@ await new Promise(r => setImmediate(r));
 await new Promise(r => setTimeout(r, 0));
 ```
 
-### Fix 2: Yield Before Expensive Operations
+### Yielding Before Heavy Work
 
 ```javascript
 await new Promise(r => setTimeout(r, 0));  // React renders
@@ -250,7 +250,7 @@ await new Promise(r => setTimeout(r, 0));  // React renders again
 let OA = __$.n2([GA]); // Then this can block
 ```
 
-### Fix 3: Yield on Continue Statements
+### Yielding on Continue
 
 ```javascript
 if (AA.type !== "message") {
@@ -259,7 +259,7 @@ if (AA.type !== "message") {
 }
 ```
 
-### Fix 4: Batched Yields in Callback Loops
+### Batched Yields
 
 Yielding every callback adds ~1ms each (100 callbacks = 100-400ms overhead). Batch instead:
 
@@ -271,7 +271,7 @@ for (let t of OA) for (let XA of t.message.content) {
 }
 ```
 
-### Fix 5: Abort Signal Checking
+### Abort Signal Checks
 
 ```javascript
 const yieldWithAbortCheck = async () => {
@@ -280,7 +280,7 @@ const yieldWithAbortCheck = async () => {
 };
 ```
 
-### Fix 6: O(n²) → O(n) Algorithm Fix
+### O(n) over O(n²)
 
 Found a bonus bug - repeated `shift()` calls are O(n²):
 
@@ -292,7 +292,7 @@ while (A.recentActivities.length > 5) A.recentActivities.shift();
 if (A.recentActivities.length > 5) A.recentActivities = A.recentActivities.slice(-5);
 ```
 
-### Fix 7: Immutable Snapshots for Race Conditions
+### Immutable Snapshots
 
 ```javascript
 normalizedMessages: [...e],  // Shallow copy prevents mutation races
@@ -300,13 +300,13 @@ normalizedMessages: [...e],  // Shallow copy prevents mutation races
 
 ---
 
-## Part 6: Verification
+## Verification
 
 "But did you break something else?"
 
 Fair question. Honestly, I can't be certain I didn't introduce subtle regressions. The test coverage below is the best I could do without access to Anthropic's internal test suite:
 
-### Runtime Tests: 5/5 Passed
+### Runtime Tests
 ```
 setTimeout timing:      1.063ms avg per yield    ✅
 Event loop cycling:     Callbacks execute        ✅
@@ -315,7 +315,7 @@ Batched yields:         93.9% faster than naive  ✅
 React render simulation: 22 renders occurred     ✅
 ```
 
-### Stress Tests: 10/10 Passed
+### Stress Tests
 ```
 1000 tool_use blocks:     1-2ms total            ✅
 Rapid abort/resume 100x:  All successful         ✅
@@ -337,11 +337,11 @@ The patched version is functionally identical - except it doesn't freeze.
 
 ---
 
-## Part 6.5: Definitive Evidence
+## Definitive Evidence
 
 This is the section for engineers who want to verify every claim. I built a test suite that analyzes the actual bundle code and measures real behavioral differences.
 
-### Code Analysis: Original vs Patched
+### Original vs Patched
 
 I extracted the Task tool region from the original 11MB bundle and compared it directly to the patched `dZ1.js`:
 
@@ -356,7 +356,7 @@ I extracted the Task tool region from the original 11MB bundle and compared it d
 
 The original Task tool code has **zero yield points**. The patched version has proper yields throughout.
 
-### Fix Verification: 5/5 Confirmed
+### Fix Verification
 
 Each fix was verified by parsing the actual patched code:
 
@@ -400,7 +400,7 @@ The patched version takes longer because it **actually yields to the event loop*
 
 *(Note: The split version also has slightly slower startup time (~2.8s vs ~1.8s) because it loads 4,728 separate module files instead of one flat bundle. This is a limitation of the splitting approach for analysis, not the yield fixes. In production, the yield fixes could be applied to the original flat bundle with no startup penalty.)*
 
-### The Yield Helper Implementation
+### The Yield Helper
 
 This is the actual code added to `dZ1.js`:
 
@@ -416,7 +416,7 @@ Simple, but critical. It:
 2. Checks for abort signals (responsive cancellation)
 3. Throws the proper abort error type
 
-### How to Verify Yourself
+### Verify It Yourself
 
 All claims can be verified. The [investigation repo](https://github.com/secemp9/claude-code-ui-freeze-investigation) includes the original bundle, the full split version, and test scripts:
 
@@ -442,7 +442,7 @@ grep -c "setTimeout" split/modules/dZ1.js         # Patched: has yields
 node tests/definitive-comparison.js
 ```
 
-### Test Files Included
+### Test Files
 
 Three test scripts for independent verification:
 
@@ -454,7 +454,7 @@ Three test scripts for independent verification:
 
 ---
 
-## Part 7: What This Teaches Us About AI-Assisted Development
+## What This Teaches About AI
 
 This bug *might* be a case study in AI limitations. I'm speculating here - I don't have access to the commit history or know who wrote what.
 
@@ -489,7 +489,7 @@ The patched code is included in the repo alongside this post. It passes all orig
 
 ---
 
-## Appendix: Files Changed
+## Files Changed
 
 ```
 /output/split/modules/dZ1.js
@@ -509,7 +509,7 @@ The patched code is included in the repo alongside this post. It passes all orig
 
 ---
 
-## Tools & References
+## References
 
 - **tool/generic-dependency-splitter.js** - The AST-based bundle splitter I built for this investigation (included in this repo)
 - **Babel** - JavaScript parsing and AST manipulation
@@ -521,7 +521,7 @@ The patched code is included in the repo alongside this post. It passes all orig
 
 ---
 
-## A Note on What Happens Next
+## What Happens Next
 
 Look, I know how this goes. Someone at Anthropic reads this, and the conversation becomes "how do we make the bundle harder to reverse engineer" instead of "how do we fix bugs faster."
 
