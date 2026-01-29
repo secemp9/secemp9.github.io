@@ -110,26 +110,41 @@
     var tocList = document.getElementById('toc-list');
     if (!content || !tocList) return;
 
-    var headings = content.querySelectorAll('h2, h3');
+    // Only use h2 headings for cleaner TOC
+    var headings = content.querySelectorAll('h2');
     if (headings.length < 2) {
-      // Hide TOC if not enough headings
       var sidebar = document.querySelector('.toc-sidebar');
       if (sidebar) sidebar.style.display = 'none';
       return;
     }
 
-    headings.forEach(function(heading, index) {
-      // Add ID if missing
+    // Skip boilerplate sections
+    var skipSections = ['cite this post', 'acknowledgements', 'references'];
+    var filteredHeadings = Array.from(headings).filter(function(h) {
+      var text = h.textContent.replace(/\s*¶\s*$/, '').trim().toLowerCase();
+      return skipSections.indexOf(text) === -1;
+    });
+
+    if (filteredHeadings.length < 2) {
+      var sidebar = document.querySelector('.toc-sidebar');
+      if (sidebar) sidebar.style.display = 'none';
+      return;
+    }
+
+    filteredHeadings.forEach(function(heading, index) {
       if (!heading.id) {
         heading.id = 'heading-' + index;
       }
 
       var li = document.createElement('li');
-      li.className = 'toc-item toc-' + heading.tagName.toLowerCase();
+      li.className = 'toc-item';
 
       var a = document.createElement('a');
       a.href = '#' + heading.id;
-      a.textContent = heading.textContent;
+      // Strip headerlink ¶ and section numbers for cleaner display
+      var text = heading.textContent.replace(/\s*¶\s*$/, '').trim();
+      text = text.replace(/^\d+\.\s*/, '');
+      a.textContent = text;
       a.className = 'toc-link';
 
       li.appendChild(a);
@@ -138,13 +153,12 @@
 
     // Highlight current section on scroll
     var tocLinks = tocList.querySelectorAll('.toc-link');
-    var headingsList = Array.from(headings);
 
     function updateActiveLink() {
       var scrollPos = window.scrollY + 100;
       var current = null;
 
-      headingsList.forEach(function(heading) {
+      filteredHeadings.forEach(function(heading) {
         if (heading.offsetTop <= scrollPos) {
           current = heading;
         }
