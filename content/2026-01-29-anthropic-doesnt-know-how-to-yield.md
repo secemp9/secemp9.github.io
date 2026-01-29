@@ -6,6 +6,8 @@ Summary: How I used AST-based deobfuscation to split an 11MB JavaScript bundle i
 
 *How I used AST-based deobfuscation to split an 11MB JavaScript bundle into 4,728 modules and discovered that AI-generated fixes created new bugs.*
 
+**Repository:** All code, patches, tests, and the AST splitting tool are available at [github.com/secemp9/claude-code-ui-freeze-investigation](https://github.com/secemp9/claude-code-ui-freeze-investigation)
+
 ---
 
 ## The Moment My Terminal Froze
@@ -416,7 +418,12 @@ Simple, but critical. It:
 
 ### How to Verify Yourself
 
-All claims can be verified. The repo includes the original bundle, the full split version, and test scripts:
+All claims can be verified. The [investigation repo](https://github.com/secemp9/claude-code-ui-freeze-investigation) includes the original bundle, the full split version, and test scripts:
+
+```bash
+git clone https://github.com/secemp9/claude-code-ui-freeze-investigation
+cd claude-code-ui-freeze-investigation
+```
 
 ```bash
 # 1. Run both versions
