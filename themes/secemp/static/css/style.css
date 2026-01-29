@@ -933,12 +933,12 @@ html, body {
 
 /* Table of Contents Sidebar - Fixed Position */
 .toc-sidebar {
-    position: fixed;
-    right: 20px;
-    top: 100px;
-    width: 220px;
-    max-height: calc(100vh - 120px);
-    z-index: 50;
+    position: fixed !important;
+    right: 40px !important;
+    top: 120px !important;
+    width: 200px;
+    max-height: calc(100vh - 140px);
+    z-index: 1000;
 }
 .toc-container {
     background: var(--bg-color);
@@ -994,9 +994,9 @@ html, body {
 }
 
 /* Hide TOC on smaller screens or when not enough space */
-@media (max-width: 1400px) {
+@media (max-width: 1100px) {
     .toc-sidebar {
-        display: none;
+        display: none !important;
     }
 }
 
