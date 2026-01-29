@@ -15,32 +15,44 @@
 {% endblock %}
 
 {% block content %}
-<div class="back-link">
-  <a href="{{ SITEURL }}/" aria-label="Back to Blog">&larr; Back</a>
+<div class="article-layout">
+  <div class="article-main">
+    <div class="back-link">
+      <a href="{{ SITEURL }}/" aria-label="Back to Blog">&larr; Back</a>
+    </div>
+    <div class="page-header">
+      <h1 class="page-title">{{ article.title }}</h1>
+      <div class="page-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
+    </div>
+    {% if article.image %}
+    <div class="article-hero-image">
+      <img src="{{ SITEURL }}/{{ article.image }}" alt="{{ article.title }}" loading="lazy">
+    </div>
+    {% endif %}
+    <div class="page-content">
+      {{ article.content }}
+    </div>
+    {% if article.prev_article or article.next_article %}
+    <div class="post-nav">
+      {% if article.prev_article %}
+        <a href="{{ SITEURL }}/{{ article.prev_article.url }}" aria-label="Previous Post">&larr; Prev</a>
+      {% endif %}
+      <span style="flex:1"></span>
+      {% if article.next_article %}
+        <a href="{{ SITEURL }}/{{ article.next_article.url }}" aria-label="Next Post">Next &rarr;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <aside class="toc-sidebar">
+    <div class="toc-container">
+      <div class="toc-header">On this page</div>
+      <nav class="toc-nav" aria-label="Table of contents">
+        <ul id="toc-list"></ul>
+      </nav>
+    </div>
+  </aside>
 </div>
-<div class="page-header">
-  <h1 class="page-title">{{ article.title }}</h1>
-  <div class="page-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
-</div>
-{% if article.image %}
-<div class="article-hero-image">
-  <img src="{{ SITEURL }}/{{ article.image }}" alt="{{ article.title }}" loading="lazy">
-</div>
-{% endif %}
-<div class="page-content">
-  {{ article.content }}
-</div>
-{% if article.prev_article or article.next_article %}
-<div class="post-nav">
-  {% if article.prev_article %}
-    <a href="{{ SITEURL }}/{{ article.prev_article.url }}" aria-label="Previous Post">&larr; Prev</a>
-  {% endif %}
-  <span style="flex:1"></span>
-  {% if article.next_article %}
-    <a href="{{ SITEURL }}/{{ article.next_article.url }}" aria-label="Next Post">Next &rarr;</a>
-  {% endif %}
-</div>
-{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -86,6 +98,65 @@
         img.setAttribute('loading', 'lazy');
       }
     });
+  });
+</script>
+<script>
+  // Table of Contents Generator
+  document.addEventListener('DOMContentLoaded', function() {
+    var content = document.querySelector('.page-content');
+    var tocList = document.getElementById('toc-list');
+    if (!content || !tocList) return;
+
+    var headings = content.querySelectorAll('h2, h3');
+    if (headings.length < 2) {
+      // Hide TOC if not enough headings
+      var sidebar = document.querySelector('.toc-sidebar');
+      if (sidebar) sidebar.style.display = 'none';
+      return;
+    }
+
+    headings.forEach(function(heading, index) {
+      // Add ID if missing
+      if (!heading.id) {
+        heading.id = 'heading-' + index;
+      }
+
+      var li = document.createElement('li');
+      li.className = 'toc-item toc-' + heading.tagName.toLowerCase();
+
+      var a = document.createElement('a');
+      a.href = '#' + heading.id;
+      a.textContent = heading.textContent;
+      a.className = 'toc-link';
+
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+
+    // Highlight current section on scroll
+    var tocLinks = tocList.querySelectorAll('.toc-link');
+    var headingsList = Array.from(headings);
+
+    function updateActiveLink() {
+      var scrollPos = window.scrollY + 100;
+      var current = null;
+
+      headingsList.forEach(function(heading) {
+        if (heading.offsetTop <= scrollPos) {
+          current = heading;
+        }
+      });
+
+      tocLinks.forEach(function(link) {
+        link.classList.remove('active');
+        if (current && link.getAttribute('href') === '#' + current.id) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateActiveLink);
+    updateActiveLink();
   });
 </script>
 {% endblock %}

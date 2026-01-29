@@ -48,7 +48,7 @@ body {
     padding: 0;
 }
 .post-page .container {
-    max-width: var(--container-width);
+    max-width: 1200px;
 }
 .post-page .main-container {
     padding: 0 var(--spacing-md);
@@ -929,4 +929,92 @@ html, body {
 }
 .headerlink:hover {
     color: var(--accent-color);
+}
+
+/* Table of Contents Sidebar */
+.article-layout {
+    display: flex;
+    gap: var(--spacing-lg);
+    position: relative;
+}
+.article-main {
+    flex: 1;
+    min-width: 0;
+}
+.toc-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    position: relative;
+}
+.toc-container {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+}
+.toc-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-color);
+}
+.toc-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.toc-item {
+    margin-bottom: 4px;
+}
+.toc-item.toc-h3 {
+    padding-left: 12px;
+}
+.toc-link {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 4px 0;
+    line-height: 1.4;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -10px;
+    transition: color 0.2s, border-color 0.2s;
+}
+.toc-link:hover {
+    color: var(--text-color);
+}
+.toc-link.active {
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+}
+
+/* Hide TOC on smaller screens */
+@media (max-width: 1200px) {
+    .toc-sidebar {
+        display: none;
+    }
+    .article-layout {
+        display: block;
+    }
+}
+
+/* Scrollbar styling for TOC */
+.toc-container::-webkit-scrollbar {
+    width: 4px;
+}
+.toc-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.toc-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+.toc-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
