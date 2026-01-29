@@ -108,13 +108,13 @@
   document.addEventListener('DOMContentLoaded', function() {
     var content = document.querySelector('.page-content');
     var tocList = document.getElementById('toc-list');
-    if (!content || !tocList) return;
+    var tocSidebar = document.querySelector('.toc-sidebar');
+    if (!content || !tocList || !tocSidebar) return;
 
     // Only use h2 headings for cleaner TOC
     var headings = content.querySelectorAll('h2');
     if (headings.length < 2) {
-      var sidebar = document.querySelector('.toc-sidebar');
-      if (sidebar) sidebar.style.display = 'none';
+      tocSidebar.style.display = 'none';
       return;
     }
 
@@ -126,8 +126,7 @@
     });
 
     if (filteredHeadings.length < 2) {
-      var sidebar = document.querySelector('.toc-sidebar');
-      if (sidebar) sidebar.style.display = 'none';
+      tocSidebar.style.display = 'none';
       return;
     }
 
@@ -141,23 +140,41 @@
 
       var a = document.createElement('a');
       a.href = '#' + heading.id;
-      // Strip headerlink ¶ and section numbers for cleaner display
       var text = heading.textContent.replace(/\s*¶\s*$/, '').trim();
       text = text.replace(/^\d+\.\s*/, '');
       a.textContent = text;
       a.className = 'toc-link';
 
+      // Smooth scroll on click
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = document.getElementById(heading.id);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.replaceState(null, '', '#' + heading.id);
+        }
+      });
+
       li.appendChild(a);
       tocList.appendChild(li);
     });
 
-    // Highlight current section on scroll
+    // Highlight current section on scroll + fade TOC in/out
     var tocLinks = tocList.querySelectorAll('.toc-link');
+    var firstHeadingTop = filteredHeadings[0] ? filteredHeadings[0].offsetTop : 300;
 
-    function updateActiveLink() {
-      var scrollPos = window.scrollY + 100;
+    function onScroll() {
+      var scrollPos = window.scrollY + 120;
+
+      // Fade in TOC after scrolling past the page header
+      if (window.scrollY > firstHeadingTop - 200) {
+        tocSidebar.classList.add('visible');
+      } else {
+        tocSidebar.classList.remove('visible');
+      }
+
+      // Update active link
       var current = null;
-
       filteredHeadings.forEach(function(heading) {
         if (heading.offsetTop <= scrollPos) {
           current = heading;
@@ -172,8 +189,8 @@
       });
     }
 
-    window.addEventListener('scroll', updateActiveLink);
-    updateActiveLink();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
   });
 </script>
 {% endblock %}

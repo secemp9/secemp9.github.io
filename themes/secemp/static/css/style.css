@@ -939,6 +939,15 @@ html, body {
     width: 200px;
     max-height: calc(100vh - 140px);
     z-index: 1000;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+.toc-sidebar.visible {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
 }
 .toc-container {
     background: var(--bg-color);
@@ -952,16 +961,18 @@ html, body {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--text-muted);
     margin-bottom: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
     border-bottom: 1px solid var(--border-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 .toc-header svg {
     flex-shrink: 0;
-    opacity: 0.7;
+    opacity: 0.5;
 }
 .toc-nav ul {
     list-style: none;
@@ -972,20 +983,16 @@ html, body {
     gap: 0;
 }
 .toc-item {
-    margin-bottom: 2px;
-}
-.toc-item.toc-h3 {
-    padding-left: 12px;
+    margin-bottom: 1px;
 }
 .toc-link {
-    display: block;
     font-size: 0.75rem;
     color: var(--text-muted);
     text-decoration: none;
-    padding: 4px 8px;
+    padding: 5px 10px;
     line-height: 1.4;
-    border-radius: 3px;
-    transition: color 0.15s, background-color 0.15s;
+    border-left: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -994,11 +1001,12 @@ html, body {
 }
 .toc-link:hover {
     color: var(--text-color);
-    background: var(--card-bg);
+    border-left-color: var(--border-color);
 }
 .toc-link.active {
     color: var(--primary-color);
-    background: rgba(212, 175, 55, 0.1);
+    border-left-color: var(--primary-color);
+    background: rgba(212, 175, 55, 0.05);
 }
 
 /* Hide TOC when not enough space beside content */
