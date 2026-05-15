@@ -76,23 +76,17 @@
 </script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Fix Obsidian-exported local image links
+    // Fix relative image paths to point to /images/
     var assetBase = "{{ SITEURL }}/images/";
     var externalPattern = /^(?:[a-z]+:)?\/\//i;
-    var obsidianPatterns = ['pasted image', 'chatgpt image'];
 
     document.querySelectorAll('.page-content img').forEach(function(img) {
       var originalSrc = img.getAttribute('src');
       if (!originalSrc) return;
+      // Skip external URLs and absolute paths
       if (externalPattern.test(originalSrc) || originalSrc.startsWith('/')) return;
 
-      var decoded = decodeURIComponent(originalSrc);
-      var lower = decoded.toLowerCase();
-      var matchesObsidian = obsidianPatterns.some(function(pattern) {
-        return lower.indexOf(pattern) !== -1;
-      });
-      if (!matchesObsidian) return;
-
+      // Strip any relative directory prefix (e.g. "images/") and keep just the filename
       var filename = originalSrc.split('/').pop();
       if (!filename) return;
 
