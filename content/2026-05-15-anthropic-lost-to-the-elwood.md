@@ -17,7 +17,7 @@ Yet again, we see each other. Yes, you — provider-customer interest mismatch, 
 
 Anyway, if you haven't been living under a rock (or, you know, if you're as terminally online as I am), you've probably heard that Anthropic plans to fiddle with the usage of `claude -p` in general. 
 
-![claude -p pricing](/images/Pasted%20image%2020260515031324.png)
+![claude -p pricing](images/Pasted%20image%2020260515031324.png)
 Probably not disabling it outright, but incurring separate costs or something, I don't know the specifics.
 
 Honestly, I get their agenda, and I'm not here to disparage them or litigate the decision. I thought I'd do something more productive with my time instead. You know, like scaling what I did in my [last blog post](https://secemp.blog/2026/01/29/anthropic-doesnt-know-how-to-yield/) and building a replacement with close parity to the official Anthropic SDK.
@@ -32,11 +32,13 @@ The way I envisioned this is pretty in-line with the previous blog. If you read 
 
 In the last post, I used Babel AST scripting to split and instrument a minified 11MB bundle — different AST-level tricks to deeply understand the UI freezing and performance issues, and provide concrete fixes that worked for me at the time on the version I was working with.
 
+Along the way I also saw [`@dexh/shannon`](https://github.com/dexhorthy/shannon) from my good friend [Dex](https://x.com/dexhorthy) on twitter, which takes a different approach — using tmux to scrape Claude instances without `claude -p` at all.
+
 However.
 
-A thought came to mind: "oh, but the official Anthropic SDK (`@anthropic-ai/claude-agent-sdk`) is just calling the installed Claude Code binary through subprocess and depending on IPC JSON streaming... but
+Another thought came to mind: "oh, but the official Anthropic SDK (`@anthropic-ai/claude-agent-sdk`) is just calling the installed Claude Code binary through subprocess and depending on IPC JSON streaming... but
 
-![we can scale this](/images/sunglasses-meme.png)
+![we can scale this](images/sunglasses-meme.png)
 
 ...we can scale this."
 
@@ -111,7 +113,7 @@ That's it. If Claude Code is installed globally, elwood finds it automatically.
 
 ---
 
-## Try It, Break It, Tell Me
+## Try me, Break me, Tell Me
 
 I included a bunch of examples in the [repo](https://github.com/secemp9/elwood). If you find issues, or something doesn't work for your case, let me know. I intend on accepting PRs and issues as needed.
 

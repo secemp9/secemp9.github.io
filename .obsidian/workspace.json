@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/2026-01-29-anthropic-doesnt-know-how-to-yield.md",
+                "file": "content/2026-05-15-anthropic-lost-to-the-elwood.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2026-01-29-anthropic-doesnt-know-how-to-yield"
+              "title": "2026-05-15-anthropic-lost-to-the-elwood"
             }
           }
         ]
@@ -170,6 +170,8 @@
   },
   "active": "e6e46bc5484a0234",
   "lastOpenFiles": [
+    "content/2026-05-15-anthropic-lost-to-the-elwood.md.tmp.2201939.1778809204503",
+    "content/2026-01-29-anthropic-doesnt-know-how-to-yield.md",
     "content/2026-05-15-anthropic-lost-to-the-elwood.md.tmp.2201939.1778808688394",
     "content/2026-05-15-anthropic-lost-to-the-elwood.md.tmp.2201939.1778808682333",
     "content/2025-11-24-on-emergent-misalignment-from-reward-hacking.md.tmp.2201939.1778808344755",
@@ -182,7 +184,6 @@
     "content/images/Pasted image 20260515031324.png",
     "Templates/blog-post.md.tmp.783142.1769441426800",
     "themes/secemp/templates/index.html.tmp.783142.1769430665290",
-    "themes/secemp/templates/base.html.tmp.783142.1769430658256",
     "output/images/rd7loe.png",
     "output/images/hero-bg.png",
     "output/images/profile.webp",
@@ -214,7 +215,6 @@
     "_site/Untitled 1.md",
     "_site/Untitled.md",
     "_posts/2025-11-07-test-again.md",
-    "_posts/2025-11-07-second-test.md",
-    "_posts/Untitledsd.md"
+    "_posts/2025-11-07-second-test.md"
   ]
 }
