@@ -39,7 +39,6 @@ However.
 Another thought came to mind: "oh, but the official Anthropic SDK (`@anthropic-ai/claude-agent-sdk`) is just calling the installed Claude Code binary through subprocess and depending on IPC JSON streaming... but
 
 ![we can scale this](images/sunglasses-meme.png)
-
 ...we can scale this."
 
 Indeed we can. By using Babel AST to instrumentalize the *entire* stack that gets called and used by the official SDK, and by directly importing the functions, methods, and classes from the installed Claude Code "binary" (if you can even call it that — it's not compiled, it's just minified JavaScript, eh).
