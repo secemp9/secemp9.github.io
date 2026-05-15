@@ -2,7 +2,7 @@ Title: Anthropic Lost to the Elwood
 Date: 2026-05-15 12:00:00
 Category: reverse-engineering
 Slug: anthropic-lost-to-the-elwood
-Summary: How I built a drop-in replacement for the official Anthropic agent SDK by using Babel AST to instrument the Claude Code CLI bundle directly — no subprocess, no API key, 100% API parity.
+Summary: How I built a drop-in replacement for the official Anthropic agent SDK by using Babel AST to instrument the Claude Code CLI bundle directly — no subprocess, no API key, close to 99% API parity.
 
 *How I scaled the AST techniques from my previous investigation into a full SDK replacement that calls agentLoop in-process — no subprocess spawning, no separate billing, 362 tests passing.*
 
@@ -98,7 +98,7 @@ The full API surface is there — `query()`, `tool()`, `createSdkMcpServer()`, h
 
 - **362 tests** passing across query parity, hooks, MCP behavioral tests, and gap-fix validations
 - **24 working examples** — direct equivalents of every official SDK example (basic queries, hooks, MCP, custom tools, session stores, subagents, V2 sessions)
-- **100% API parity** with `@anthropic-ai/claude-agent-sdk` — same function signatures, same message types, same options
+- **Close to 99% API parity** with `@anthropic-ai/claude-agent-sdk` — I double checked but I might have missed something, any PRs/issues opened are welcome
 - Works with **all auth methods**: subscription (`claude login`), `ANTHROPIC_API_KEY`, OAuth, Bedrock, Vertex, Foundry
 
 Install:
