@@ -2,6 +2,7 @@ Title: Anthropic Lost to the Elwood
 Date: 2026-05-15 12:00:00
 Category: reverse-engineering
 Slug: anthropic-lost-to-the-elwood
+Image: images/Pasted%20image%2020260515034658.png
 Summary: How I built a drop-in replacement for the official Anthropic agent SDK by using Babel AST to instrument the Claude Code CLI bundle directly — no subprocess, no API key, close to 99% API parity.
 
 *How I scaled the AST techniques from my previous investigation into a full SDK replacement that calls agentLoop in-process — no subprocess spawning, no separate billing, 362 tests passing.*
