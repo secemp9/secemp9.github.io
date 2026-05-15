@@ -17,7 +17,7 @@ Yet again, we see each other. Yes, you — provider-customer interest mismatch, 
 
 Anyway, if you haven't been living under a rock (or, you know, if you're as terminally online as I am), you've probably heard that Anthropic plans to fiddle with the usage of `claude -p` in general. 
 
-![claude -p pricing](images/Pasted%20image%2020260515031324.png)
+![claude -p pricing](/images/Pasted%20image%2020260515031324.png)
 Probably not disabling it outright, but incurring separate costs or something, I don't know the specifics.
 
 Honestly, I get their agenda, and I'm not here to disparage them or litigate the decision. I thought I'd do something more productive with my time instead. You know, like scaling what I did in my [last blog post](https://secemp.blog/2026/01/29/anthropic-doesnt-know-how-to-yield/) and building a replacement with close parity to the official Anthropic SDK.
@@ -36,7 +36,7 @@ However.
 
 A thought came to mind: "oh, but the official Anthropic SDK (`@anthropic-ai/claude-agent-sdk`) is just calling the installed Claude Code binary through subprocess and depending on IPC JSON streaming... but
 
-![we can scale this](images/sunglasses-meme.png)
+![we can scale this](/images/sunglasses-meme.png)
 
 ...we can scale this."
 

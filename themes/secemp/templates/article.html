@@ -76,25 +76,7 @@
 </script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Fix relative image paths to point to /images/
-    var assetBase = "{{ SITEURL }}/images/";
-    var externalPattern = /^(?:[a-z]+:)?\/\//i;
-
-    document.querySelectorAll('.page-content img').forEach(function(img) {
-      var originalSrc = img.getAttribute('src');
-      if (!originalSrc) return;
-      // Skip external URLs and absolute paths
-      if (externalPattern.test(originalSrc) || originalSrc.startsWith('/')) return;
-
-      // Strip any relative directory prefix (e.g. "images/") and keep just the filename
-      var filename = originalSrc.split('/').pop();
-      if (!filename) return;
-
-      img.setAttribute('src', assetBase + filename);
-      if (!img.hasAttribute('loading')) {
-        img.setAttribute('loading', 'lazy');
-      }
-    });
+    // No client-side image path fixups — use absolute paths in markdown
   });
 </script>
 <script>
