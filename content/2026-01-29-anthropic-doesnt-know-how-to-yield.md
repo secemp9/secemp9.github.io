@@ -2,6 +2,7 @@ Title: Anthropic Doesn't Know How to Yield
 Date: 2026-01-29 17:30:00
 Category: reverse-engineering
 Slug: anthropic-doesnt-know-how-to-yield
+Image: images/hero-bg.png
 Summary: How I used AST-based deobfuscation to split an 11MB JavaScript bundle into 4,728 modules and discovered that AI-generated fixes created new bugs.
 
 *How I used AST-based deobfuscation to split an 11MB JavaScript bundle into 4,728 modules and discovered that AI-generated fixes created new bugs.*
@@ -53,7 +54,7 @@ Let me unpack this.
 
 **The "fix":** Someone used Claude to fix it. I just can't prove it.
 
-<img width="436" height="333" alt="image" src="https://i.tribune.com.pk/media/images/james-doakes1753344838-0/james-doakes1753344838-0-436x333.webp" />
+<img width="436" height="333" alt="James Doakes looking suspicious, used as a reaction image" src="https://i.tribune.com.pk/media/images/james-doakes1753344838-0/james-doakes1753344838-0-436x333.webp" />
 
 what am I saying, this isn't speculation - Boris Cherny, who leads Claude Code development at Anthropic, has [publicly documented](https://x.com/bcherny/status/2007179832300581177) that they use Claude code to build Claude Code. The fix reduced render spam by adding fewer yield points which is a very claude coded solution imo
 

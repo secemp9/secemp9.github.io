@@ -5,13 +5,18 @@
 {% block body_class %} class="post-page"{% endblock %}
 
 {% block content %}
-<div class="back-link">
-  <a href="{{ SITEURL }}/" aria-label="Back to Home">&larr; Back</a>
-</div>
-<div class="page-header">
-  <h1 class="page-title">{{ page.title }}</h1>
-</div>
-<div class="page-content">
-  {{ page.content }}
+<div class="content-shell">
+  <div class="back-link">
+    <a href="{{ SITEURL }}/" aria-label="Back to Home">&larr; Back</a>
+  </div>
+  <div class="page-header">
+    <div class="page-meta">
+      <div class="page-kicker">Page</div>
+    </div>
+    <h1 class="page-title">{{ page.title }}</h1>
+  </div>
+  <div class="page-content">
+    {{ page.content }}
+  </div>
 </div>
 {% endblock %}

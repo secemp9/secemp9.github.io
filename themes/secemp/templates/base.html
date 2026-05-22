@@ -39,7 +39,7 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body{% block body_class %}{% endblock %}>
-  <a href="#main-content" class="skip-link" style="position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:999;">Skip to main content</a>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <header>
     <div class="container">
       <div class="header-inner">
@@ -78,14 +78,33 @@
       </div>
     </div>
   </header>
-  <div class="container">
-    <div class="main-container">
-      <main id="main-content">
-        {% block content %}{% endblock %}
-      </main>
+  <div class="site-frame">
+    <div class="container">
+      <div class="main-container">
+        <main id="main-content">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
     </div>
   </div>
   {% block sidebar %}{% endblock %}
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a href="{{ SITEURL }}/" class="footer-title">{{ SITENAME }}</a>
+          <p class="footer-copy">{{ SITESUBTITLE }}</p>
+        </div>
+        <div class="footer-links" role="navigation" aria-label="Footer navigation">
+          <a href="{{ SITEURL }}/posts/">Posts</a>
+          <a href="{{ SITEURL }}/about/">About</a>
+          <a href="mailto:secemp9@gmail.com">Email</a>
+          <a href="https://github.com/secemp9" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://x.com/secemp9" target="_blank" rel="noopener">X</a>
+        </div>
+      </div>
+    </div>
+  </footer>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

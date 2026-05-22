@@ -4,19 +4,19 @@ Status: published
 
 Hi, I'm secemp/secemp9.
 
-I'm an independent researcher interested in everything ML, CS, and Math (and related fields).
+I'm an independent researcher working across ML, reverse engineering, systems, and math.
 
-Thinking outside the box? I like to think there *is* no box. Pragmatic optimistic.
+This site is where I publish investigations, notes, and experiments.
 
-Chaotic-minded, but striving for order.
+I care about pragmatic models, better tools, and learning by building.
 
 ## Current Focus
 
-Currently in my exploratory-to-exploitation phase.
+Right now I'm mostly focused on agent tooling, model behavior, and reverse engineering workflows.
 
-Here you'll find notes, experiments, and projects, mostly about ML.
+Expect technical writeups, design notes, and the occasional opinionated post about where current tooling breaks.
 
-I like the number 9 (which can be generalized to all odd numbers), but really, I just like numbers in general.
+I still like the number 9, but the site is mostly about making messy systems legible.
 
 ## Contact
 

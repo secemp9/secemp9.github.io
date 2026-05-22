@@ -1,44 +1,103 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% set featured = articles[0] if articles else None %}
 <div class="hero">
-  <div class="hero-content">
-    <div class="hero-greeting">Hi, I'm</div>
-    <h1 class="hero-name"><span class="highlight">secemp</span></h1>
-    <p class="hero-bio">{{ SITESUBTITLE }}</p>
-    <a href="mailto:secemp9@gmail.com" class="corner-btn">
-      <span class="corner tl"></span>
-      <span class="corner tr"></span>
-      <span class="corner bl"></span>
-      <span class="corner br"></span>
-      Contact
-    </a>
+  <div class="hero-layout">
+    <div class="hero-content">
+      <div class="hero-greeting">Hi, I'm</div>
+      <h1 class="hero-name"><span class="highlight">secemp</span></h1>
+      <p class="hero-bio">{{ SITESUBTITLE }}</p>
+      <div class="hero-actions">
+        <a href="mailto:secemp9@gmail.com" class="corner-btn">
+          <span class="corner tl"></span>
+          <span class="corner tr"></span>
+          <span class="corner bl"></span>
+          <span class="corner br"></span>
+          Contact
+        </a>
+        <a href="{{ SITEURL }}/posts/" class="ghost-btn">Read posts</a>
+      </div>
+      <div class="hero-meta">
+        <span>{{ articles|length }} posts</span>
+        {% if featured %}
+        <span>Latest: {{ featured.date.strftime('%Y-%m-%d') }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <img src="{{ SITEURL }}/images/hero-bg.png" alt="" width="720" height="480" loading="eager">
+    </div>
   </div>
 </div>
 
+{% if featured %}
 <div class="section-header">
-  <div class="section-title">> Latest Posts</div>
+  <div class="section-title">> Featured</div>
+  <a href="{{ SITEURL }}/{{ featured.url }}" class="section-link">Open latest post</a>
+</div>
+
+<article class="featured-post">
+  <a class="card-link" href="{{ SITEURL }}/{{ featured.url }}">
+    <div class="card-content">
+      <div class="card-eyebrow">Latest essay</div>
+      <div class="card-date">{{ featured.date.strftime('%Y-%m-%d') }}</div>
+      <div class="card-title">{{ featured.title }}</div>
+      <div class="card-excerpt">{{ featured.summary|striptags|truncate(220) }}</div>
+      {% if featured.tags %}
+      <div class="card-tags">
+        {% for tag in featured.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </a>
+</article>
+{% endif %}
+
+{% if (featured and articles|length > 1) or not featured %}
+<div class="section-header">
+  <div class="section-title">> Recent Posts</div>
   <a href="/posts/" class="section-link">See all posts</a>
 </div>
 
 <div class="blog-list">
-  {% for article in articles[:6] %}
-    <div class="blog-card">
-      <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
-        <div class="card-content">
-          <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
-          <div class="card-title">{{ article.title }}</div>
-          <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
-          {% if article.tags %}
-          <div class="card-tags">
-            {% for tag in article.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+  {% if featured %}
+    {% for article in articles[1:6] %}
+      <div class="blog-card">
+        <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
+          <div class="card-content">
+            <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
+            <div class="card-title">{{ article.title }}</div>
+            <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
+            {% if article.tags %}
+            <div class="card-tags">
+              {% for tag in article.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+            </div>
+            {% endif %}
           </div>
-          {% endif %}
-        </div>
-      </a>
-    </div>
-  {% endfor %}
+        </a>
+      </div>
+    {% endfor %}
+  {% else %}
+    {% for article in articles[:6] %}
+      <div class="blog-card">
+        <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
+          <div class="card-content">
+            <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
+            <div class="card-title">{{ article.title }}</div>
+            <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
+            {% if article.tags %}
+            <div class="card-tags">
+              {% for tag in article.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  {% endif %}
 </div>
+{% endif %}
 
 {% if articles_paginator.num_pages > 1 %}
 <div class="pagination">

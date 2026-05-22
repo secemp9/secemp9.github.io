@@ -2,7 +2,8 @@ Title: Being Wrong Faster
 Date: 2026-01-26 10:38:02
 Category: misc
 Slug: how-i-think-a-personal-model-for-bayesian-reasoning
-Image: images/rd7loe.png
+Image: images/Pasted%20image%2020260126115838.png
+Summary: A practical heuristic for learning faster: design your bets, systems, and workflows so the places you are wrong show up early and cheaply.
 
 Everyone builds a model of the world in their head. Kids do it when they learn that dropped things fall. Adults do it when they pick up a new tool and start predicting what buttons do before pressing them. It's automatic - you observe, you predict, you update.
 

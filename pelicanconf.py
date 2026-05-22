@@ -73,7 +73,7 @@ SOCIAL = (
 )
 
 # Site metadata for templates
-SITESUBTITLE = 'ML researcher and pragmatic optimist. Writing about ideas and scaling.'
+SITESUBTITLE = 'Reverse engineering, ML, and systems notes from an independent researcher.'
 PROFILE_IMAGE = '/theme/img/profile.webp'
 OG_IMAGE = 'https://pbs.twimg.com/profile_images/1904889083505053698/fIdxky7Q_400x400.jpg'
 
