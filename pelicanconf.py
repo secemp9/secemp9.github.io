@@ -78,7 +78,11 @@ PROFILE_IMAGE = '/theme/img/profile.webp'
 OG_IMAGE = 'https://pbs.twimg.com/profile_images/1904889083505053698/fIdxky7Q_400x400.jpg'
 
 # Plugins (add as needed)
-PLUGINS = []
+PLUGIN_PATHS = ['plugins']
+# obsidian_image_links rewrites Obsidian-pasted relative image links
+# (e.g. ![](images/Pasted%20image%20....png)) to {static}/images/... so
+# the same markdown renders in Obsidian and on the published site.
+PLUGINS = ['obsidian_image_links']
 
 # Cache for faster rebuilds
 CACHE_CONTENT = True

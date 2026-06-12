@@ -6,29 +6,26 @@
 <div class="listing-shell">
   <div class="page-header">
     <div class="page-meta">
-      <div class="page-kicker">Archive</div>
+      <div class="page-kicker">ls posts/</div>
       <div class="page-count">{{ articles|length }} posts</div>
     </div>
     <h1 class="page-title">Posts</h1>
   </div>
 
-  <div class="blog-list">
-    {% for article in articles %}
-      <div class="blog-card">
-        <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
-          <div class="card-content">
-            <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
-            <div class="card-title">{{ article.title }}</div>
-            <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
-            {% if article.tags %}
-            <div class="card-tags">
-              {% for tag in article.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
-            </div>
-            {% endif %}
-          </div>
+  {% for year, year_articles in articles|groupby('date.year')|reverse %}
+  <section class="year-group">
+    <h2 class="year-label">{{ year }}</h2>
+    <ul class="post-ledger">
+      {% for article in year_articles %}
+      <li>
+        <a href="{{ SITEURL }}/{{ article.url }}">
+          <time datetime="{{ article.date.isoformat() }}">{{ article.date.strftime('%m-%d') }}</time>
+          <span class="ledger-title">{{ article.title }}</span>
         </a>
-      </div>
-    {% endfor %}
-  </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endfor %}
 </div>
 {% endblock %}

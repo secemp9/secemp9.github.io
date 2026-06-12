@@ -2,112 +2,61 @@
 
 {% block content %}
 {% set featured = articles[0] if articles else None %}
-<div class="hero">
-  <div class="hero-layout">
-    <div class="hero-content">
-      <div class="hero-greeting">Hi, I'm</div>
-      <h1 class="hero-name"><span class="highlight">secemp</span></h1>
-      <p class="hero-bio">{{ SITESUBTITLE }}</p>
-      <div class="hero-actions">
-        <a href="mailto:secemp9@gmail.com" class="corner-btn">
-          <span class="corner tl"></span>
-          <span class="corner tr"></span>
-          <span class="corner bl"></span>
-          <span class="corner br"></span>
-          Contact
-        </a>
-        <a href="{{ SITEURL }}/posts/" class="ghost-btn">Read posts</a>
-      </div>
-      <div class="hero-meta">
-        <span>{{ articles|length }} posts</span>
-        {% if featured %}
-        <span>Latest: {{ featured.date.strftime('%Y-%m-%d') }}</span>
-        {% endif %}
-      </div>
+<div class="index-shell">
+  <section class="intro">
+    <p class="intro-kicker">whoami</p>
+    <h1 class="intro-name">secemp<span class="accent">.</span></h1>
+    <p class="intro-bio">{{ SITESUBTITLE }}</p>
+    <div class="intro-links">
+      <a href="{{ SITEURL }}/posts/">Read posts</a>
+      <a href="{{ SITEURL }}/about/">About me</a>
+      <a href="mailto:secemp9@gmail.com">Get in touch</a>
     </div>
-    <div class="hero-visual" aria-hidden="true">
-      <img src="{{ SITEURL }}/images/hero-2026-05.jpeg" alt="" width="1672" height="941" loading="eager">
-    </div>
-  </div>
-</div>
+  </section>
 
-{% if featured %}
-<div class="section-header">
-  <div class="section-title">> Featured</div>
-  <a href="{{ SITEURL }}/{{ featured.url }}" class="section-link">Open latest post</a>
-</div>
-
-<article class="featured-post">
-  <a class="card-link" href="{{ SITEURL }}/{{ featured.url }}">
-    <div class="card-content">
-      <div class="card-eyebrow">Latest essay</div>
-      <div class="card-date">{{ featured.date.strftime('%Y-%m-%d') }}</div>
-      <div class="card-title">{{ featured.title }}</div>
-      <div class="card-excerpt">{{ featured.summary|striptags|truncate(220) }}</div>
-      {% if featured.tags %}
-      <div class="card-tags">
-        {% for tag in featured.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
-      </div>
-      {% endif %}
-    </div>
-  </a>
-</article>
-{% endif %}
-
-{% if (featured and articles|length > 1) or not featured %}
-<div class="section-header">
-  <div class="section-title">> Recent Posts</div>
-  <a href="/posts/" class="section-link">See all posts</a>
-</div>
-
-<div class="blog-list">
+  <div class="home-grid">
   {% if featured %}
-    {% for article in articles[1:6] %}
-      <div class="blog-card">
-        <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
-          <div class="card-content">
-            <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
-            <div class="card-title">{{ article.title }}</div>
-            <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
-            {% if article.tags %}
-            <div class="card-tags">
-              {% for tag in article.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
-            </div>
-            {% endif %}
-          </div>
-        </a>
-      </div>
-    {% endfor %}
-  {% else %}
-    {% for article in articles[:6] %}
-      <div class="blog-card">
-        <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
-          <div class="card-content">
-            <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
-            <div class="card-title">{{ article.title }}</div>
-            <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
-            {% if article.tags %}
-            <div class="card-tags">
-              {% for tag in article.tags %}<span class="card-tag">{{ tag }}</span>{% endfor %}
-            </div>
-            {% endif %}
-          </div>
-        </a>
-      </div>
-    {% endfor %}
+  <section class="featured">
+    <h2 class="section-label">Latest</h2>
+    <article class="featured-entry">
+      <a href="{{ SITEURL }}/{{ featured.url }}">
+        <time datetime="{{ featured.date.isoformat() }}">{{ featured.date.strftime('%Y-%m-%d') }}</time>
+        <h3>{{ featured.title }}</h3>
+        <p>{{ featured.summary|striptags|truncate(220) }}</p>
+        <span class="readmore">Read &rarr;</span>
+      </a>
+    </article>
+  </section>
   {% endif %}
-</div>
-{% endif %}
 
-{% if articles_paginator.num_pages > 1 %}
-<div class="pagination">
-  {% if articles_page.has_previous() %}
-    <a href="{{ SITEURL }}/{{ articles_previous_page.url }}">&laquo; Newer</a>
+  {% if articles|length > 1 %}
+  <section class="writing-section">
+    <h2 class="section-label">Writing</h2>
+    <ul class="post-ledger">
+      {% for article in articles[1:8] %}
+      <li>
+        <a href="{{ SITEURL }}/{{ article.url }}">
+          <time datetime="{{ article.date.isoformat() }}">{{ article.date.strftime('%Y-%m-%d') }}</time>
+          <span class="ledger-title">{{ article.title }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <a class="all-link" href="{{ SITEURL }}/posts/">All posts &rarr;</a>
+  </section>
   {% endif %}
-  <span>Page {{ articles_page.number }} of {{ articles_paginator.num_pages }}</span>
-  {% if articles_page.has_next() %}
-    <a href="{{ SITEURL }}/{{ articles_next_page.url }}">Older &raquo;</a>
+  </div>
+
+  {% if articles_paginator.num_pages > 1 %}
+  <div class="pagination">
+    {% if articles_page.has_previous() %}
+      <a href="{{ SITEURL }}/{{ articles_previous_page.url }}">&laquo; Newer</a>
+    {% endif %}
+    <span>Page {{ articles_page.number }} of {{ articles_paginator.num_pages }}</span>
+    {% if articles_page.has_next() %}
+      <a href="{{ SITEURL }}/{{ articles_next_page.url }}">Older &raquo;</a>
+    {% endif %}
+  </div>
   {% endif %}
 </div>
-{% endif %}
 {% endblock %}

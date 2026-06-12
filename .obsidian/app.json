@@ -7,7 +7,7 @@
   "attachmentFolderPath": "content/images",
   "useMarkdownLinks": true,
   "alwaysUpdateLinks": true,
-  "newLinkFormat": "shortest",
+  "newLinkFormat": "relative",
   "useTab": false,
   "tabSize": 2,
   "readableLineLength": true,

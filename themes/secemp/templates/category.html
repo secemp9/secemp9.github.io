@@ -8,24 +8,21 @@
 <div class="listing-shell">
   <div class="page-header">
     <div class="page-meta">
-      <div class="page-kicker">Category</div>
+      <div class="page-kicker">category</div>
       <div class="page-count">{{ articles|length }} posts</div>
     </div>
     <h1 class="page-title">{{ category }}</h1>
   </div>
 
-  <div class="blog-list">
+  <ul class="post-ledger">
     {% for article in articles %}
-      <div class="blog-card">
-        <a class="card-link" href="{{ SITEURL }}/{{ article.url }}">
-          <div class="card-content">
-            <div class="card-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
-            <div class="card-title">{{ article.title }}</div>
-            <div class="card-excerpt">{{ article.summary|striptags|truncate(140) }}</div>
-          </div>
-        </a>
-      </div>
+    <li>
+      <a href="{{ SITEURL }}/{{ article.url }}">
+        <time datetime="{{ article.date.isoformat() }}">{{ article.date.strftime('%Y-%m-%d') }}</time>
+        <span class="ledger-title">{{ article.title }}</span>
+      </a>
+    </li>
     {% endfor %}
-  </div>
+  </ul>
 </div>
 {% endblock %}

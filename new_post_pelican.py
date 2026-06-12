@@ -82,6 +82,11 @@ def create_post(title: str, tags: list = None, category: str = None):
     lines.append(f"Slug: {slug}")
     lines.append("")
     lines.append("Write your post content here in markdown!")
+    lines.append("")
+    lines.append("Paste images directly in Obsidian: they are saved to content/images/ and")
+    lines.append("embedded as `![](images/file.png)`, which renders both here and on the")
+    lines.append("published site. For a hero image at the top of the post, add a metadata")
+    lines.append("line above (no blank lines before it): `Image: images/file.png`")
 
     filepath.write_text('\n'.join(lines))
     print(f"New post created: {filepath}")

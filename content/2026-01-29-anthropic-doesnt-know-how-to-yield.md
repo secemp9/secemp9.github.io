@@ -2,7 +2,6 @@ Title: Anthropic Doesn't Know How to Yield
 Date: 2026-01-29 17:30:00
 Category: reverse-engineering
 Slug: anthropic-doesnt-know-how-to-yield
-Image: images/hero-bg.png
 Summary: How I used AST-based deobfuscation to split an 11MB JavaScript bundle into 4,728 modules and discovered that AI-generated fixes created new bugs.
 
 *How I used AST-based deobfuscation to split an 11MB JavaScript bundle into 4,728 modules and discovered that AI-generated fixes created new bugs.*

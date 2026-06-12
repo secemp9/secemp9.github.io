@@ -77,6 +77,11 @@ Tags:
 Slug: ${baseSlug}
 
 Write your post content here in markdown!
+
+Paste images directly in Obsidian: they are saved to content/images/ and
+embedded as \`![](images/file.png)\`, which renders both here and on the
+published site. For a hero image at the top of the post, add a metadata
+line above (no blank lines before it): \`Image: images/file.png\`
 `;
 
     const file = await vault.create(filepath, content);

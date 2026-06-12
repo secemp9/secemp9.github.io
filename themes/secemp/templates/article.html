@@ -15,14 +15,39 @@
 {% endblock %}
 
 {% block content %}
+{% set words = article.content|striptags|wordcount %}
+{% set read_minutes = ((words / 230)|round(0, 'ceil'))|int %}
+{% if read_minutes < 1 %}{% set read_minutes = 1 %}{% endif %}
 <div class="article-layout">
+  <aside class="meta-rail" aria-label="Article metadata">
+    <a class="rail-back" href="{{ SITEURL }}/">&larr; back</a>
+    <div class="rail-group">
+      <span class="rail-label">date</span>
+      <time datetime="{{ article.date.isoformat() }}">{{ article.date.strftime('%Y-%m-%d') }}</time>
+    </div>
+    <div class="rail-group">
+      <span class="rail-label">read</span>
+      <span class="rail-value">{{ read_minutes }} min &middot; {{ words }} words</span>
+    </div>
+    {% if article.tags %}
+    <div class="rail-group">
+      <span class="rail-label">tags</span>
+      <div class="rail-tags">
+        {% for tag in article.tags %}
+        <a href="{{ SITEURL }}/{{ tag.url }}" class="page-tag">{{ tag }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </aside>
   <article class="article-shell">
     <div class="back-link">
       <a href="{{ SITEURL }}/" aria-label="Back to Blog">&larr; Back</a>
     </div>
     <div class="page-header">
       <div class="page-meta">
-        <div class="page-date">{{ article.date.strftime('%Y-%m-%d') }}</div>
+        <time class="page-date" datetime="{{ article.date.isoformat() }}">{{ article.date.strftime('%Y-%m-%d') }}</time>
+        <span class="page-date">{{ read_minutes }} min read</span>
         {% if article.tags %}
         <div class="page-tags">
           {% for tag in article.tags %}
@@ -65,7 +90,7 @@
   <aside class="toc-sidebar" id="toc-sidebar">
     <div class="toc-container">
       <div class="toc-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg>
         <span>On this page</span>
       </div>
       <nav class="toc-nav" aria-label="Table of contents">
@@ -88,13 +113,8 @@
       var percent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
       bar.style.width = percent + '%';
     }
-    window.addEventListener('scroll', updateBar);
+    window.addEventListener('scroll', updateBar, { passive: true });
     updateBar();
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // No client-side image path fixups — use absolute paths in markdown
   });
 </script>
 <script>
