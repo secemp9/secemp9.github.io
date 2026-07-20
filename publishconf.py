@@ -10,7 +10,7 @@ sys.path.append(os.curdir)
 from pelicanconf import *
 
 # Production URL
-SITEURL = 'https://secemp9.github.io'
+SITEURL = 'https://secemp.blog'
 RELATIVE_URLS = False
 
 # Feed generation (enabled for production)
