@@ -38,6 +38,7 @@ STATIC_PATHS = ['images', 'extra']
 EXTRA_PATH_METADATA = {
     'extra/favicon.ico': {'path': 'favicon.ico'},
     'extra/CNAME': {'path': 'CNAME'},
+    'extra/og-image.png': {'path': 'og-image.png'},
 }
 
 # Markdown extensions
@@ -75,7 +76,7 @@ SOCIAL = (
 # Site metadata for templates
 SITESUBTITLE = 'Reverse engineering, ML, and systems notes from an independent researcher.'
 PROFILE_IMAGE = '/theme/img/profile.webp'
-OG_IMAGE = 'https://pbs.twimg.com/profile_images/1904889083505053698/fIdxky7Q_400x400.jpg'
+OG_IMAGE = 'https://secemp.blog/og-image.png'
 
 # Homepage dossier panel
 NOW = 'Agent tooling, model behavior, and reverse engineering workflows.'

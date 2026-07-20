@@ -1251,6 +1251,15 @@ main {
     line-height: 1.6;
 }
 
+.footer-colophon {
+    margin: 0.6rem 0 0 0;
+    font-family: var(--font-code);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    opacity: 0.75;
+}
+
 .footer-links {
     display: flex;
     flex-wrap: wrap;
