@@ -77,6 +77,26 @@ SITESUBTITLE = 'Reverse engineering, ML, and systems notes from an independent r
 PROFILE_IMAGE = '/theme/img/profile.webp'
 OG_IMAGE = 'https://pbs.twimg.com/profile_images/1904889083505053698/fIdxky7Q_400x400.jpg'
 
+# Homepage dossier panel
+NOW = 'Agent tooling, model behavior, and reverse engineering workflows.'
+FOCUS = 'llm evaluation · agent harnesses · systems'
+
+# Homepage projects ledger: (name, url, blurb, kind)
+PROJECTS = (
+    ('elwood', 'https://github.com/secemp9/elwood',
+     'Drop-in replacement for the Claude Code SDK via Babel AST instrumentation.', 'tool'),
+    ('harn', 'https://github.com/secemp9/harn',
+     'Full Python port of earendil\u2019s pi agent.', 'library'),
+    ('rubrics', 'https://github.com/secemp9/rubrics',
+     'A collection of rubrics for LLM judge use cases.', 'data'),
+    ('niwa', 'https://github.com/secemp9/niwa',
+     'Async conflict-aware spec and planning for users and their agents.', 'tool'),
+    ('jari', 'https://github.com/secemp9/jari',
+     'LMDB-backed task and issue tracker for agent workflows.', 'tool'),
+    ('goal', 'https://github.com/secemp9/goal',
+     'Port of /goal from Codex to arbitrary agents and harnesses.', 'tool'),
+)
+
 # Plugins (add as needed)
 PLUGIN_PATHS = ['plugins']
 # obsidian_image_links rewrites Obsidian-pasted relative image links

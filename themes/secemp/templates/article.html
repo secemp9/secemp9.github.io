@@ -10,10 +10,6 @@
 
 {% block body_class %} class="post-page"{% endblock %}
 
-{% block reading_progress %}
-<div id="reading-progress" class="reading-progress"></div>
-{% endblock %}
-
 {% block content %}
 {% set words = article.content|striptags|wordcount %}
 {% set read_minutes = ((words / 230)|round(0, 'ceil'))|int %}
@@ -102,21 +98,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-  // Reading progress bar
-  document.addEventListener('DOMContentLoaded', function() {
-    var bar = document.getElementById('reading-progress');
-    if (!bar) return;
-    function updateBar() {
-      var scrollTop = window.scrollY;
-      var docHeight = document.body.scrollHeight - window.innerHeight;
-      var percent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      bar.style.width = percent + '%';
-    }
-    window.addEventListener('scroll', updateBar, { passive: true });
-    updateBar();
-  });
-</script>
 <script>
   // Table of Contents Generator
   document.addEventListener('DOMContentLoaded', function() {

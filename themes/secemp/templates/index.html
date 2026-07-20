@@ -4,13 +4,35 @@
 {% set featured = articles[0] if articles else None %}
 <div class="index-shell">
   <section class="intro">
-    <p class="intro-kicker">whoami</p>
-    <h1 class="intro-name">secemp<span class="accent">.</span></h1>
-    <p class="intro-bio">{{ SITESUBTITLE }}</p>
-    <div class="intro-links">
-      <a href="{{ SITEURL }}/posts/">Read posts</a>
-      <a href="{{ SITEURL }}/about/">About me</a>
-      <a href="mailto:secemp9@gmail.com">Get in touch</a>
+    <div class="intro-grid">
+      <div class="intro-main">
+        <p class="intro-kicker">~/whoami</p>
+        <h1 class="intro-name">secemp<span class="accent">.</span></h1>
+        <p class="intro-bio">{{ SITESUBTITLE }}</p>
+        <div class="intro-links">
+          <a href="{{ SITEURL }}/posts/">Read posts</a>
+          <a href="{{ SITEURL }}/about/">About me</a>
+          <a href="mailto:secemp9@gmail.com">Get in touch</a>
+        </div>
+      </div>
+      <dl class="dossier">
+        <div class="dossier-row">
+          <dt>now</dt>
+          <dd>{{ NOW }}</dd>
+        </div>
+        <div class="dossier-row">
+          <dt>focus</dt>
+          <dd>{{ FOCUS }}</dd>
+        </div>
+        <div class="dossier-row">
+          <dt>elsewhere</dt>
+          <dd class="dossier-links">
+            <a href="https://github.com/secemp9" target="_blank" rel="noopener">github</a>
+            <a href="https://huggingface.co/secemp9" target="_blank" rel="noopener">huggingface</a>
+            <a href="https://x.com/secemp9" target="_blank" rel="noopener">x</a>
+          </dd>
+        </div>
+      </dl>
     </div>
   </section>
 
@@ -46,6 +68,26 @@
   </section>
   {% endif %}
   </div>
+
+  {% if PROJECTS %}
+  <section class="projects-section">
+    <h2 class="section-label">Projects</h2>
+    <ul class="project-ledger">
+      {% for name, url, blurb, kind in PROJECTS %}
+      <li>
+        <a href="{{ url }}" target="_blank" rel="noopener">
+          <span class="project-main">
+            <span class="project-name">{{ name }}</span>
+            <span class="project-blurb">{{ blurb }}</span>
+          </span>
+          <span class="project-kind">{{ kind }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <a class="all-link" href="https://github.com/secemp9?tab=repositories" target="_blank" rel="noopener">All repositories &rarr;</a>
+  </section>
+  {% endif %}
 
   {% if articles_paginator.num_pages > 1 %}
   <div class="pagination">

@@ -16,6 +16,9 @@
   <meta name="twitter:image" content="{{ OG_IMAGE }}">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/material-darker.min.css" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/theme/css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
@@ -33,7 +36,6 @@
       }
     };
   </script>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <script>document.addEventListener('DOMContentLoaded', function(){hljs.highlightAll();});</script>
   {% block extra_head %}{% endblock %}
@@ -45,7 +47,7 @@
     <div class="container header-bar">
       <a href="{{ SITEURL }}/" class="logo-link">
         <img src="/theme/img/profile.webp" alt="Profile Picture" class="avatar" width="28" height="28" loading="lazy">
-        <span class="logo">secemp<span class="logo-cursor">_</span></span>
+        <span class="logo">secemp<span class="logo-dot">.</span></span>
       </a>
       <nav aria-label="Main navigation">
         <ul>
