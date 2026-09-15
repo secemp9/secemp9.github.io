@@ -98,12 +98,18 @@ PROJECTS = (
      'Port of /goal from Codex to arbitrary agents and harnesses.', 'tool'),
 )
 
+# Donation methods: add only your own hosted checkout URL and receiving addresses.
+# An empty collection leaves the corresponding payment method unavailable.
+DONATION_CARD_URL = ''
+DONATION_CARD_PROVIDER = 'Stripe'
+DONATION_WALLETS = ()
+
 # Plugins (add as needed)
 PLUGIN_PATHS = ['plugins']
 # obsidian_image_links rewrites Obsidian-pasted relative image links
 # (e.g. ![](images/Pasted%20image%20....png)) to {static}/images/... so
 # the same markdown renders in Obsidian and on the published site.
-PLUGINS = ['obsidian_image_links']
+PLUGINS = ['obsidian_image_links', 'donation_methods']
 
 # Cache for faster rebuilds
 CACHE_CONTENT = True
