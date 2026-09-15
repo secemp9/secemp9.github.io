@@ -1,0 +1,49 @@
+{% extends "page.html" %}
+
+{% block body_class %} class="post-page donation-page"{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/theme/css/donate.css">
+{% endblock %}
+
+{% block content %}
+{% set donation_url = page.donation_url|default('')|trim %}
+<div class="donation-shell">
+  <header class="donation-header">
+    <p class="intro-kicker">~/support</p>
+    <h1 class="page-title">{{ page.title }}</h1>
+    {% include 'visibility.html' %}
+  </header>
+
+  <div class="donation-layout">
+    <div class="page-content donation-copy">
+      {{ page.content }}
+    </div>
+
+    <aside class="donation-panel" aria-labelledby="donation-heading">
+      <span class="donation-eyebrow">Independent work</span>
+      <h2 id="donation-heading">Help keep it going.</h2>
+      <p>Your support makes room for more research, tools, and writing.</p>
+
+      {% if donation_url.startswith('https://') %}
+      <a class="donation-action" href="{{ donation_url|e }}" rel="noopener noreferrer">
+        <span>{{ page.donation_label|default('Donate', true)|e }}</span>
+        <span aria-hidden="true">&nearr;</span>
+      </a>
+      <p class="donation-detail">Continue to {{ page.donation_provider|default('the payment page', true)|e }}.</p>
+      {% else %}
+      <a class="donation-action" href="mailto:secemp9@gmail.com?subject=Supporting%20your%20work">
+        <span>Get in touch about supporting</span>
+        <span aria-hidden="true">&nearr;</span>
+      </a>
+      <p class="donation-detail">For now, email me about supporting the work.</p>
+      {% endif %}
+
+      <div class="donation-signature">
+        <img src="/theme/img/profile.webp" alt="" width="36" height="36">
+        <span>Thank you.<br><span class="donation-name">&mdash; secemp</span></span>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

@@ -123,6 +123,23 @@ public content impossible to discover.
 References: [Pelican hidden posts and drafts](https://docs.getpelican.com/en/latest/content.html#hidden-posts),
 [Google's noindex guidance](https://developers.google.com/search/docs/crawling-indexing/block-indexing).
 
+## Donation page
+
+The donation page lives in `content/pages/donate.md` at `/donate/`. It starts
+unlisted and uses the dedicated `donate.html` template. Edit its Markdown to
+change the copy.
+
+To connect a payment destination, add `Donation_url: YOUR_HTTPS_PAYMENT_LINK`
+to its metadata header. Optional `Donation_label` and `Donation_provider` fields
+set the button label and the service named below it. Use your actual hosted
+payment page's HTTPS link; the site does not collect payment details itself.
+Until a link is supplied, the page offers an explicitly labeled email contact
+instead of a payment action.
+
+Preview it at [localhost:4002/donate/](http://localhost:4002/donate/). When ready,
+set `Status: published` and deploy; the URL stays `/donate/` and the page joins
+the navigation.
+
 ## Check a build
 
 ```sh
