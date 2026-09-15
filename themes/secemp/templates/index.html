@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% set active_nav = 'home' %}
 
 {% block content %}
-{% set featured = articles[0] if articles else None %}
+{% set visible_articles = articles_page.object_list %}
+{% set featured = visible_articles[0] if visible_articles else None %}
 <div class="index-shell">
   <section class="intro">
     <div class="intro-grid">
@@ -11,7 +13,7 @@
         <p class="intro-bio">{{ SITESUBTITLE }}</p>
         <div class="intro-links">
           <a href="{{ SITEURL }}/posts/">Read posts</a>
-          <a href="{{ SITEURL }}/about/">About me</a>
+          {% if has_about %}<a href="{{ SITEURL }}/about/">About me</a>{% endif %}
           <a href="mailto:secemp9@gmail.com">Get in touch</a>
         </div>
       </div>
@@ -51,11 +53,11 @@
   </section>
   {% endif %}
 
-  {% if articles|length > 1 %}
+  {% if visible_articles|length > 1 %}
   <section class="writing-section">
     <h2 class="section-label">Writing</h2>
     <ul class="post-ledger">
-      {% for article in articles[1:8] %}
+      {% for article in visible_articles[1:] %}
       <li>
         <a href="{{ SITEURL }}/{{ article.url }}">
           <time datetime="{{ article.date.isoformat() }}">{{ article.date.strftime('%Y-%m-%d') }}</time>

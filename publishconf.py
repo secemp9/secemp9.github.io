@@ -23,3 +23,7 @@ DELETE_OUTPUT_DIRECTORY = True
 # Disable caching for production builds
 CACHE_CONTENT = False
 LOAD_CONTENT_CACHE = False
+
+# Drafts are local previews. Use Status: hidden for a shareable deployed page.
+DRAFT_SAVE_AS = ''
+DRAFT_PAGE_SAVE_AS = ''

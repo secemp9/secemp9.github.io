@@ -1,0 +1,11 @@
+{% if unlisted and document.save_as != '404.html' %}
+<div class="visibility-note" aria-label="Page visibility">
+  <div>
+    <span class="visibility-label">{{ 'Draft' if document.status == 'draft' else 'Unlisted' }}</span>
+    <span class="visibility-copy">{{ 'Local preview only.' if document.status == 'draft' else 'Anyone with this link can read this page.' }}</span>
+  </div>
+  {% if document.status == 'hidden' %}
+  <button class="copy-link" type="button" data-copy-link hidden aria-live="polite">Copy link</button>
+  {% endif %}
+</div>
+{% endif %}

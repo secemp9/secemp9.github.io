@@ -1,8 +1,15 @@
+{% set document = article if article is defined else page if page is defined else none %}
+{% set unlisted = document and document.status in ['hidden', 'draft'] %}
+{% set has_about = pages|selectattr('slug', 'equalto', 'about')|list|length > 0 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% if unlisted %}
+  <meta name="robots" content="noindex, nofollow, noimageindex">
+  <meta name="referrer" content="no-referrer">
+  {% endif %}
   <title>{% block title %}{{ SITENAME }}{% endblock %}</title>
   <meta name="description" content="{% block description %}{{ SITESUBTITLE }}{% endblock %}">
   <meta property="og:title" content="{% block og_title %}{{ SITENAME }}{% endblock %}">
@@ -38,7 +45,7 @@
     };
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script>document.addEventListener('DOMContentLoaded', function(){hljs.highlightAll();});</script>
+  <script src="/theme/js/site.js" defer></script>
   {% block extra_head %}{% endblock %}
 </head>
 <body{% block body_class %}{% endblock %}>
@@ -52,9 +59,11 @@
       </a>
       <nav aria-label="Main navigation">
         <ul>
-          <li><a href="{{ SITEURL }}/"{% if not article and not page %} class="active" aria-current="page"{% endif %} aria-label="Home">Home</a></li>
-          <li><a href="/posts/" aria-label="Posts">Posts</a></li>
+          <li><a href="{{ SITEURL }}/"{% if active_nav == 'home' %} class="active" aria-current="page"{% endif %} aria-label="Home">Home</a></li>
+          <li><a href="{{ SITEURL }}/posts/"{% if active_nav == 'posts' %} class="active" aria-current="page"{% endif %} aria-label="Posts">Posts</a></li>
+          {% if has_about %}
           <li><a href="{{ SITEURL }}/about/"{% if page and page.slug == 'about' %} class="active" aria-current="page"{% endif %} aria-label="About">About</a></li>
+          {% endif %}
         </ul>
       </nav>
       <div class="social-icons">
@@ -88,7 +97,7 @@
         <div class="footer-links" role="navigation" aria-label="Footer navigation">
           <a href="{{ SITEURL }}/posts/">Posts</a>
           <a href="{{ SITEURL }}/tags/">Tags</a>
-          <a href="{{ SITEURL }}/about/">About</a>
+          {% if has_about %}<a href="{{ SITEURL }}/about/">About</a>{% endif %}
           {% if FEED_ALL_ATOM %}<a href="{{ SITEURL }}/{{ FEED_ALL_ATOM }}">RSS</a>{% endif %}
           <a href="mailto:secemp9@gmail.com">Email</a>
           <a href="https://github.com/secemp9" target="_blank" rel="noopener">GitHub</a>

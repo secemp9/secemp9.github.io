@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% set active_nav = 'posts' %}
 
 {% block title %}{{ article.title }} - {{ SITENAME }}{% endblock %}
-{% block description %}{{ article.summary|striptags|truncate(160) }}{% endblock %}
-{% block og_title %}{{ article.title }}{% endblock %}
-{% block og_description %}{{ article.summary|striptags|truncate(160) }}{% endblock %}
+{% block description %}{{ article.summary|striptags|truncate(160)|e }}{% endblock %}
+{% block og_title %}{{ article.title|striptags|e }}{% endblock %}
+{% block og_description %}{{ article.summary|striptags|truncate(160)|e }}{% endblock %}
 {% block og_url %}{{ article.url }}{% endblock %}
-{% block twitter_title %}{{ article.title }}{% endblock %}
-{% block twitter_description %}{{ article.summary|striptags|truncate(160) }}{% endblock %}
+{% block twitter_title %}{{ article.title|striptags|e }}{% endblock %}
+{% block twitter_description %}{{ article.summary|striptags|truncate(160)|e }}{% endblock %}
 
 {% block body_class %} class="post-page"{% endblock %}
 
@@ -30,7 +31,11 @@
       <span class="rail-label">tags</span>
       <div class="rail-tags">
         {% for tag in article.tags %}
+        {% if unlisted %}
+        <span class="page-tag">{{ tag }}</span>
+        {% else %}
         <a href="{{ SITEURL }}/{{ tag.url }}" class="page-tag">{{ tag }}</a>
+        {% endif %}
         {% endfor %}
       </div>
     </div>
@@ -47,12 +52,17 @@
         {% if article.tags %}
         <div class="page-tags">
           {% for tag in article.tags %}
+          {% if unlisted %}
+          <span class="page-tag">{{ tag }}</span>
+          {% else %}
           <a href="{{ SITEURL }}/{{ tag.url }}" class="page-tag">{{ tag }}</a>
+          {% endif %}
           {% endfor %}
         </div>
         {% endif %}
       </div>
       <h1 class="page-title">{{ article.title }}</h1>
+      {% include 'visibility.html' %}
     </div>
     {% if article.image %}
     <div class="article-hero-image">
@@ -67,7 +77,7 @@
       <p class="article-endcap-copy">Browse the archive, read more context, or reach out directly.</p>
       <div class="article-endcap-links">
         <a href="{{ SITEURL }}/posts/">All posts</a>
-        <a href="{{ SITEURL }}/about/">About</a>
+        {% if has_about %}<a href="{{ SITEURL }}/about/">About</a>{% endif %}
         <a href="mailto:secemp9@gmail.com">Email</a>
       </div>
     </div>
@@ -145,7 +155,8 @@
         e.preventDefault();
         var target = document.getElementById(heading.id);
         if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          target.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' });
           history.replaceState(null, '', '#' + heading.id);
         }
       });

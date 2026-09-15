@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block title %}{{ page.title }} - {{ SITENAME }}{% endblock %}
+{% block description %}{{ page.summary|striptags|truncate(160)|e }}{% endblock %}
+{% block og_title %}{{ page.title|striptags|e }}{% endblock %}
+{% block og_description %}{{ page.summary|striptags|truncate(160)|e }}{% endblock %}
+{% block og_url %}{{ page.url }}{% endblock %}
+{% block twitter_title %}{{ page.title|striptags|e }}{% endblock %}
+{% block twitter_description %}{{ page.summary|striptags|truncate(160)|e }}{% endblock %}
 
 {% block body_class %} class="post-page"{% endblock %}
 
@@ -14,6 +20,7 @@
       <div class="page-kicker">cat {{ page.slug }}.md</div>
     </div>
     <h1 class="page-title">{{ page.title }}</h1>
+    {% include 'visibility.html' %}
   </div>
   <div class="page-content">
     {{ page.content }}
