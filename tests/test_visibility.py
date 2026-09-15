@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from urllib.parse import urlsplit
 
 from pelican import Pelican
@@ -128,7 +129,7 @@ class VisibilityIntegrationTests(unittest.TestCase):
         # Only inputs, outputs and caches move; publication policy comes from
         # the actual repository configuration and templates under test.
         config = ROOT / ("publishconf.py" if production else "pelicanconf.py")
-        with unittest.mock.patch.object(sys, "path", [str(ROOT), *sys.path]):
+        with mock.patch.object(sys, "path", [str(ROOT), *sys.path]):
             settings = read_settings(
                 str(config),
                 override={
