@@ -34,16 +34,26 @@ class Document(HTMLParser):
         super().__init__()
         self.meta = {}
         self.links = []
+        self.navigation_links = []
+        self._main_navigation = False
         self.feed(html)
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
-        if tag == "meta":
+        if tag == "nav" and attrs.get("aria-label") == "Main navigation":
+            self._main_navigation = True
+        elif tag == "meta":
             self.meta[attrs.get("name") or attrs.get("property")] = attrs.get(
                 "content", ""
             )
         elif tag == "a" and "href" in attrs:
             self.links.append(attrs["href"])
+            if self._main_navigation:
+                self.navigation_links.append(attrs["href"])
+
+    def handle_endtag(self, tag):
+        if tag == "nav":
+            self._main_navigation = False
 
 
 class VisibilityIntegrationTests(unittest.TestCase):
@@ -163,7 +173,11 @@ class VisibilityIntegrationTests(unittest.TestCase):
         document = Document(self.read_output(relative))
         self.assertNotIn("noindex", document.meta.get("robots", ""), relative)
 
-    def assert_no_public_leaks(self, extra_private=()):
+    def navigation_paths(self):
+        document = Document(self.read_output("index.html"))
+        return {urlsplit(link).path for link in document.navigation_links}
+
+    def assert_no_public_leaks(self, extra_private=(), extra_markers=()):
         private_paths = {HIDDEN_ARTICLE, HIDDEN_PAGE, "404.html", *extra_private}
         markers = (
             HIDDEN_TITLE,
@@ -174,6 +188,7 @@ class VisibilityIntegrationTests(unittest.TestCase):
             "DRAFTPAGE_SENTINEL",
             "unfinished-article",
             "unfinished-page",
+            *extra_markers,
         )
         # Native hidden/draft collections must leave no references in any
         # generated public HTML, feeds, or future XML sitemap.
@@ -235,11 +250,13 @@ class VisibilityIntegrationTests(unittest.TestCase):
         self.build()
         self.assert_unindexed(HIDDEN_ARTICLE)
         self.assert_unindexed(HIDDEN_PAGE)
+        self.assertNotIn("/preview-notes/", self.navigation_paths())
 
         self.write_visibility("published")
         self.build()
         self.assert_public(HIDDEN_ARTICLE)
         self.assert_public(HIDDEN_PAGE)
+        self.assertIn("/preview-notes/", self.navigation_paths())
         # Publishing must expose the same article URL in indexes and feeds.
         for relative in (
             "index.html",
@@ -257,6 +274,7 @@ class VisibilityIntegrationTests(unittest.TestCase):
         self.build()
         self.assert_unindexed(HIDDEN_ARTICLE)
         self.assert_unindexed(HIDDEN_PAGE)
+        self.assertNotIn("/preview-notes/", self.navigation_paths())
         self.assert_no_public_leaks()
         self.assert_private_taxonomy_absent()
 
@@ -268,6 +286,101 @@ class VisibilityIntegrationTests(unittest.TestCase):
         self.build()
         self.assertFalse((self.output / "drafts/unfinished-article.html").exists())
         self.assertFalse((self.output / "drafts/pages/unfinished-page.html").exists())
+        self.assert_no_public_leaks()
+
+    def test_translated_and_custom_path_drafts_remain_local(self):
+        cases = (
+            (
+                "unfinished-fr.md", "unfinished-article", "fr", None,
+                "drafts/unfinished-article-fr.html",
+            ),
+            (
+                "pages/unfinished-fr.md", "unfinished-page", "fr", None,
+                "drafts/pages/unfinished-page-fr.html",
+            ),
+            (
+                "custom-article.md", "custom-article", "en",
+                "review/custom-article/index.html", "review/custom-article/index.html",
+            ),
+            (
+                "custom-article-fr.md", "custom-article", "fr",
+                "review/custom-article-fr/index.html", "review/custom-article-fr/index.html",
+            ),
+            (
+                "pages/custom-page.md", "custom-page", "en",
+                "review/custom-page/index.html", "review/custom-page/index.html",
+            ),
+            (
+                "pages/custom-page-fr.md", "custom-page", "fr",
+                "review/custom-page-fr/index.html", "review/custom-page-fr/index.html",
+            ),
+        )
+        # Every article/page language and custom-path case must be available
+        # at its declared local URL but produce no production HTML.
+        for filename, slug, language, save_as, _ in cases:
+            metadata = {
+                "Title": f"DRAFTMATRIX_SENTINEL {slug} {language}",
+                "Date": "2026-01-03 12:00",
+                "Slug": slug,
+                "Lang": language,
+                "Status": "draft",
+            }
+            if save_as:
+                metadata["Save_as"] = save_as
+                metadata["Url"] = save_as.removesuffix("index.html")
+            self.write_content(filename, metadata)
+
+        self.build()
+        self.assert_no_public_leaks(extra_markers=("DRAFTMATRIX_SENTINEL",))
+        # Production suppresses both native draft paths and explicit overrides.
+        for *_, relative in cases:
+            self.assertFalse((self.output / relative).exists(), relative)
+
+        # Reusing this process after a production build must not let the
+        # registered production plugin suppress development drafts.
+        self.build(production=False)
+        # All six local outputs must retain crawler and referrer restrictions.
+        for *_, relative in cases:
+            self.assert_unindexed(relative)
+
+        self.build()
+        # Rebuilding production in the same directory removes every old draft.
+        for *_, relative in cases:
+            self.assertFalse((self.output / relative).exists(), relative)
+        self.assert_no_public_leaks(extra_markers=("DRAFTMATRIX_SENTINEL",))
+
+    def test_pagination_lists_distinct_complete_article_slices(self):
+        # Eight published articles with page size six must yield Feb 7–2 on
+        # index.html, then Feb 1 and the Jan 1 public control on index2.html.
+        for day in range(1, 8):
+            self.write_content(
+                f"pagination-{day}.md",
+                {
+                    "Title": f"Pagination article {day}",
+                    "Date": f"2026-02-{day:02d} 12:00",
+                    "Slug": f"pagination-{day}",
+                    "Status": "published",
+                },
+            )
+        self.build()
+        first_page = Document(self.read_output("index.html"))
+        second_page = Document(self.read_output("index2.html"))
+
+        def article_paths(document):
+            return [
+                urlsplit(link).path for link in document.links
+                if urlsplit(link).path.startswith("/2026/")
+            ]
+
+        self.assertEqual(
+            article_paths(first_page),
+            [f"/2026/02/{day:02d}/pagination-{day}/" for day in (7, 6, 5, 4, 3, 2)],
+        )
+        self.assertEqual(
+            article_paths(second_page),
+            ["/2026/02/01/pagination-1/", "/2026/01/01/public-control/"],
+        )
+        self.assertIn("/index2.html", {urlsplit(link).path for link in first_page.links})
         self.assert_no_public_leaks()
 
     def test_hiding_about_removes_hardcoded_navigation_links(self):
