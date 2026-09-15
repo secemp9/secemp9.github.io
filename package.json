@@ -1,0 +1,14 @@
+{
+  "name": "secemp-blog-ui-tests",
+  "private": true,
+  "description": "Development-only DOM tests; the published Pelican site uses plain JavaScript.",
+  "scripts": {
+    "test": "node --test tests/donation-ui.test.cjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

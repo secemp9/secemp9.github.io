@@ -5,6 +5,9 @@ cache/
 __pycache__/
 *.pyc
 
+# Development-only JavaScript test dependencies
+node_modules/
+
 # Virtual environment
 .venv/
 venv/
