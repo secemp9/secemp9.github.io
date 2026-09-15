@@ -64,6 +64,11 @@
           {% if has_about %}
           <li><a href="{{ SITEURL }}/about/"{% if page and page.slug == 'about' %} class="active" aria-current="page"{% endif %} aria-label="About">About</a></li>
           {% endif %}
+          {% if DISPLAY_PAGES_ON_MENU %}
+          {% for menu_page in pages if menu_page.slug != 'about' %}
+          <li><a href="{{ SITEURL }}/{{ menu_page.url }}"{% if page == menu_page %} class="active" aria-current="page"{% endif %}>{{ menu_page.title }}</a></li>
+          {% endfor %}
+          {% endif %}
         </ul>
       </nav>
       <div class="social-icons">
