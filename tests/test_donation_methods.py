@@ -250,8 +250,8 @@ class DonationIntegrationTests(unittest.TestCase):
         self.assertEqual([panel["attrs"]["data-frequency-panel"] for panel in panels], ["once", "monthly"])
         self.assertFalse(any(document.is_hidden(panel) for panel in panels))
         self.assertTrue(document.is_hidden(document.with_attribute("data-frequency-toggle")[0]))
-        self.assertFalse(document.with_attribute("data-monthly-plan") if not configured else False)
         if not configured:
+            self.assertFalse(document.with_attribute("data-monthly-plan"))
             self.assertFalse(document.with_attribute("data-monthly-sponsors"))
             self.assertFalse(document.with_attribute("data-manage-monthly"))
             self.assertIn("Monthly card payments are not available yet.", html)
