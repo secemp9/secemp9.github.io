@@ -129,12 +129,51 @@ The donation page lives in `content/pages/donate.md` at `/donate/`. It starts
 unlisted and uses the dedicated `donate.html` template. Edit its Markdown to
 change the copy.
 
-To connect a payment destination, add `Donation_url: YOUR_HTTPS_PAYMENT_LINK`
-to its metadata header. Optional `Donation_label` and `Donation_provider` fields
-set the button label and the service named below it. Use your actual hosted
-payment page's HTTPS link; the site does not collect payment details itself.
-Until a link is supplied, the page offers an explicitly labeled email contact
-instead of a payment action.
+Configure payment methods in `pelicanconf.py`:
+
+- `DONATION_CARD_URL`: your hosted HTTPS payment link. For Stripe, create a
+  Payment Link with **Customers choose what to pay** for one-time support.
+  A Stripe test link can be used while testing the unlisted page.
+- `DONATION_CARD_PROVIDER`: the checkout name shown on the button, such as Stripe.
+- `DONATION_WALLETS`: one receiving address record per network and asset.
+
+The wallet record format is:
+
+```python
+{
+    'id': 'base-usdc',
+    'network': 'base',
+    'network_label': 'Base',
+    'asset': 'USDC',
+    'address': 'YOUR_ACTUAL_RECEIVING_ADDRESS',
+}
+```
+
+Replace the example address with your own verified receiving address before
+adding the record to `DONATION_WALLETS`. Repeat for each asset/network you
+actually accept; the selectors are generated from those records. Never put
+private keys or seed phrases in the configuration. Blank defaults show clear
+unavailable states; no sample payment destination is included in the site.
+
+QR codes are generated locally during the Pelican build using `qrcode`, with a
+white background and a four-module quiet margin. They encode only the exact
+receiving address, so the donor must select the displayed network in their
+wallet. QR generation and copying do not verify address ownership, network
+compatibility, or payment receipt. No external QR service is called.
+
+The method switcher and copy controls use plain JavaScript. If JavaScript is
+unavailable, configured links and addresses remain visible. If clipboard access
+fails, the address can be selected and copied manually. Invalid configuration
+logs a build error; the deployment's `--fatal warnings` stops that build.
+
+Existing page metadata `Donation_url` and `Donation_provider` still override
+the corresponding global card settings. Payment details are entered on the
+provider's hosted checkout. This site does not collect card details, create
+payment intents, verify crypto transactions, or display payment confirmations.
+
+See [Stripe Payment Links](https://docs.stripe.com/payment-links/create) and
+[Stripe testing](https://docs.stripe.com/testing) for checkout setup. Available
+wallet methods depend on the provider, account settings, and donor's device.
 
 Preview it at [localhost:4002/donate/](http://localhost:4002/donate/). When ready,
 set `Status: published` and deploy; the URL stays `/donate/` and the page joins
@@ -144,8 +183,13 @@ the navigation.
 
 ```sh
 .venv/bin/python -m unittest discover -s tests
+npm ci --ignore-scripts
+npm test
 .venv/bin/pelican content -o output-preview -s publishconf.py --fatal warnings
 ```
 
 The second command uses the real production domain in generated URLs. Use
 `./serve.sh --production` for a version with local links.
+
+Node 22 and jsdom are used only for interaction tests. The deployed site stays
+static HTML, CSS, and JavaScript; no Node server or npm packages are shipped.
