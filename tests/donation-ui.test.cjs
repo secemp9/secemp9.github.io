@@ -176,7 +176,9 @@ test('copy writes the selected wallet’s exact address and announces only copyi
   copy.click();
   await settle();
   assert.equal(writeText.mock.callCount(), 1);
-  assert.deepEqual(writeText.mock.calls[0].arguments, ['fixture-address-two-TOKEN']);
+  // Arguments originate in jsdom's realm; compare their count and exact string.
+  assert.equal(writeText.mock.calls[0].arguments.length, 1);
+  assert.equal(writeText.mock.calls[0].arguments[0], 'fixture-address-two-TOKEN');
   assert.match(status.textContent, /copied/i);
   assert.doesNotMatch(status.textContent, /paid|donation received|payment successful/i);
   assert.equal(status.getAttribute('role'), 'status');
