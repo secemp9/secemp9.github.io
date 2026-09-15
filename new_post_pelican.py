@@ -139,14 +139,16 @@ def import_post(src_path: str, title: str = None, status: str = None):
         content = '\n'.join(meta_lines) + content
     elif status is not None or 'status' not in metadata:
         # Change only the metadata header; body text and other fields stay intact.
-        header, separator, body = content.partition('\n\n')
+        separator = re.search(r'\n[ \t]*\n', content)
+        header_end = separator.start() if separator else len(content)
+        header, body = content[:header_end], content[header_end:]
         header, replacements = re.subn(
             r'^status\s*:[^\n]*$', f"Status: {status or 'hidden'}", header,
             count=1, flags=re.IGNORECASE | re.MULTILINE,
         )
         if not replacements:
             header = header.rstrip() + f"\nStatus: {status or 'hidden'}"
-        content = header + separator + body
+        content = header + body
 
     filepath.write_text(content)
     print(f"Imported post: {filepath}")
