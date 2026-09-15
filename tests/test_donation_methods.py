@@ -10,7 +10,7 @@ import unittest
 from unittest import mock
 import xml.etree.ElementTree as ET
 
-from pelican import Pelican
+from pelican import Pelican, signals
 from pelican.contents import Article, Page
 from pelican.settings import DEFAULT_CONFIG, read_settings
 import qrcode
@@ -35,7 +35,9 @@ class DonationConfigurationTests(unittest.TestCase):
         config.update(settings or {})
         values = {"title": "Support", "template": "donate", "status": "hidden"}
         values.update(metadata or {})
-        page = content_class("A donation page.", metadata=values, settings=config)
+        # Isolate unit calls from receivers retained by earlier integration builds.
+        with signals.content_object_init.muted():
+            page = content_class("A donation page.", metadata=values, settings=config)
         prepare_donation(page)
         return page
 
