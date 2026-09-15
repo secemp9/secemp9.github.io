@@ -30,6 +30,7 @@ This Obsidian vault is configured to work with your Pelican blog structure.
 5. **The template automatically:**
    - Renames the file to `YYYY-MM-DD-slug.md` (with today's date)
    - Fills in proper Pelican metadata with title and date
+   - Adds `Status: hidden`, so the deployed post is unlisted until you publish it
    - Opens file ready for editing
 
 **Example:**
@@ -66,11 +67,31 @@ Pelican uses Key: Value format (NOT YAML):
 ```
 Title: My Post Title
 Date: 2025-01-26 14:30
+Status: hidden
 Tags: python, web
 Slug: my-post-title
 
 Your content here...
 ```
+
+## Preview and Publish
+
+Both the template and `scripts/create-blog-post.js` create posts with
+`Status: hidden`. They are generated at their regular URL when you push to
+`main`, but do not appear in the blog listings, feeds, or page navigation, and
+include `noindex` for search engines.
+
+1. Preview locally with `./serve.sh`, or `./serve.sh --production --port 4002`
+   to check production settings on localhost.
+2. Commit and push the hidden post to `main`; after deployment, share its URL.
+3. When ready, change `Status: hidden` to `Status: published`, commit, and push.
+   Keep the date and slug unchanged to preserve the shared URL.
+
+Use `Status: draft` for a local draft: this site's production settings suppress
+draft HTML. Unlisted posts and drafts are not confidential: a public GitHub
+repository still exposes committed source, images, and history. `noindex` is a
+search instruction, not a password, and removing an already indexed URL takes a
+recrawl. See [the site README](../README.md#what-unlisted-means) for the limits.
 
 ## Troubleshooting
 

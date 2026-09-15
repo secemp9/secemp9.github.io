@@ -68,6 +68,7 @@ if (dateMatch) {
 -%>
 Title: <% title %>
 Date: <% dateStr %>
+Status: hidden
 Tags:
 Slug: <% slug %>
 
@@ -77,4 +78,3 @@ Paste images directly in Obsidian: they are saved to content/images/ and
 embedded as `![](images/file.png)`, which renders both here and on the
 published site. For a hero image at the top of the post, add a metadata
 line above (no blank lines before it): `Image: images/file.png`
-

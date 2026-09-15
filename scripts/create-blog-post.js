@@ -73,6 +73,7 @@ module.exports = async function(tp) {
     // Pelican metadata format (Key: Value, no YAML delimiters)
     const content = `Title: ${title}
 Date: ${datePrefix} ${timeStr}
+Status: hidden
 Tags:
 Slug: ${baseSlug}
 

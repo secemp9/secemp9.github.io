@@ -39,14 +39,15 @@ def list_posts():
     if not posts:
         print("No posts found.")
         return
-    print(f"{'Date':<12} | {'Title'}")
+    print(f"{'Date':<12} | {'Status':<10} | {'Title'}")
     print("-" * 60)
     for post in posts:
         content = post.read_text()
         meta, _ = parse_pelican_metadata(content)
         title = meta.get('title', '(no title)')
         date = meta.get('date', '????-??-??').split()[0]
-        print(f"{date:<12} | {title}")
+        status = meta.get('status', 'published')
+        print(f"{date:<12} | {status:<10} | {title}")
 
 def remove_post(slug_or_filename: str):
     """Remove a post by slug or filename."""
@@ -59,8 +60,8 @@ def remove_post(slug_or_filename: str):
         match.unlink()
         print(f"Removed post: {match}")
 
-def create_post(title: str, tags: list = None, category: str = None):
-    """Create a new post with Pelican format."""
+def create_post(title: str, tags: list = None, category: str = None, status: str = 'hidden'):
+    """Create a new post, unlisted until explicitly published."""
     slug = slugify(title)
     date = datetime.now().strftime("%Y-%m-%d")
     datetime_str = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -74,6 +75,7 @@ def create_post(title: str, tags: list = None, category: str = None):
     lines = [
         f"Title: {title}",
         f"Date: {datetime_str}",
+        f"Status: {status}",
     ]
     if tags:
         lines.append(f"Tags: {', '.join(tags)}")
@@ -91,7 +93,7 @@ def create_post(title: str, tags: list = None, category: str = None):
     filepath.write_text('\n'.join(lines))
     print(f"New post created: {filepath}")
 
-def import_post(src_path: str, title: str = None):
+def import_post(src_path: str, title: str = None, status: str = None):
     """Import an existing markdown file as a Pelican post."""
     src = Path(src_path)
     if not src.exists():
@@ -123,15 +125,28 @@ def import_post(src_path: str, title: str = None):
         return
 
     # Check if content already has Pelican metadata
-    if not content.strip().startswith('Title:'):
+    metadata, _ = parse_pelican_metadata(content)
+    if 'title' not in metadata:
         # Add Pelican metadata
         meta_lines = [
             f"Title: {title}",
             f"Date: {datetime_str}",
             f"Slug: {slug}",
+            f"Status: {status or 'hidden'}",
+            "",
             "",
         ]
         content = '\n'.join(meta_lines) + content
+    elif status is not None or 'status' not in metadata:
+        # Change only the metadata header; body text and other fields stay intact.
+        header, separator, body = content.partition('\n\n')
+        header, replacements = re.subn(
+            r'^status\s*:[^\n]*$', f"Status: {status or 'hidden'}", header,
+            count=1, flags=re.IGNORECASE | re.MULTILINE,
+        )
+        if not replacements:
+            header = header.rstrip() + f"\nStatus: {status or 'hidden'}"
+        content = header + separator + body
 
     filepath.write_text(content)
     print(f"Imported post: {filepath}")
@@ -142,6 +157,10 @@ def main():
     parser.add_argument('--title', help='Specify the post title.')
     parser.add_argument('--tags', help='Comma-separated tags.')
     parser.add_argument('--category', help='Post category.')
+    parser.add_argument(
+        '--status', choices=('hidden', 'published', 'draft'),
+        help='Visibility: new posts default to hidden; imports retain an explicit status.',
+    )
     parser.add_argument('--list', action='store_true', help='List all posts.')
     parser.add_argument('--remove', help='Remove a post by slug or filename.')
     args = parser.parse_args()
@@ -158,7 +177,7 @@ def main():
         return
 
     if args.from_file:
-        import_post(args.from_file, args.title)
+        import_post(args.from_file, args.title, args.status)
         return
 
     # Create new post
@@ -168,7 +187,7 @@ def main():
         return
 
     tags = [t.strip() for t in args.tags.split(',')] if args.tags else None
-    create_post(title, tags, args.category)
+    create_post(title, tags, args.category, args.status or 'hidden')
 
 if __name__ == "__main__":
     main()
