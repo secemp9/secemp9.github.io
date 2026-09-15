@@ -6,7 +6,12 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 
 // Deliberately synthetic destinations: this fixture can never collect donations.
 const fixture = `<!doctype html><html><body>
-<main data-donation-widget data-default-method="card">
+<main data-donation-widget data-default-method="card" data-default-frequency="once">
+  <div data-frequency-toggle hidden role="group" aria-label="Donation frequency">
+    <button type="button" data-frequency="once" aria-pressed="false" aria-controls="donate-once">One-time</button>
+    <button type="button" data-frequency="monthly" aria-pressed="false" aria-controls="donate-monthly">Monthly</button>
+  </div>
+  <section id="donate-once" data-frequency-panel="once">
   <div data-method-toggle hidden aria-label="Payment method">
     <button type="button" data-method="card" aria-pressed="false">Card</button>
     <button type="button" data-method="crypto" aria-pressed="false">Crypto</button>
@@ -46,6 +51,16 @@ const fixture = `<!doctype html><html><body>
       <span data-copy-status role="status" aria-live="polite"></span>
     </article>
   </section>
+  </section>
+  <section id="donate-monthly" data-frequency-panel="monthly">
+    <h2>Monthly</h2>
+    <a data-monthly-plan href="https://example.invalid/monthly-five">€5 / month</a>
+    <a data-monthly-plan href="https://example.invalid/monthly-ten">€10 / month</a>
+    <a data-monthly-plan href="https://example.invalid/monthly-twenty">€20 / month</a>
+    <p>Billed every month until you cancel.</p>
+    <a href="https://example.invalid/sponsors">GitHub Sponsors</a>
+  </section>
+  <a data-manage-monthly href="https://example.invalid/customer-portal">Manage or cancel monthly support</a>
 </main>
 </body></html>`;
 
@@ -97,6 +112,10 @@ function selectCrypto(ui) {
   ui.find('[data-method="crypto"]').click();
 }
 
+function selectFrequency(ui, frequency) {
+  ui.find(`[data-frequency="${frequency}"]`).click();
+}
+
 function wallet(ui, id) {
   return ui.find(`[data-wallet-panel="${id}"]`);
 }
@@ -113,6 +132,155 @@ async function settle() {
   await Promise.resolve();
   await Promise.resolve();
 }
+
+test('enhancement defaults to one-time donations and exposes the frequency controls', async (t) => {
+  const ui = await boot(t);
+  assert.equal(ui.find('[data-frequency-toggle]').hidden, false);
+  assert.equal(ui.find('[data-frequency="once"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(ui.find('[data-frequency="monthly"]').getAttribute('aria-pressed'), 'false');
+  assert.equal(ui.find('[data-frequency-panel="once"]').hidden, false);
+  assert.equal(ui.find('[data-frequency-panel="monthly"]').hidden, true);
+  assert.equal(ui.find('[data-manage-monthly]').closest('[hidden]'), null);
+  assert.equal(ui.window.fetch.mock.callCount(), 0);
+});
+
+test('frequency switches update the controlled panels and keep subscription management available', async (t) => {
+  const ui = await boot(t);
+  const onceButton = ui.find('[data-frequency="once"]');
+  const monthlyButton = ui.find('[data-frequency="monthly"]');
+  const oncePanel = ui.document.getElementById(onceButton.getAttribute('aria-controls'));
+  const monthlyPanel = ui.document.getElementById(monthlyButton.getAttribute('aria-controls'));
+  const management = ui.find('[data-manage-monthly]');
+  selectFrequency(ui, 'monthly');
+  assert.equal(onceButton.getAttribute('aria-pressed'), 'false');
+  assert.equal(monthlyButton.getAttribute('aria-pressed'), 'true');
+  assert.equal(oncePanel.hidden, true);
+  assert.equal(monthlyPanel.hidden, false);
+  assert.equal(management.closest('[hidden]'), null);
+  selectFrequency(ui, 'once');
+  assert.equal(onceButton.getAttribute('aria-pressed'), 'true');
+  assert.equal(monthlyButton.getAttribute('aria-pressed'), 'false');
+  assert.equal(oncePanel.hidden, false);
+  assert.equal(monthlyPanel.hidden, true);
+  assert.equal(management.closest('[hidden]'), null);
+  assert.equal(management.href, 'https://example.invalid/customer-portal');
+  assert.equal(ui.window.fetch.mock.callCount(), 0);
+});
+
+test('each monthly amount retains its own checkout URL through method and frequency changes', async (t) => {
+  const ui = await boot(t);
+  // Prediction: selecting a payment view never rewrites any of the three fixed monthly checkout destinations.
+  const plans = () => Array.from(ui.document.querySelectorAll('[data-monthly-plan]'))
+    .map((link) => [link.textContent, link.href]);
+  const expected = [
+    ['€5 / month', 'https://example.invalid/monthly-five'],
+    ['€10 / month', 'https://example.invalid/monthly-ten'],
+    ['€20 / month', 'https://example.invalid/monthly-twenty'],
+  ];
+  assert.deepEqual(plans(), expected);
+  selectFrequency(ui, 'monthly');
+  assert.deepEqual(plans(), expected);
+  selectFrequency(ui, 'once');
+  selectCrypto(ui);
+  selectNetwork(ui, 'network-two');
+  selectFrequency(ui, 'monthly');
+  assert.deepEqual(plans(), expected);
+  assert.equal(ui.find('[data-method-panel="card"] a').href, 'https://example.invalid/checkout');
+  assert.equal(ui.window.fetch.mock.callCount(), 0);
+});
+
+test('returning from monthly restores the previous one-time method, network, and asset', async (t) => {
+  const ui = await boot(t);
+  selectCrypto(ui);
+  selectNetwork(ui, 'network-two');
+  ui.find('[data-asset="two-token"]').click();
+  selectFrequency(ui, 'monthly');
+  assert.notEqual(wallet(ui, 'two-token').closest('[hidden]'), null);
+  selectFrequency(ui, 'once');
+  assert.equal(ui.find('[data-method="crypto"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(ui.find('[data-method-panel="crypto"]').hidden, false);
+  assert.equal(ui.find('[data-network-select]').value, 'network-two');
+  assert.equal(ui.find('[data-asset="two-token"]').getAttribute('aria-pressed'), 'true');
+  assert.deepEqual(visibleValues(ui.document, 'data-wallet-panel'), ['two-token']);
+  assert.equal(wallet(ui, 'two-token').closest('[hidden]'), null);
+  assert.equal(ui.window.fetch.mock.callCount(), 0);
+});
+
+test('changing frequency clears a completed copy announcement', async (t) => {
+  const ui = await boot(t, { clipboard: { writeText: async () => {} } });
+  selectCrypto(ui);
+  const panel = wallet(ui, 'one-native');
+  const status = panel.querySelector('[data-copy-status]');
+  panel.querySelector('[data-copy-address]').click();
+  await settle();
+  assert.equal(status.textContent, 'Address copied.');
+  selectFrequency(ui, 'monthly');
+  assert.equal(status.textContent, '');
+  selectFrequency(ui, 'once');
+  assert.equal(status.textContent, '');
+});
+
+test('copy completion after choosing monthly cannot announce success in a hidden one-time panel', async (t) => {
+  const pending = deferred();
+  const ui = await boot(t, { clipboard: { writeText: () => pending.promise } });
+  selectCrypto(ui);
+  const previous = wallet(ui, 'one-native');
+  previous.querySelector('[data-copy-address]').click();
+  selectFrequency(ui, 'monthly');
+  pending.resolve();
+  await settle();
+  assert.notEqual(previous.closest('[hidden]'), null);
+  assert.equal(previous.querySelector('[data-copy-status]').textContent, '');
+  selectFrequency(ui, 'once');
+  assert.equal(previous.querySelector('[data-copy-status]').textContent, '');
+});
+
+test('copy failure after choosing monthly cannot focus a hidden address or displace the monthly link', async (t) => {
+  const pending = deferred();
+  const ui = await boot(t, { clipboard: { writeText: () => pending.promise } });
+  selectCrypto(ui);
+  const previous = wallet(ui, 'one-native');
+  previous.querySelector('[data-copy-address]').click();
+  selectFrequency(ui, 'monthly');
+  const monthlyLink = ui.find('[data-monthly-plan]');
+  monthlyLink.focus();
+  pending.reject(new Error('Permission denied'));
+  await settle();
+  assert.notEqual(previous.closest('[hidden]'), null);
+  assert.equal(ui.document.activeElement, monthlyLink);
+  assert.equal(previous.querySelector('[data-copy-status]').textContent, '');
+});
+
+test('returning from monthly before an earlier copy completes still invalidates its announcement', async (t) => {
+  const pending = deferred();
+  const ui = await boot(t, { clipboard: { writeText: () => pending.promise } });
+  selectCrypto(ui);
+  const original = wallet(ui, 'one-native');
+  original.querySelector('[data-copy-address]').click();
+  selectFrequency(ui, 'monthly');
+  selectFrequency(ui, 'once');
+  pending.resolve();
+  await settle();
+  assert.equal(original.closest('[hidden]'), null);
+  assert.equal(original.querySelector('[data-copy-status]').textContent, '');
+});
+
+test('returning from monthly before an earlier copy fails cannot steal focus', async (t) => {
+  const pending = deferred();
+  const ui = await boot(t, { clipboard: { writeText: () => pending.promise } });
+  selectCrypto(ui);
+  const original = wallet(ui, 'one-native');
+  original.querySelector('[data-copy-address]').click();
+  selectFrequency(ui, 'monthly');
+  selectFrequency(ui, 'once');
+  const frequencyButton = ui.find('[data-frequency="once"]');
+  frequencyButton.focus();
+  pending.reject(new Error('Permission denied'));
+  await settle();
+  assert.equal(original.closest('[hidden]'), null);
+  assert.equal(ui.document.activeElement, frequencyButton);
+  assert.equal(original.querySelector('[data-copy-status]').textContent, '');
+});
 
 test('enhancement defaults to the configured method, first network, and first asset', async (t) => {
   const ui = await boot(t);
