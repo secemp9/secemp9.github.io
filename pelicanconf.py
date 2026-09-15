@@ -103,6 +103,12 @@ PROJECTS = (
 DONATION_CARD_URL = ''
 DONATION_CARD_PROVIDER = 'Stripe'
 DONATION_WALLETS = ()
+# Monthly plans: id, amount (decimal string), currency (e.g. EUR), url.
+# Each URL must be a separate monthly Stripe Payment Link matching its amount.
+# Configure the hosted customer portal with cancellation enabled before adding plans.
+DONATION_MONTHLY_PLANS = ()
+DONATION_CUSTOMER_PORTAL_URL = ''
+DONATION_GITHUB_SPONSORS_URL = ''
 
 # Plugins (add as needed)
 PLUGIN_PATHS = ['plugins']

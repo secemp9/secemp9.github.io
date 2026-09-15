@@ -27,6 +27,12 @@ WALLETS = (
     {"id": "base-eth", "network": "base", "network_label": "Base", "asset": "ETH", "address": EVM_ADDRESS},
     {"id": "solana-sol", "network": "solana", "network_label": "Solana", "asset": "SOL", "address": SOL_ADDRESS},
 )
+MONTHLY_PLANS = (
+    {"id": "eur-5", "amount": "5", "currency": "EUR", "url": "https://checkout.example/monthly-5"},
+    {"id": "eur-10", "amount": "10", "currency": "EUR", "url": "https://checkout.example/monthly-10"},
+)
+PORTAL_URL = "https://billing.example/supporters"
+SPONSORS_URL = "https://github.com/sponsors/fixture-account"
 
 
 class DonationConfigurationTests(unittest.TestCase):
@@ -45,6 +51,7 @@ class DonationConfigurationTests(unittest.TestCase):
         page = self.page()
         self.assertEqual(page.donation, {
             "card": {"url": "", "provider": "Stripe", "configured": False},
+            "monthly": {"plans": [], "portal_url": "", "sponsors_url": "", "configured": False},
             "networks": [], "wallets": [],
         })
         self.assertFalse(hasattr(self.page(metadata={"template": "page"}), "donation"))
@@ -59,6 +66,95 @@ class DonationConfigurationTests(unittest.TestCase):
             "url": "https://checkout.example/page", "provider": "Page provider", "configured": True,
         })
         self.assertFalse(self.page(settings, {"donation_url": ""}).donation["card"]["configured"])
+
+    def test_monthly_plans_preserve_order_and_exact_decimal_amounts(self):
+        plans = (
+            dict(MONTHLY_PLANS[0], amount="0005.5000"),
+            dict(MONTHLY_PLANS[1], amount="12345678901234567890.1234567890123456789", currency="USD"),
+            {"id": "jpy-50", "amount": "50", "currency": "JPY", "url": "https://checkout.example/monthly-50"},
+        )
+        before = deepcopy(plans)
+        monthly = self.page({
+            "DONATION_MONTHLY_PLANS": plans,
+            "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL,
+            "DONATION_GITHUB_SPONSORS_URL": SPONSORS_URL,
+        }).donation["monthly"]
+        self.assertEqual(monthly, {
+            "plans": [dict(plans[0], amount="5.5"), plans[1], plans[2]],
+            "portal_url": PORTAL_URL, "sponsors_url": SPONSORS_URL, "configured": True,
+        })
+        self.assertEqual(plans, before)
+
+    def test_sponsors_only_needs_no_stripe_portal_and_portal_alone_remains_available(self):
+        self.assertEqual(self.page({"DONATION_GITHUB_SPONSORS_URL": SPONSORS_URL}).donation["monthly"], {
+            "plans": [], "portal_url": "", "sponsors_url": SPONSORS_URL, "configured": True,
+        })
+        self.assertEqual(self.page({"DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL}).donation["monthly"], {
+            "plans": [], "portal_url": PORTAL_URL, "sponsors_url": "", "configured": False,
+        })
+
+    def test_monthly_plans_require_a_management_portal(self):
+        with self.assertRaisesRegex(ValueError, "DONATION_CUSTOMER_PORTAL_URL is required"):
+            self.page({"DONATION_MONTHLY_PLANS": MONTHLY_PLANS})
+
+    def test_monthly_plan_cannot_reuse_effective_one_time_destination(self):
+        settings = {"DONATION_MONTHLY_PLANS": MONTHLY_PLANS, "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL}
+        with self.assertRaisesRegex(ValueError, "one-time"):
+            self.page(dict(settings, DONATION_CARD_URL=MONTHLY_PLANS[0]["url"]))
+        with self.assertRaisesRegex(ValueError, "one-time"):
+            self.page(dict(settings, DONATION_CARD_URL="https://checkout.example/global"), {"donation_url": MONTHLY_PLANS[0]["url"]})
+        # Disabling the effective one-time URL removes the duplicate destination.
+        self.assertTrue(self.page(dict(settings, DONATION_CARD_URL=MONTHLY_PLANS[0]["url"]), {"donation_url": ""}).donation["monthly"]["configured"])
+
+    def test_invalid_monthly_records_are_rejected_before_rendering(self):
+        invalid = (
+            (None, "list or tuple"),
+            ({}, "list or tuple"),
+            ([None], "record"),
+            ([{}], r"\.id"),
+            ([dict(MONTHLY_PLANS[0], id="eur 5")], r"\.id"),
+            ([dict(MONTHLY_PLANS[0], currency="eur")], r"\.currency"),
+            ([dict(MONTHLY_PLANS[0], currency="EURO")], r"\.currency"),
+            ([dict(MONTHLY_PLANS[0], currency="EU1")], r"\.currency"),
+            ([dict(MONTHLY_PLANS[0], url="")], r"\.url"),
+            ([dict(MONTHLY_PLANS[0], url="http://checkout.example/monthly")], r"\.url"),
+            ([dict(MONTHLY_PLANS[0], url="https://user:password@checkout.example/monthly")], r"\.url"),
+            ([MONTHLY_PLANS[0], dict(MONTHLY_PLANS[1], id="eur-5")], r"\.id duplicates"),
+            ([MONTHLY_PLANS[0], dict(MONTHLY_PLANS[1], amount="05.00")], "amount/currency"),
+            ([MONTHLY_PLANS[0], dict(MONTHLY_PLANS[1], url=MONTHLY_PLANS[0]["url"])], r"\.url duplicates"),
+        )
+        # Each fixture violates its named field or a unique-checkout invariant.
+        for plans, error in invalid:
+            with self.subTest(plans=plans), self.assertRaisesRegex(ValueError, error):
+                self.page({"DONATION_MONTHLY_PLANS": plans, "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL})
+
+    def test_monthly_amount_requires_positive_plain_decimal_string(self):
+        # These values violate the exact positive decimal-string contract.
+        for amount in (None, 5, 5.5, True, "", " ", " 5", "0", "0.00", "-5", "+5", "1e3", "NaN", "Infinity", ".5", "5.", "1,000", "٥"):
+            with self.subTest(amount=amount), self.assertRaisesRegex(ValueError, r"DONATION_MONTHLY_PLANS\[0\]\.amount"):
+                self.page({
+                    "DONATION_MONTHLY_PLANS": [dict(MONTHLY_PLANS[0], amount=amount)],
+                    "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL,
+                })
+
+    def test_monthly_service_urls_reject_unsafe_and_unofficial_destinations(self):
+        invalid = (
+            ("DONATION_CUSTOMER_PORTAL_URL", None),
+            ("DONATION_CUSTOMER_PORTAL_URL", "http://billing.example"),
+            ("DONATION_CUSTOMER_PORTAL_URL", "https://billing.example:bad"),
+            ("DONATION_CUSTOMER_PORTAL_URL", "https://user:secret@billing.example"),
+            ("DONATION_GITHUB_SPONSORS_URL", "http://github.com/sponsors/fixture-account"),
+            ("DONATION_GITHUB_SPONSORS_URL", "https://github.com.evil.example/sponsors/fixture-account"),
+            ("DONATION_GITHUB_SPONSORS_URL", "https://github.com/fixture-account"),
+            ("DONATION_GITHUB_SPONSORS_URL", "https://github.com/sponsors/fixture-account/other"),
+            ("DONATION_GITHUB_SPONSORS_URL", "https://github.com/sponsors/fixture-account?other=1"),
+            ("DONATION_GITHUB_SPONSORS_URL", "https://github.com/sponsors/fixture-account#other"),
+            ("DONATION_GITHUB_SPONSORS_URL", "https://github.com:443/sponsors/fixture-account"),
+        )
+        # Each service URL must fail its own setting's HTTPS or official-profile rule.
+        for field, value in invalid:
+            with self.subTest(field=field, value=value), self.assertRaisesRegex(ValueError, field):
+                self.page({field: value})
 
     def test_wallets_group_by_network_and_encode_exact_raw_address(self):
         original_add_data = qrcode.QRCode.add_data
@@ -126,6 +222,9 @@ class DonationIntegrationTests(unittest.TestCase):
                     overrides.update({
                         "DONATION_CARD_URL": "https://checkout.example/support" if configured else "",
                         "DONATION_WALLETS": WALLETS if configured else (),
+                        "DONATION_MONTHLY_PLANS": MONTHLY_PLANS if configured else (),
+                        "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL if configured else "",
+                        "DONATION_GITHUB_SPONSORS_URL": SPONSORS_URL if configured else "",
                     })
                     config = ROOT / ("publishconf.py" if production else "pelicanconf.py")
                     with mock.patch.object(sys, "path", [str(ROOT), *sys.path]):
@@ -140,6 +239,10 @@ class DonationIntegrationTests(unittest.TestCase):
                     self.assertEqual("https://checkout.example/support" in html, configured)
                     self.assertEqual(EVM_ADDRESS in html, configured)
                     self.assertEqual(SOL_ADDRESS in html, configured)
+                    self.assertEqual(MONTHLY_PLANS[0]["url"] in html, configured)
+                    self.assertEqual(MONTHLY_PLANS[1]["url"] in html, configured)
+                    self.assertEqual(PORTAL_URL in html, configured)
+                    self.assertEqual(SPONSORS_URL in html, configured)
                     # A hidden donation page must not appear in public navigation,
                     # indexes or feeds, even though its direct URL renders.
                     for path in output.rglob("*"):

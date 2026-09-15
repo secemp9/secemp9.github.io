@@ -3,10 +3,15 @@
 DONATION_WALLETS is an ordered list/tuple of dictionaries with id, network,
 network_label, asset and address. Use an empty collection until real receiving
 addresses are available; incomplete records are errors, never payment options.
-This validates configuration shape, not address ownership or chain compatibility.
+DONATION_MONTHLY_PLANS contains id, amount, currency and URL for each hosted
+monthly checkout. Amounts describe the matching checkout; they are never charged
+or converted by this static page. Configure the customer portal for cancellation.
+This validates configuration shape, not address ownership, chain compatibility,
+or the amount and billing interval actually configured at a checkout provider.
 """
 
 from collections.abc import Mapping
+from decimal import Decimal
 import re
 from urllib.parse import urlsplit
 
@@ -44,11 +49,11 @@ def _identifier(value, field):
     return value
 
 
-def _card_url(value):
+def _https_url(value, field):
     if value == "":
         return ""
     if not isinstance(value, str) or re.search(r"[\s<>\"'\\\x00-\x1f\x7f]", value):
-        raise ValueError("DONATION_CARD_URL / Donation_url must be an HTTPS checkout URL")
+        raise ValueError(f"{field} must be an HTTPS URL")
     try:
         parsed = urlsplit(value)
         valid = (
@@ -59,10 +64,83 @@ def _card_url(value):
         )
         parsed.port  # Access validates a supplied port before the URL is rendered.
     except ValueError as error:
-        raise ValueError("DONATION_CARD_URL / Donation_url is malformed") from error
+        raise ValueError(f"{field} is malformed") from error
     if not valid:
-        raise ValueError("DONATION_CARD_URL / Donation_url must be HTTPS without credentials")
+        raise ValueError(f"{field} must be HTTPS without credentials")
     return value
+
+
+def _monthly_amount(value, field):
+    value = _text(value, field, limit=64)
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", value):
+        raise ValueError(f"{field} must be a positive decimal string, without signs or exponents")
+    amount = Decimal(value)
+    if not amount.is_finite() or amount <= 0:
+        raise ValueError(f"{field} must be a positive finite decimal string")
+    display = format(amount, "f")
+    return display.rstrip("0").rstrip(".") if "." in display else display
+
+
+def _monthly_methods(settings, card_url):
+    portal_url = _https_url(
+        settings.get("DONATION_CUSTOMER_PORTAL_URL", ""), "DONATION_CUSTOMER_PORTAL_URL"
+    )
+    sponsors_url = _https_url(
+        settings.get("DONATION_GITHUB_SPONSORS_URL", ""), "DONATION_GITHUB_SPONSORS_URL"
+    )
+    if sponsors_url:
+        parsed = urlsplit(sponsors_url)
+        if (
+            parsed.hostname != "github.com"
+            or parsed.port is not None
+            or parsed.query
+            or parsed.fragment
+            or not re.fullmatch(r"/sponsors/[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*/?", parsed.path)
+        ):
+            raise ValueError("DONATION_GITHUB_SPONSORS_URL must be an https://github.com/sponsors/<account> profile URL")
+    configured_plans = settings.get("DONATION_MONTHLY_PLANS", ())
+    if not isinstance(configured_plans, (list, tuple)):
+        raise ValueError("DONATION_MONTHLY_PLANS must be a list or tuple of monthly plan records")
+
+    plans = []
+    ids = set()
+    pairs = set()
+    urls = set()
+    # Each declared plan must yield one unique amount/currency and checkout URL.
+    for index, record in enumerate(configured_plans):
+        prefix = f"DONATION_MONTHLY_PLANS[{index}]"
+        if not isinstance(record, Mapping):
+            raise ValueError(f"{prefix} must be a monthly plan record")
+        identifier = _identifier(record.get("id"), f"{prefix}.id")
+        amount = _monthly_amount(record.get("amount"), f"{prefix}.amount")
+        currency = _text(record.get("currency"), f"{prefix}.currency", limit=3)
+        if not re.fullmatch(r"[A-Z]{3}", currency):
+            raise ValueError(f"{prefix}.currency must be a three-letter uppercase currency code")
+        url = _https_url(record.get("url"), f"{prefix}.url")
+        if not url:
+            raise ValueError(f"{prefix}.url must be a nonempty monthly checkout URL")
+        if identifier in ids:
+            raise ValueError(f"{prefix}.id duplicates another monthly plan")
+        pair = (amount, currency)
+        if pair in pairs:
+            raise ValueError(f"{prefix} duplicates a monthly amount/currency pair")
+        if url in urls:
+            raise ValueError(f"{prefix}.url duplicates another monthly checkout URL")
+        if url == card_url:
+            raise ValueError(f"{prefix}.url must differ from the one-time DONATION_CARD_URL / Donation_url")
+        ids.add(identifier)
+        pairs.add(pair)
+        urls.add(url)
+        plans.append({"id": identifier, "amount": amount, "currency": currency, "url": url})
+
+    if plans and not portal_url:
+        raise ValueError("DONATION_CUSTOMER_PORTAL_URL is required when DONATION_MONTHLY_PLANS are configured, so supporters can manage or cancel")
+    return {
+        "plans": plans,
+        "portal_url": portal_url,
+        "sponsors_url": sponsors_url,
+        "configured": bool(plans or sponsors_url),
+    }
 
 
 def _qr_svg(address):
@@ -83,7 +161,10 @@ def prepare_donation(content):
 
     # Read the current content's settings, never state from an earlier build.
     settings = content.settings
-    card_url = _card_url(getattr(content, "donation_url", settings.get("DONATION_CARD_URL", "")))
+    card_url = _https_url(
+        getattr(content, "donation_url", settings.get("DONATION_CARD_URL", "")),
+        "DONATION_CARD_URL / Donation_url",
+    )
     provider = _text(
         getattr(content, "donation_provider", settings.get("DONATION_CARD_PROVIDER", "Stripe")),
         "DONATION_CARD_PROVIDER / Donation_provider",
@@ -129,6 +210,7 @@ def prepare_donation(content):
 
     content.donation = {
         "card": {"url": card_url, "provider": provider, "configured": bool(card_url)},
+        "monthly": _monthly_methods(settings, card_url),
         "networks": [{"id": network, "label": label} for network, label in networks.items()],
         "wallets": wallets,
     }
