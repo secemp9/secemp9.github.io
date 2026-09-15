@@ -49,7 +49,7 @@ const fixture = `<!doctype html><html><body>
 </main>
 </body></html>`;
 
-async function boot(t, { clipboard, html = fixture } = {}) {
+async function boot(t, { clipboard, html = fixture, secureContext = true } = {}) {
   const errors = [];
   const virtualConsole = new VirtualConsole();
   virtualConsole.on('jsdomError', (error) => errors.push(error));
@@ -64,6 +64,8 @@ async function boot(t, { clipboard, html = fixture } = {}) {
   });
   const { window } = dom;
   const { document } = window;
+  // jsdom does not expose this browser property, even for an HTTPS URL.
+  Object.defineProperty(window, 'isSecureContext', { value: secureContext });
   if (clipboard !== undefined) {
     Object.defineProperty(window.navigator, 'clipboard', { value: clipboard });
   }
@@ -212,6 +214,16 @@ test('unavailable Clipboard API keeps copy controls hidden and addresses selecta
   input.select();
   assert.equal(ui.document.activeElement, input);
   assert.equal(input.value.slice(input.selectionStart, input.selectionEnd), 'fixture-address-ONE');
+});
+
+test('insecure contexts preserve manual copying without enabling Clipboard API controls', async (t) => {
+  const writeText = t.mock.fn(async () => {});
+  const ui = await boot(t, { clipboard: { writeText }, secureContext: false });
+  selectCrypto(ui);
+  const panel = wallet(ui, 'one-native');
+  assert.equal(panel.querySelector('[data-copy-address]').hidden, true);
+  assert.equal(panel.querySelector('[data-wallet-address]').disabled, false);
+  assert.equal(writeText.mock.callCount(), 0);
 });
 
 test('copy completion after switching wallets cannot leave a stale success message', async (t) => {
