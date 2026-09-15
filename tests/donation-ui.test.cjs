@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
-const { JSDOM } = require('jsdom');
+const { JSDOM, VirtualConsole } = require('jsdom');
 
 // Deliberately synthetic destinations: this fixture can never collect donations.
 const fixture = `<!doctype html><html><body>
@@ -50,11 +50,18 @@ const fixture = `<!doctype html><html><body>
 </body></html>`;
 
 async function boot(t, { clipboard, html = fixture } = {}) {
+  const errors = [];
+  const virtualConsole = new VirtualConsole();
+  virtualConsole.on('jsdomError', (error) => errors.push(error));
   const dom = new JSDOM(html, {
     url: 'https://example.invalid/donate/',
     runScripts: 'outside-only',
+    virtualConsole,
   });
-  t.after(() => dom.window.close());
+  t.after(() => {
+    dom.window.close();
+    assert.deepEqual(errors, [], 'Donation event handlers must not throw uncaught errors');
+  });
   const { window } = dom;
   const { document } = window;
   if (clipboard !== undefined) {
@@ -236,6 +243,19 @@ test('copy failure after switching wallets cannot focus a hidden address or show
   assert.equal(ui.document.activeElement, activeInput);
   assert.equal(previous.querySelector('[data-copy-status]').textContent, '');
   assert.equal(wallet(ui, 'one-token').querySelector('[data-copy-status]').textContent, '');
+});
+
+test('switching away and back still cancels an earlier clipboard announcement', async (t) => {
+  const pending = deferred();
+  const ui = await boot(t, { clipboard: { writeText: () => pending.promise } });
+  selectCrypto(ui);
+  const original = wallet(ui, 'one-native');
+  original.querySelector('[data-copy-address]').click();
+  ui.find('[data-asset="one-token"]').click();
+  ui.find('[data-asset="one-native"]').click();
+  pending.resolve();
+  await settle();
+  assert.equal(original.querySelector('[data-copy-status]').textContent, '');
 });
 
 test('a crypto-only configuration defaults to its available method', async (t) => {
