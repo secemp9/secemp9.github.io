@@ -56,5 +56,5 @@ fi
 
 printf 'Serving %s at http://localhost:%s (output: %s/)\n' "$settings" "$port" "$output"
 exec "$pelican_bin" content --settings "$settings" --output "$output" \
-    --autoreload --listen --bind 127.0.0.1 --port "$port" --fatal warnings \
+    --autoreload --listen --bind 127.0.0.1 --port "$port" --fatal errors \
     --extra-settings "SITEURL=\"http://localhost:$port\""

@@ -82,17 +82,22 @@ The URL stays the same as long as `Date` and `Slug` stay the same. The next buil
 adds it to listings and feeds and removes `noindex`. Reversing the status removes
 it from those listings again.
 
-For a standalone unlisted page, create `content/pages/preview.md` with:
+The included `content/pages/preview.md` is an unlisted design sample. Open
+[the local preview page](http://localhost:4001/preview/) or
+[the production settings preview](http://localhost:4002/preview/) to try it.
+After deployment it is available at `https://secemp.blog/preview/`.
+
+For another standalone unlisted page, create `content/pages/my-preview.md` with:
 
 ```text
 Title: Preview
-Slug: preview
+Slug: my-preview
 Status: hidden
 
 Page content here.
 ```
 
-Its URL is `/preview/`; changing its status to `published` makes it public and
+Its URL is `/my-preview/`; changing its status to `published` makes it public and
 eligible for the page menu. Native drafts are available in the development build
 under `/drafts/<slug>.html` for articles and `/drafts/pages/<slug>.html` for pages.
 
