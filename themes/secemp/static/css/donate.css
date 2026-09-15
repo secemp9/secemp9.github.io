@@ -231,9 +231,64 @@
 
 .donation-page [hidden] { display: none !important; }
 
+.donation-frequency {
+    display: flex;
+    gap: var(--space-3);
+    margin: 0 var(--space-3) var(--space-3);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.donation-frequency button {
+    min-height: 44px;
+    padding: 0.5rem 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: var(--font-code);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.donation-frequency [aria-pressed="true"] { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+.donation-frequency button:hover { color: var(--text-color); }
+.donation-period-heading { margin: 0; padding: 0 var(--space-3) var(--space-2); font-family: var(--font-code); font-size: 0.85rem; font-weight: 400; }
+.is-enhanced .donation-period-heading { display: none; }
+.donation-monthly { padding: var(--space-3); border-top: 1px solid var(--border-color); }
+.donation-monthly .donation-period-heading { padding: 0 0 var(--space-2); }
+.is-enhanced .donation-monthly { padding-top: 0; border-top: 0; }
+.donation-period-info { margin: 0 0 var(--space-2); font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); }
+.donation-monthly-amounts { display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); gap: 0.65rem; }
+
+.donation-monthly-plan {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 80px;
+    padding: 0.85rem;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-color);
+    font-family: var(--font-code);
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+
+.donation-monthly-plan:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.monthly-currency { font-size: 0.75rem; }
+.monthly-interval { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); }
+.donation-sponsors { margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--border-color); }
+.donation-management { padding: 0 var(--space-3); border-top: 1px solid var(--border-color); }
+.donation-management a { display: inline-flex; align-items: center; min-height: 48px; color: var(--text-muted); font-family: var(--font-code); font-size: 0.7rem; text-underline-offset: 3px; }
+.donation-management a:hover { color: var(--text-color); }
+
 @media (max-width: 600px) {
     .donation-shell { padding-top: var(--space-4); }
     .donation-panel-heading, .donation-method-panel { padding: var(--space-2); }
     .donation-methods { margin: 0 var(--space-2); }
     .donation-methods button { font-size: 0.72rem; }
+    .donation-frequency { margin-right: var(--space-2); margin-left: var(--space-2); }
+    .donation-monthly { padding: var(--space-2); }
+    .donation-management { padding: 0 var(--space-2); }
 }

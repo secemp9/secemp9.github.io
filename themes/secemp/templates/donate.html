@@ -8,6 +8,7 @@
 
 {% block content %}
 {% set donation = page.donation|default({'card': {'configured': false}, 'networks': [], 'wallets': []}) %}
+{% set monthly = donation.monthly|default({'plans': [], 'portal_url': '', 'sponsors_url': ''}) %}
 {% set default_method = 'crypto' if donation.wallets and not donation.card.configured else 'card' %}
 <div class="donation-shell">
   <header class="donation-header">
@@ -20,11 +21,18 @@
       {{ page.content }}
     </div>
 
-    <section class="donation-panel" data-donation-widget data-default-method="{{ default_method }}" aria-labelledby="donation-heading">
+    <section class="donation-panel" data-donation-widget data-default-method="{{ default_method }}" data-default-frequency="once" aria-labelledby="donation-heading">
       <div class="donation-panel-heading">
         <h2 id="donation-heading">Payment methods</h2>
       </div>
 
+      <div class="donation-frequency" data-frequency-toggle hidden role="group" aria-label="Donation frequency">
+        <button type="button" data-frequency="once" aria-pressed="true" aria-controls="donation-once">One-time</button>
+        <button type="button" data-frequency="monthly" aria-pressed="false" aria-controls="donation-monthly">Monthly</button>
+      </div>
+
+      <section id="donation-once" data-frequency-panel="once" aria-labelledby="donation-once-heading">
+      <h3 id="donation-once-heading" class="donation-period-heading">One-time</h3>
       <div class="donation-methods" data-method-toggle hidden role="group" aria-label="Donation method">
         <button type="button" data-method="card" aria-pressed="{{ 'true' if default_method == 'card' else 'false' }}" aria-controls="donation-card">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
@@ -85,6 +93,38 @@
         {% endif %}
       </section>
 
+      </section>
+
+      <section id="donation-monthly" class="donation-monthly" data-frequency-panel="monthly" aria-labelledby="donation-monthly-heading">
+        <h3 id="donation-monthly-heading" class="donation-period-heading">Monthly</h3>
+        {% if monthly.plans %}
+        <p class="donation-period-info" id="monthly-billing">The amount you choose is charged each month until you cancel.</p>
+        <div class="donation-monthly-amounts">
+          {% for plan in monthly.plans %}
+          <a href="{{ plan.url|e }}" class="donation-monthly-plan" data-monthly-plan="{{ plan.id|e }}" rel="noopener noreferrer" aria-label="Donate {{ plan.amount|e }} {{ plan.currency|e }} per month with Stripe" aria-describedby="monthly-billing">
+            <span>{{ plan.amount|e }} <span class="monthly-currency">{{ plan.currency|e }}</span></span>
+            <span class="monthly-interval">per month <span aria-hidden="true">&nearr;</span></span>
+          </a>
+          {% endfor %}
+        </div>
+        <p class="donation-detail">Continue to Stripe to confirm your monthly payment.</p>
+        {% else %}
+        <p class="donation-period-info">Monthly card payments are not available yet.</p>
+        {% endif %}
+
+        {% if monthly.sponsors_url %}
+        <div class="donation-sponsors">
+          <a class="donation-action donation-action-secondary" data-monthly-sponsors href="{{ monthly.sponsors_url|e }}" rel="noopener noreferrer">GitHub Sponsors <span aria-hidden="true">&nearr;</span></a>
+          <p class="donation-detail">Set up and manage a sponsorship through GitHub.</p>
+        </div>
+        {% endif %}
+      </section>
+
+      {% if monthly.portal_url %}
+      <div class="donation-management">
+        <a data-manage-monthly href="{{ monthly.portal_url|e }}" rel="noopener noreferrer" aria-label="Manage or cancel monthly Stripe payments">Manage or cancel on Stripe</a>
+      </div>
+      {% endif %}
     </section>
   </div>
   <div class="donation-visibility">{% include 'visibility.html' %}</div>

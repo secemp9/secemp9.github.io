@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var widget = document.querySelector('[data-donation-widget]');
   if (!widget) return;
+  var frequencyToggle = widget.querySelector('[data-frequency-toggle]');
+  var frequencyButtons = Array.from(widget.querySelectorAll('[data-frequency]'));
+  var frequencyPanels = Array.from(widget.querySelectorAll('[data-frequency-panel]'));
+  var currentFrequency = widget.dataset.defaultFrequency || 'once';
   var methodToggle = widget.querySelector('[data-method-toggle]');
   var methodButtons = Array.from(widget.querySelectorAll('[data-method]'));
   var methodPanels = Array.from(widget.querySelectorAll('[data-method-panel]'));
@@ -35,6 +39,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function selectFrequency(frequency) {
+    currentFrequency = frequency;
+    clearCopyFeedback();
+    // Only the chosen cadence is visible; existing one-time choices are retained.
+    frequencyButtons.forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button.dataset.frequency === frequency));
+    });
+    frequencyPanels.forEach(function (panel) {
+      panel.hidden = panel.dataset.frequencyPanel !== frequency;
+    });
+  }
+
   function selectWallet(walletId) {
     currentWallet = walletId;
     clearCopyFeedback();
@@ -59,6 +75,10 @@ document.addEventListener('DOMContentLoaded', function () {
     selectWallet(firstAsset);
   }
 
+  // Each frequency control selects its own cadence without changing payment URLs.
+  frequencyButtons.forEach(function (button) {
+    button.addEventListener('click', function () { selectFrequency(button.dataset.frequency); });
+  });
   // Each native method button selects its own panel.
   methodButtons.forEach(function (button) {
     button.addEventListener('click', function () { selectMethod(button.dataset.method); });
@@ -87,11 +107,11 @@ document.addEventListener('DOMContentLoaded', function () {
         status.textContent = '';
         try {
           await navigator.clipboard.writeText(address.value);
-          if (version === selectionVersion && currentWallet === walletId && currentMethod === 'crypto') {
+          if (version === selectionVersion && currentWallet === walletId && currentMethod === 'crypto' && currentFrequency === 'once') {
             status.textContent = 'Address copied.';
           }
         } catch (error) {
-          if (version !== selectionVersion || currentWallet !== walletId || currentMethod !== 'crypto') return;
+          if (version !== selectionVersion || currentWallet !== walletId || currentMethod !== 'crypto' || currentFrequency !== 'once') return;
           address.focus();
           address.select();
           status.textContent = 'Select and copy the address above.';
@@ -102,5 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   widget.classList.add('is-enhanced');
   selectMethod(currentMethod);
+  selectFrequency(currentFrequency);
   if (methodToggle) methodToggle.hidden = false;
+  if (frequencyToggle) frequencyToggle.hidden = false;
 });
