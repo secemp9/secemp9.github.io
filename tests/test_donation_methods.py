@@ -116,13 +116,13 @@ class DonationIntegrationTests(unittest.TestCase):
             (pages / "donate.md").write_text("Title: Support fixture\nSlug: donate\nStatus: hidden\nTemplate: donate\n\nDonation body.\n", encoding="utf-8")
             overrides = {
                 "PATH": str(content), "OUTPUT_PATH": str(directory / "output"),
-                "CACHE_PATH": str(directory / "cache"), "CACHE_CONTENT": False,
-                "LOAD_CONTENT_CACHE": False, "STATIC_PATHS": [], "EXTRA_PATH_METADATA": {},
+                "CACHE_PATH": str(directory / "cache"),
+                "STATIC_PATHS": [], "EXTRA_PATH_METADATA": {},
             }
-            # Production has payment destinations; the subsequent local build
-            # must read its empty settings rather than retain signal state.
-            for production, configured in ((True, True), (False, False)):
-                with self.subTest(production=production):
+            # Payment destinations must follow current settings across production
+            # and two local builds with unchanged content and the real reader cache.
+            for production, configured in ((True, True), (False, True), (False, False)):
+                with self.subTest(production=production, configured=configured):
                     overrides.update({
                         "DONATION_CARD_URL": "https://checkout.example/support" if configured else "",
                         "DONATION_WALLETS": WALLETS if configured else (),
@@ -130,6 +130,8 @@ class DonationIntegrationTests(unittest.TestCase):
                     config = ROOT / ("publishconf.py" if production else "pelicanconf.py")
                     with mock.patch.object(sys, "path", [str(ROOT), *sys.path]):
                         settings = read_settings(str(config), override=overrides)
+                        self.assertEqual(settings["CACHE_CONTENT"], not production)
+                        self.assertEqual(settings["LOAD_CONTENT_CACHE"], not production)
                         with redirect_stdout(StringIO()):
                             Pelican(settings).run()
                     output = directory / "output"
