@@ -19,14 +19,6 @@
 
 .donation-visibility { margin-top: var(--space-4); max-width: 42rem; }
 
-.donation-subtitle {
-    margin: var(--space-2) 0 0;
-    color: var(--text-muted);
-    font-family: var(--font-code);
-    font-size: 0.8rem;
-    line-height: 1.7;
-}
-
 .donation-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -42,29 +34,11 @@
 
 .donation-copy { padding-top: var(--space-1); }
 
-.donation-copy h2 {
-    font-family: var(--font-code);
-    font-size: 0.75rem;
-    font-weight: 400;
-    letter-spacing: 0.05em;
-    margin-top: 2rem;
-    color: var(--text-muted);
-    padding-bottom: 0.8rem;
-}
-
 .donation-panel {
     border: 1px solid var(--border-color);
     border-top: 2px solid var(--primary-color);
     background: var(--surface-1);
     min-width: 0;
-}
-
-.donation-eyebrow {
-    font-family: var(--font-code);
-    font-size: 0.65rem;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--text-muted);
 }
 
 .donation-panel h2 {
@@ -111,26 +85,6 @@
     font-size: 0.8rem;
     line-height: 1.5;
 }
-
-.donation-signature {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: var(--space-3);
-    font-family: var(--font-code);
-    font-size: 0.75rem;
-    line-height: 1.5;
-}
-
-.donation-signature img {
-    width: 36px;
-    height: 36px;
-    margin: 0;
-    object-fit: cover;
-    border: 1px solid var(--border-strong);
-}
-
-.donation-name { color: var(--text-muted); }
 
 @media (min-width: 880px) {
     .donation-layout {
@@ -275,22 +229,10 @@
     font-size: 0.75rem;
 }
 
-.crypto-empty { display: flex; flex-wrap: wrap; gap: 0.5rem; color: var(--text-muted); font-family: var(--font-code); font-size: 0.7rem; }
-.crypto-empty span { border: 1px dashed var(--border-strong); padding: 0.5rem 0.75rem; }
-
-.donation-panel-footer {
-    border-top: 1px solid var(--border-color);
-    padding: 0.9rem var(--space-3);
-    color: var(--text-muted);
-    font-family: var(--font-code);
-    font-size: 0.7rem;
-}
-
 .donation-page [hidden] { display: none !important; }
 
 @media (max-width: 600px) {
     .donation-shell { padding-top: var(--space-4); }
-    .donation-name { display: block; }
     .donation-panel-heading, .donation-method-panel { padding: var(--space-2); }
     .donation-methods { margin: 0 var(--space-2); }
     .donation-methods button { font-size: 0.72rem; }

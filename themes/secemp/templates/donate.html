@@ -13,22 +13,16 @@
   <header class="donation-header">
     <p class="intro-kicker">~/support</p>
     <h1 class="page-title">{{ page.title }}</h1>
-    <p class="donation-subtitle">research, tools, and following a thread a little too far.</p>
   </header>
 
   <div class="donation-layout">
     <div class="page-content donation-copy">
       {{ page.content }}
-      <div class="donation-signature">
-        <img src="/theme/img/profile.webp" alt="" width="36" height="36">
-        <span>secemp<span class="donation-name"> / anything could work</span></span>
-      </div>
     </div>
 
     <section class="donation-panel" data-donation-widget data-default-method="{{ default_method }}" aria-labelledby="donation-heading">
       <div class="donation-panel-heading">
-        <h2 id="donation-heading">Leave a little support.</h2>
-        <span class="donation-eyebrow">Thank you</span>
+        <h2 id="donation-heading">Payment methods</h2>
       </div>
 
       <div class="donation-methods" data-method-toggle hidden role="group" aria-label="Donation method">
@@ -43,7 +37,7 @@
       </div>
 
       <section id="donation-card" class="donation-method-panel" data-method-panel="card" aria-labelledby="donation-card-heading">
-        <h3 id="donation-card-heading">An amount that works for you.</h3>
+        <h3 id="donation-card-heading">Card or wallet</h3>
         {% if donation.card.configured %}
         <p>Choose your amount at checkout. Cards and supported wallets are handled by {{ donation.card.provider|e }}.</p>
         <a class="donation-action" href="{{ donation.card.url|e }}" rel="noopener noreferrer">
@@ -51,9 +45,8 @@
         </a>
         <p class="donation-detail">Available payment methods appear at checkout.</p>
         {% else %}
-        <p>Card donations aren't connected yet.</p>
-        <button class="donation-action" type="button" disabled>Card checkout coming soon</button>
-        <p class="donation-detail">For now, you can <a href="mailto:secemp9@gmail.com?subject=Supporting%20your%20work">get in touch about supporting</a>.</p>
+        <p>Card payments are not available yet.</p>
+        <button class="donation-action" type="button" disabled>Not available yet</button>
         {% endif %}
       </section>
 
@@ -88,13 +81,10 @@
         </section>
         {% endfor %}
         {% else %}
-        <p>Crypto receiving addresses aren't available here yet.</p>
-        <div class="crypto-empty" aria-hidden="true"><span>Network</span><span>Asset</span><span>Address</span></div>
-        <p class="donation-detail">You can <a href="mailto:secemp9@gmail.com?subject=Supporting%20your%20work">get in touch about contributing</a>.</p>
+        <p>Crypto payments are not available yet.</p>
         {% endif %}
       </section>
 
-      <div class="donation-panel-footer">a little help is appreciated.</div>
     </section>
   </div>
   <div class="donation-visibility">{% include 'visibility.html' %}</div>
