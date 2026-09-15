@@ -136,6 +136,50 @@ Configure payment methods in `pelicanconf.py`:
   A Stripe test link can be used while testing the unlisted page.
 - `DONATION_CARD_PROVIDER`: the checkout name shown on the button, such as Stripe.
 - `DONATION_WALLETS`: one receiving address record per network and asset.
+- `DONATION_MONTHLY_PLANS`: fixed monthly Stripe prices with their matching
+  Payment Links (see below).
+- `DONATION_CUSTOMER_PORTAL_URL`: your Stripe customer-portal login link for
+  managing and cancelling monthly payments.
+- `DONATION_GITHUB_SPONSORS_URL`: optional `https://github.com/sponsors/ACCOUNT`
+  profile link. Leave empty until you have a working Sponsors page.
+
+### Monthly payments
+
+The page starts on **One-time**. **Monthly** shows only configured recurring
+Stripe links and the optional GitHub Sponsors route. Crypto remains under
+One-time: copying an address does not set up recurring transfers.
+
+In Stripe, create a product with a **monthly recurring price**, then a Payment
+Link for that price. Add a record like this to `DONATION_MONTHLY_PLANS`, replacing
+the placeholder with the actual link:
+
+```python
+{
+    'id': 'eur-5',
+    'amount': '5',
+    'currency': 'EUR',
+    'url': 'YOUR_STRIPE_MONTHLY_PAYMENT_LINK',
+}
+```
+
+Amounts are decimal strings, currencies are uppercase three-letter codes, and
+each amount button goes directly to its own checkout URL. Choose the amounts
+and currency you actually want to accept; these examples are not enabled by
+default. Stripe's **Customers choose what to pay** Payment Links support
+one-time payments only, so don't reuse that URL for a monthly option.
+
+Activate Stripe's [customer portal](https://docs.stripe.com/no-code/customer-portal),
+enable subscription cancellation there, and set `DONATION_CUSTOMER_PORTAL_URL`
+to its HTTPS login link. The site requires this when monthly Stripe plans are
+configured. The management link remains visible on either frequency and can
+remain configured after removing every plan, for existing subscribers.
+
+The amounts and currencies here are display labels: they must match the actual
+Stripe prices. Updating these settings does not change an existing subscription
+or cancel it; manage billing in Stripe. Test the chosen monthly amount, currency,
+and cancellation flow using Stripe's test environment before adding live links.
+
+### Crypto payments
 
 The wallet record format is:
 
@@ -161,8 +205,9 @@ receiving address, so the donor must select the displayed network in their
 wallet. QR generation and copying do not verify address ownership, network
 compatibility, or payment receipt. No external QR service is called.
 
-The method switcher and copy controls use plain JavaScript. If JavaScript is
-unavailable, configured links and addresses remain visible. If clipboard access
+The frequency/method switchers and copy controls use plain JavaScript. If JavaScript is
+unavailable, both one-time and monthly sections, configured links, and addresses
+remain visible. If clipboard access
 fails, the address can be selected and copied manually. Invalid configuration
 logs a build error; the deployment's `--fatal warnings` stops that build.
 
