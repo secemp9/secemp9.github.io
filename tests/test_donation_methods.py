@@ -2,6 +2,7 @@
 
 from contextlib import redirect_stdout
 from copy import deepcopy
+from html.parser import HTMLParser
 from io import StringIO
 from pathlib import Path
 import sys
@@ -33,6 +34,47 @@ MONTHLY_PLANS = (
 )
 PORTAL_URL = "https://billing.example/supporters"
 SPONSORS_URL = "https://github.com/sponsors/fixture-account"
+
+
+class DonationDocument(HTMLParser):
+    """Inspect rendered links and hidden ancestors before JavaScript executes."""
+
+    VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
+    def __init__(self, html):
+        super().__init__()
+        self.nodes = []
+        self._stack = []
+        self._anchor = None
+        self.feed(html)
+
+    def handle_starttag(self, tag, attrs):
+        node = {"tag": tag, "attrs": dict(attrs), "ancestors": tuple(self._stack), "text": ""}
+        self.nodes.append(node)
+        if tag not in self.VOID_TAGS:
+            self._stack.append(node)
+        if tag == "a":
+            self._anchor = node
+
+    def handle_endtag(self, tag):
+        # A closing tag ends its matching open element and any unclosed children.
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index]["tag"] == tag:
+                del self._stack[index:]
+                break
+        if tag == "a":
+            self._anchor = None
+
+    def handle_data(self, data):
+        if self._anchor is not None:
+            self._anchor["text"] += data
+
+    def with_attribute(self, name):
+        return [node for node in self.nodes if name in node["attrs"]]
+
+    @staticmethod
+    def is_hidden(node):
+        return any("hidden" in ancestor["attrs"] for ancestor in (*node["ancestors"], node))
 
 
 class DonationConfigurationTests(unittest.TestCase):
@@ -202,6 +244,40 @@ class DonationConfigurationTests(unittest.TestCase):
 
 
 class DonationIntegrationTests(unittest.TestCase):
+    def assert_monthly_no_javascript_fallback(self, html, configured):
+        document = DonationDocument(html)
+        panels = document.with_attribute("data-frequency-panel")
+        self.assertEqual([panel["attrs"]["data-frequency-panel"] for panel in panels], ["once", "monthly"])
+        self.assertFalse(any(document.is_hidden(panel) for panel in panels))
+        self.assertTrue(document.is_hidden(document.with_attribute("data-frequency-toggle")[0]))
+        self.assertFalse(document.with_attribute("data-monthly-plan") if not configured else False)
+        if not configured:
+            self.assertFalse(document.with_attribute("data-monthly-sponsors"))
+            self.assertFalse(document.with_attribute("data-manage-monthly"))
+            self.assertIn("Monthly card payments are not available yet.", html)
+            return
+
+        plans = document.with_attribute("data-monthly-plan")
+        self.assertEqual(len(plans), len(MONTHLY_PLANS))
+        # Each rendered amount must keep its own checkout and explicit monthly label.
+        for link, plan in zip(plans, MONTHLY_PLANS):
+            self.assertEqual(link["tag"], "a")
+            self.assertEqual(link["attrs"]["data-monthly-plan"], plan["id"])
+            self.assertEqual(link["attrs"]["href"], plan["url"])
+            self.assertIn(f'{plan["amount"]} {plan["currency"]}', " ".join(link["text"].split()))
+            self.assertIn("per month", link["text"])
+            self.assertIn(f'{plan["amount"]} {plan["currency"]} per month', link["attrs"]["aria-label"])
+            self.assertFalse(document.is_hidden(link))
+        portal = document.with_attribute("data-manage-monthly")
+        self.assertEqual(len(portal), 1)
+        self.assertEqual(portal[0]["attrs"]["href"], PORTAL_URL)
+        self.assertFalse(document.is_hidden(portal[0]))
+        self.assertFalse(any("data-frequency-panel" in ancestor["attrs"] for ancestor in portal[0]["ancestors"]))
+        sponsors = document.with_attribute("data-monthly-sponsors")
+        self.assertEqual(len(sponsors), 1)
+        self.assertEqual(sponsors[0]["attrs"]["href"], SPONSORS_URL)
+        self.assertFalse(document.is_hidden(sponsors[0]))
+
     def test_real_theme_keeps_configured_donations_unlisted_across_builds(self):
         with tempfile.TemporaryDirectory(prefix="secemp-donation-") as temporary:
             directory = Path(temporary)
@@ -243,6 +319,7 @@ class DonationIntegrationTests(unittest.TestCase):
                     self.assertEqual(MONTHLY_PLANS[1]["url"] in html, configured)
                     self.assertEqual(PORTAL_URL in html, configured)
                     self.assertEqual(SPONSORS_URL in html, configured)
+                    self.assert_monthly_no_javascript_fallback(html, configured)
                     # A hidden donation page must not appear in public navigation,
                     # indexes or feeds, even though its direct URL renders.
                     for path in output.rglob("*"):
