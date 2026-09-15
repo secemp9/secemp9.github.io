@@ -188,7 +188,7 @@ npm test
 .venv/bin/pelican content -o output-preview -s publishconf.py --fatal warnings
 ```
 
-The second command uses the real production domain in generated URLs. Use
+The Pelican command uses the real production domain in generated URLs. Use
 `./serve.sh --production` for a version with local links.
 
 Node 22 and jsdom are used only for interaction tests. The deployed site stays
