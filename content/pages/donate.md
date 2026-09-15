@@ -4,18 +4,12 @@ Status: hidden
 Template: donate
 Summary: Support secemp's independent research, open-source tools, and writing.
 
-Hi, I'm secemp. I build tools, investigate how systems behave, and write about what I find. If something here has been useful to you, you can help me keep working on it.
+if a post helped something click, or one of my tools saved you some time, you can send a little support my way.
 
-## What you're supporting
+i mostly follow frustration and interest. sometimes that turns into an investigation, sometimes an open-source tool, sometimes a very long post. support helps me make room for more of that.
 
-**Research.** Following questions across ML, reverse engineering, systems, and math, then sharing what I learn.
+## other ways to help
 
-**Tools.** Turning experiments into open-source projects that other people can use and build on.
+share a [post you found useful](/posts/), try a [project](https://github.com/secemp9), or send me a question, correction, or bug report. those help too.
 
-**Writing.** Taking the time to explain an investigation, including the details that make it useful to someone else.
-
-## Other ways to help
-
-Share a [post you found useful](/posts/), try a [project](https://github.com/secemp9), or send me a question, correction, or idea. Those contributions matter too.
-
-Thanks for reading, sharing, and supporting.
+thank you. really.

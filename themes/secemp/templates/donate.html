@@ -7,43 +7,100 @@
 {% endblock %}
 
 {% block content %}
-{% set donation_url = page.donation_url|default('')|trim %}
+{% set donation = page.donation|default({'card': {'configured': false}, 'networks': [], 'wallets': []}) %}
+{% set default_method = 'crypto' if donation.wallets and not donation.card.configured else 'card' %}
 <div class="donation-shell">
   <header class="donation-header">
     <p class="intro-kicker">~/support</p>
     <h1 class="page-title">{{ page.title }}</h1>
-    {% include 'visibility.html' %}
+    <p class="donation-subtitle">research, tools, and following a thread a little too far.</p>
   </header>
 
   <div class="donation-layout">
     <div class="page-content donation-copy">
       {{ page.content }}
-    </div>
-
-    <aside class="donation-panel" aria-labelledby="donation-heading">
-      <span class="donation-eyebrow">Independent work</span>
-      <h2 id="donation-heading">Help keep it going.</h2>
-      <p>Your support makes room for more research, tools, and writing.</p>
-
-      {% if donation_url.startswith('https://') %}
-      <a class="donation-action" href="{{ donation_url|e }}" rel="noopener noreferrer">
-        <span>{{ page.donation_label|default('Donate', true)|e }}</span>
-        <span aria-hidden="true">&nearr;</span>
-      </a>
-      <p class="donation-detail">Continue to {{ page.donation_provider|default('the payment page', true)|e }}.</p>
-      {% else %}
-      <a class="donation-action" href="mailto:secemp9@gmail.com?subject=Supporting%20your%20work">
-        <span>Get in touch about supporting</span>
-        <span aria-hidden="true">&nearr;</span>
-      </a>
-      <p class="donation-detail">For now, email me about supporting the work.</p>
-      {% endif %}
-
       <div class="donation-signature">
         <img src="/theme/img/profile.webp" alt="" width="36" height="36">
-        <span>Thank you.<br><span class="donation-name">&mdash; secemp</span></span>
+        <span>secemp<span class="donation-name"> / anything could work</span></span>
       </div>
-    </aside>
+    </div>
+
+    <section class="donation-panel" data-donation-widget data-default-method="{{ default_method }}" aria-labelledby="donation-heading">
+      <div class="donation-panel-heading">
+        <h2 id="donation-heading">Leave a little support.</h2>
+        <span class="donation-eyebrow">Thank you</span>
+      </div>
+
+      <div class="donation-methods" data-method-toggle hidden role="group" aria-label="Donation method">
+        <button type="button" data-method="card" aria-pressed="{{ 'true' if default_method == 'card' else 'false' }}" aria-controls="donation-card">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+          Card &amp; wallets
+        </button>
+        <button type="button" data-method="crypto" aria-pressed="{{ 'true' if default_method == 'crypto' else 'false' }}" aria-controls="donation-crypto">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7Z M3 7l9 5 9-5M12 12v10"/></svg>
+          Crypto
+        </button>
+      </div>
+
+      <section id="donation-card" class="donation-method-panel" data-method-panel="card" aria-labelledby="donation-card-heading">
+        <h3 id="donation-card-heading">An amount that works for you.</h3>
+        {% if donation.card.configured %}
+        <p>Choose your amount at checkout. Cards and supported wallets are handled by {{ donation.card.provider|e }}.</p>
+        <a class="donation-action" href="{{ donation.card.url|e }}" rel="noopener noreferrer">
+          <span>Continue to {{ donation.card.provider|e }}</span><span aria-hidden="true">&nearr;</span>
+        </a>
+        <p class="donation-detail">Available payment methods appear at checkout.</p>
+        {% else %}
+        <p>Card donations aren't connected yet.</p>
+        <button class="donation-action" type="button" disabled>Card checkout coming soon</button>
+        <p class="donation-detail">For now, you can <a href="mailto:secemp9@gmail.com?subject=Supporting%20your%20work">get in touch about supporting</a>.</p>
+        {% endif %}
+      </section>
+
+      <section id="donation-crypto" class="donation-method-panel" data-method-panel="crypto" aria-labelledby="donation-crypto-heading">
+        <h3 id="donation-crypto-heading">Choose your network and asset.</h3>
+        {% if donation.wallets %}
+        <div class="crypto-controls" data-crypto-controls hidden>
+          <label class="donation-field-label" for="donation-network">Network</label>
+          <select id="donation-network" data-network-select>
+            {% for network in donation.networks %}
+            <option value="{{ network.id|e }}">{{ network.label|e }}</option>
+            {% endfor %}
+          </select>
+          <fieldset class="crypto-assets">
+            <legend class="donation-field-label">Asset</legend>
+            <div class="crypto-asset-options">
+              {% for wallet in donation.wallets %}
+              <button type="button" data-asset="{{ wallet.id|e }}" data-network="{{ wallet.network|e }}" aria-pressed="false" aria-controls="wallet-{{ wallet.id|e }}">{{ wallet.asset|e }}</button>
+              {% endfor %}
+            </div>
+          </fieldset>
+        </div>
+        {% for wallet in donation.wallets %}
+        <section id="wallet-{{ wallet.id|e }}" class="crypto-wallet" data-wallet-panel="{{ wallet.id|e }}" data-network="{{ wallet.network|e }}" aria-labelledby="wallet-heading-{{ wallet.id|e }}">
+          <h4 id="wallet-heading-{{ wallet.id|e }}">{{ wallet.asset|e }} <span>on {{ wallet.network_label|e }}</span></h4>
+          <div class="crypto-qr" role="img" aria-label="Receiving address for {{ wallet.asset|e }} on {{ wallet.network_label|e }}">{{ wallet.qr_svg|safe }}</div>
+          <p class="crypto-network-note" id="wallet-note-{{ wallet.id|e }}">Send only <strong>{{ wallet.asset|e }}</strong> on <strong>{{ wallet.network_label|e }}</strong>. The QR contains the address; select the network in your wallet.</p>
+          <label class="donation-field-label" for="wallet-address-{{ wallet.id|e }}">Receiving address</label>
+          <input id="wallet-address-{{ wallet.id|e }}" class="crypto-address" data-wallet-address type="text" value="{{ wallet.address|e }}" readonly spellcheck="false" autocomplete="off" aria-describedby="wallet-note-{{ wallet.id|e }}">
+          <button class="donation-action donation-action-secondary" data-copy-address type="button" hidden>Copy address <span aria-hidden="true">&nearr;</span></button>
+          <span class="crypto-copy-status" data-copy-status role="status" aria-live="polite"></span>
+        </section>
+        {% endfor %}
+        {% else %}
+        <p>Crypto receiving addresses aren't available here yet.</p>
+        <div class="crypto-empty" aria-hidden="true"><span>Network</span><span>Asset</span><span>Address</span></div>
+        <p class="donation-detail">You can <a href="mailto:secemp9@gmail.com?subject=Supporting%20your%20work">get in touch about contributing</a>.</p>
+        {% endif %}
+      </section>
+
+      <div class="donation-panel-footer">a little help is appreciated.</div>
+    </section>
   </div>
+  <div class="donation-visibility">{% include 'visibility.html' %}</div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/theme/js/donate.js" defer></script>
 {% endblock %}

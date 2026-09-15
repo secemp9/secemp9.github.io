@@ -34,6 +34,17 @@ jobs:
       - name: Test visibility and publishing
         run: python -m unittest discover -s tests
 
+      - name: Setup Node for interaction tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Test donation interactions
+        run: |
+          npm ci --ignore-scripts
+          npm test
+
       - name: Build site
         run: pelican content -o output -s publishconf.py --fatal warnings
 
