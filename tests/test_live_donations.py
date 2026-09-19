@@ -73,6 +73,17 @@ class LiveDonationTests(unittest.TestCase):
             self.assertFalse(document.is_hidden(portal))
             self.assertIn('Each unit is 1 EUR per month.', html)
             self.assertIn('charged each month until you cancel', html)
+            policy = document.with_attribute('data-donation-policy')
+            self.assertEqual(len(policy), 1)
+            self.assertFalse(document.is_hidden(policy[0]))
+            self.assertFalse(any('data-frequency-panel' in node['attrs']
+                                 for node in policy[0]['ancestors']))
+            self.assertIn('Refunds and cancellations', html)
+            self.assertIn('For accidental or duplicate payments, contact', html)
+            self.assertIn('href="mailto:secemp9@gmail.com"', html)
+            self.assertIn('Refund requests are reviewed individually.', html)
+            self.assertIn('Cancelling a monthly contribution stops future payments but does not automatically refund previous payments.', html)
+            self.assertIn('Any applicable statutory rights remain unaffected.', html)
             self.assertIn('name="robots" content="noindex, nofollow, noimageindex"', html)
             self.assertNotIn('/donate/', (directory / 'output/index.html').read_text(encoding='utf-8'))
             # Live HTML must not leak test checkouts, a sandbox notice, secrets, or a charge form.

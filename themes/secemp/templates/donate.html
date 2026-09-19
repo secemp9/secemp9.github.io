@@ -142,6 +142,13 @@
       {% endif %}
     </section>
   </div>
+  {% if not DONATION_SANDBOX|default(false) and (donation.card.configured or donation.wallets or monthly.plans or custom_monthly or monthly.sponsors_url) %}
+  <section class="donation-policy" data-donation-policy aria-labelledby="donation-policy-heading">
+    <h2 id="donation-policy-heading">Refunds and cancellations</h2>
+    <p>For accidental or duplicate payments, contact <a href="mailto:secemp9@gmail.com">secemp9@gmail.com</a>. Refund requests are reviewed individually.</p>
+    <p>Cancelling a monthly contribution stops future payments but does not automatically refund previous payments. Any applicable statutory rights remain unaffected.</p>
+  </section>
+  {% endif %}
   <div class="donation-visibility">{% include 'visibility.html' %}</div>
 </div>
 {% endblock %}

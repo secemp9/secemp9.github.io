@@ -77,6 +77,7 @@ class SandboxTests(unittest.TestCase):
             html = (directory / 'output/donate/index.html').read_text(encoding='utf-8')
             self.assertIn('data-donation-sandbox', html)
             self.assertIn('No real money is transferred.', html)
+            self.assertNotIn('data-donation-policy', html)
             self.assertIn('name="robots" content="noindex, nofollow, noimageindex"', html)
             self.assertIn('Other monthly amount', html)
             self.assertIn('Each unit is 1 EUR per month.', html)

@@ -20,6 +20,28 @@
 .donation-visibility { margin-top: var(--space-4); max-width: 42rem; }
 .donation-sandbox-notice { margin: 0 0 var(--space-3); padding: var(--space-2); border: 1px solid var(--primary-color); color: var(--primary-color); font-family: var(--font-code); font-size: 0.8rem; line-height: 1.6; }
 
+.donation-policy {
+    max-width: 42rem;
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.65;
+}
+
+.donation-policy h2 {
+    margin: 0 0 var(--space-2);
+    color: var(--text-color);
+    font-family: var(--font-code);
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+.donation-policy p { margin: 0 0 var(--space-2); }
+.donation-policy p:last-child { margin-bottom: 0; }
+.donation-policy a { color: var(--text-color); text-underline-offset: 3px; overflow-wrap: anywhere; }
+
 .donation-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
