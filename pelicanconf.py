@@ -102,7 +102,28 @@ PROJECTS = (
 # An empty collection leaves the corresponding payment method unavailable.
 DONATION_CARD_URL = ''
 DONATION_CARD_PROVIDER = 'Stripe'
-DONATION_WALLETS = ()
+# Public Phantom receiving addresses supplied by the owner on 2026-09-19.
+# Equal EVM addresses do not make networks interchangeable. No private keys.
+_DONATION_EVM_ADDRESS = '0x77334ce2f9bebdcb35d294eb93fab0175a844186'
+DONATION_WALLETS = (
+    {'id': 'solana-sol', 'network': 'solana', 'network_label': 'Solana',
+     'asset': 'SOL', 'address': '8n5UNHa2rGoqw4tMLQcgBeywEC4HBDeYK6eijHBDRCDM'},
+    {'id': 'ethereum-eth', 'network': 'ethereum', 'network_label': 'Ethereum',
+     'asset': 'ETH', 'address': _DONATION_EVM_ADDRESS},
+    # One BTC option: Native SegWit, not the separate Taproot receiving address.
+    {'id': 'bitcoin-btc', 'network': 'bitcoin', 'network_label': 'Bitcoin',
+     'asset': 'BTC', 'address': 'bc1qm3zuxj2ty99awg3fka52ryythjp5m59ks7n0g6'},
+    {'id': 'base-eth', 'network': 'base', 'network_label': 'Base',
+     'asset': 'ETH', 'address': _DONATION_EVM_ADDRESS},
+    {'id': 'sui-sui', 'network': 'sui', 'network_label': 'Sui',
+     'asset': 'SUI', 'address': '0xcf4d0ca54490e10bb35d4f909b8e303fa75fa350f7d0fd8ad0cad73de194a9da'},
+    {'id': 'polygon-pol', 'network': 'polygon', 'network_label': 'Polygon',
+     'asset': 'POL', 'address': _DONATION_EVM_ADDRESS},
+    {'id': 'hyperevm-hype', 'network': 'hyperevm', 'network_label': 'HyperEVM',
+     'asset': 'HYPE', 'address': _DONATION_EVM_ADDRESS},
+    {'id': 'robinhood-eth', 'network': 'robinhood', 'network_label': 'Robinhood Chain',
+     'asset': 'ETH', 'address': _DONATION_EVM_ADDRESS},
+)
 # Monthly plans: id, amount (decimal string), currency (e.g. EUR), url.
 # Each URL must be a separate monthly Stripe Payment Link matching its amount.
 # Configure the hosted customer portal with cancellation enabled before adding plans.

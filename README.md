@@ -247,8 +247,19 @@ The wallet record format is:
 Replace the example address with your own verified receiving address before
 adding the record to `DONATION_WALLETS`. Repeat for each asset/network you
 actually accept; the selectors are generated from those records. Never put
-private keys or seed phrases in the configuration. Blank defaults show clear
-unavailable states; no sample payment destination is included in the site.
+private keys or seed phrases in the configuration. Empty settings show clear
+unavailable states; the example above is not a payment destination.
+
+The current configuration uses the owner's public Phantom receiving addresses
+for SOL on Solana, ETH on Ethereum/Base/Robinhood Chain, BTC on Bitcoin,
+SUI on Sui, POL on Polygon, and HYPE on HyperEVM. Only these native assets are
+listed; adding a token requires its own explicit asset/network record. Bitcoin
+uses the supplied Native SegWit (`bc1q`) address, not the alternate Taproot one.
+The five EVM networks share an address but retain separate network labels.
+These are **real mainnet receiving addresses**, including in the production
+preview on port 4002. The Stripe sandbox on port 4003 excludes them entirely.
+Address-format checks do not prove ownership or successful receipt; verify the
+displayed destination in Phantom before sharing the donation page.
 
 QR codes are generated locally during the Pelican build using `qrcode`, with a
 white background and a four-module quiet margin. They encode only the exact

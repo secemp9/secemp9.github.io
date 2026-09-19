@@ -20,7 +20,7 @@ from plugins.donation_methods import prepare_donation
 
 
 ROOT = Path(__file__).resolve().parents[1]
-# Fixtures exist only in tests; no receiving address is shipped in site settings.
+# Synthetic fixtures exist only in tests, separate from the owner's site settings.
 EVM_ADDRESS = "0x1234567890123456789012345678901234567890"
 SOL_ADDRESS = "11111111111111111111111111111111"
 WALLETS = (
