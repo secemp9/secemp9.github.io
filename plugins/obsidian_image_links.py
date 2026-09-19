@@ -83,5 +83,15 @@ def process_content(content):
     content._content = _TAG.sub(rewrite_tag, html)
 
 
+def normalize_static_links(generator):
+    # Pelican 4.12 decodes only %20 when collecting static paths, although its
+    # URL resolver decodes every escape. Match the resolver before files load.
+    generator.context['static_links'] = {
+        unquote(unescape(path)) for path in generator.context['static_links']
+    }
+
+
 def register():
     signals.content_object_init.connect(process_content)
+    signals.article_generator_finalized.connect(normalize_static_links)
+    signals.page_generator_finalized.connect(normalize_static_links)
