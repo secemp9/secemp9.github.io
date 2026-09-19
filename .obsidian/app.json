@@ -1,5 +1,4 @@
 {
-  "legacyEditor": false,
   "livePreview": true,
   "defaultViewMode": "source",
   "newFileLocation": "folder",
@@ -12,12 +11,17 @@
   "tabSize": 2,
   "readableLineLength": true,
   "strictLineBreaks": false,
-  "showFrontmatter": true,
+  "propertiesInDocument": "visible",
   "showLineNumber": true,
   "spellcheck": true,
   "foldHeading": true,
   "foldIndent": true,
   "showIndentGuide": true,
   "vimMode": false,
-  "promptDelete": false
+  "promptDelete": true,
+  "trashOption": "local",
+  "userIgnoreFilters": [
+    "output/", "output-preview/", "output-sandbox/", "cache/",
+    "node_modules/", "venv/", "_site/", "_posts/", "images/"
+  ]
 }

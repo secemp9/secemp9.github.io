@@ -1,0 +1,9 @@
+{
+  "id": "secemp-blog",
+  "name": "Blog",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "Create posts, edit visibility, and build a local Pelican preview.",
+  "author": "secemp",
+  "isDesktopOnly": true
+}

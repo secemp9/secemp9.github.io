@@ -3,6 +3,8 @@ output/
 output-preview/
 output-sandbox/
 cache/
+.preview/
+.trash/
 __pycache__/
 *.pyc
 
@@ -23,3 +25,7 @@ Thumbs.db
 
 # Obsidian symlink
 images
+
+# Per-machine session state and the retired local Templater installation.
+.obsidian/workspace*.json
+.obsidian/plugins/templater-obsidian/

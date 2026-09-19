@@ -1,5 +1,5 @@
 {
-  "templater-obsidian:create-new-note-from-template": [
+  "secemp-blog:new-post": [
     {
       "modifiers": [
         "Mod",
@@ -8,7 +8,7 @@
       "key": "n"
     }
   ],
-  "templater-obsidian:run-templater-user-script": [
+  "secemp-blog:set-visibility": [
     {
       "modifiers": [
         "Mod",
@@ -16,6 +16,8 @@
       ],
       "key": "b"
     }
+  ],
+  "secemp-blog:preview-note": [
+    { "modifiers": ["Mod", "Shift"], "key": "p" }
   ]
 }
-

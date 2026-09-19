@@ -1,0 +1,5 @@
+.secemp-blog-form label { display: block; font-weight: var(--font-medium); }
+.secemp-blog-form input, .secemp-blog-form select { display: block; width: 100%; margin-top: 0.5rem; }
+.secemp-blog-form p { color: var(--text-muted); font-size: var(--font-ui-small); }
+.secemp-blog-buttons { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+.secemp-blog-form .secemp-blog-error { color: var(--text-error); }
