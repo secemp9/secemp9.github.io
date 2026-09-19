@@ -58,6 +58,8 @@ const fixture = `<!doctype html><html><body>
     <a data-monthly-plan href="https://example.invalid/monthly-ten">€10 / month</a>
     <a data-monthly-plan href="https://example.invalid/monthly-twenty">€20 / month</a>
     <p>Billed every month until you cancel.</p>
+    <a data-monthly-custom href="https://example.invalid/monthly-custom" aria-describedby="monthly-custom-help">Other monthly amount</a>
+    <p id="monthly-custom-help">Choose a quantity at checkout. Each unit is 1 EUR per month.</p>
     <a href="https://example.invalid/sponsors">GitHub Sponsors</a>
   </section>
   <a data-manage-monthly href="https://example.invalid/customer-portal">Manage or cancel monthly support</a>
@@ -186,6 +188,33 @@ test('each monthly amount retains its own checkout URL through method and freque
   selectFrequency(ui, 'monthly');
   assert.deepEqual(plans(), expected);
   assert.equal(ui.find('[data-method-panel="card"] a').href, 'https://example.invalid/checkout');
+  assert.equal(ui.window.fetch.mock.callCount(), 0);
+});
+
+test('custom monthly checkout stays static and accessible through frequency changes', async (t) => {
+  const ui = await boot(t);
+  const custom = ui.find('[data-monthly-custom]');
+  assert.notEqual(custom.closest('[hidden]'), null);
+  selectFrequency(ui, 'monthly');
+  assert.equal(custom.closest('[hidden]'), null);
+  assert.equal(custom.href, 'https://example.invalid/monthly-custom');
+  assert.equal(ui.document.getElementById(custom.getAttribute('aria-describedby')).textContent,
+    'Choose a quantity at checkout. Each unit is 1 EUR per month.');
+  selectFrequency(ui, 'once');
+  selectCrypto(ui);
+  selectFrequency(ui, 'monthly');
+  assert.equal(custom.href, 'https://example.invalid/monthly-custom');
+  assert.equal(ui.find('[data-manage-monthly]').closest('[hidden]'), null);
+  assert.equal(ui.window.fetch.mock.callCount(), 0);
+});
+
+test('a custom-only monthly option works without fixed tiers or backend calls', async (t) => {
+  const html = fixture.replace(/    <a data-monthly-plan[^\n]+\n/g, '');
+  const ui = await boot(t, { html });
+  selectFrequency(ui, 'monthly');
+  assert.equal(ui.document.querySelectorAll('[data-monthly-plan]').length, 0);
+  assert.equal(ui.find('[data-monthly-custom]').closest('[hidden]'), null);
+  assert.equal(ui.find('[data-manage-monthly]').closest('[hidden]'), null);
   assert.equal(ui.window.fetch.mock.callCount(), 0);
 });
 

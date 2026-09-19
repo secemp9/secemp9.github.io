@@ -18,6 +18,7 @@
 }
 
 .donation-visibility { margin-top: var(--space-4); max-width: 42rem; }
+.donation-sandbox-notice { margin: 0 0 var(--space-3); padding: var(--space-2); border: 1px solid var(--primary-color); color: var(--primary-color); font-family: var(--font-code); font-size: 0.8rem; line-height: 1.6; }
 
 .donation-layout {
     display: grid;
@@ -278,6 +279,7 @@
 .donation-monthly-plan:hover { border-color: var(--primary-color); color: var(--primary-color); }
 .monthly-currency { font-size: 0.75rem; }
 .monthly-interval { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); }
+.donation-monthly-custom { margin-top: var(--space-2); }
 .donation-sponsors { margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--border-color); }
 .donation-management { padding: 0 var(--space-3); border-top: 1px solid var(--border-color); }
 .donation-management a { display: inline-flex; align-items: center; min-height: 48px; color: var(--text-muted); font-family: var(--font-code); font-size: 0.7rem; text-underline-offset: 3px; }

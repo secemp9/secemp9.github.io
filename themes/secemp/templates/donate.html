@@ -9,12 +9,17 @@
 {% block content %}
 {% set donation = page.donation|default({'card': {'configured': false}, 'networks': [], 'wallets': []}) %}
 {% set monthly = donation.monthly|default({'plans': [], 'portal_url': '', 'sponsors_url': ''}) %}
+{% set custom_monthly = monthly.custom|default(none) %}
 {% set default_method = 'crypto' if donation.wallets and not donation.card.configured else 'card' %}
 <div class="donation-shell">
   <header class="donation-header">
     <p class="intro-kicker">~/support</p>
     <h1 class="page-title">{{ page.title }}</h1>
   </header>
+
+  {% if DONATION_SANDBOX|default(false) %}
+  <p class="donation-sandbox-notice" data-donation-sandbox>Sandbox preview — test payments only. No real money is transferred.</p>
+  {% endif %}
 
   <div class="donation-layout">
     <div class="page-content donation-copy">
@@ -97,8 +102,9 @@
 
       <section id="donation-monthly" class="donation-monthly" data-frequency-panel="monthly" aria-labelledby="donation-monthly-heading">
         <h3 id="donation-monthly-heading" class="donation-period-heading">Monthly</h3>
-        {% if monthly.plans %}
+        {% if monthly.plans or custom_monthly %}
         <p class="donation-period-info" id="monthly-billing">The amount you choose is charged each month until you cancel.</p>
+        {% if monthly.plans %}
         <div class="donation-monthly-amounts">
           {% for plan in monthly.plans %}
           <a href="{{ plan.url|e }}" class="donation-monthly-plan" data-monthly-plan="{{ plan.id|e }}" rel="noopener noreferrer" aria-label="Donate {{ plan.amount|e }} {{ plan.currency|e }} per month with Stripe" aria-describedby="monthly-billing">
@@ -107,6 +113,15 @@
           </a>
           {% endfor %}
         </div>
+        {% endif %}
+        {% if custom_monthly %}
+        <div class="donation-monthly-custom">
+          <a class="donation-action donation-action-secondary" data-monthly-custom href="{{ custom_monthly.url|e }}" rel="noopener noreferrer" aria-describedby="monthly-billing monthly-custom-help">
+            <span>{{ 'Other monthly amount' if monthly.plans else 'Choose monthly amount' }}</span><span aria-hidden="true">&nearr;</span>
+          </a>
+          <p class="donation-detail" id="monthly-custom-help">Choose a quantity at checkout. Each unit is {{ custom_monthly.unit_amount|e }} {{ custom_monthly.currency|e }} per month.</p>
+        </div>
+        {% endif %}
         <p class="donation-detail">Continue to Stripe to confirm your monthly payment.</p>
         {% else %}
         <p class="donation-period-info">Monthly card payments are not available yet.</p>

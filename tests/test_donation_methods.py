@@ -34,6 +34,7 @@ MONTHLY_PLANS = (
 )
 PORTAL_URL = "https://billing.example/supporters"
 SPONSORS_URL = "https://github.com/sponsors/fixture-account"
+CUSTOM_MONTHLY = {"url": "https://checkout.example/monthly-custom", "unit_amount": "1", "currency": "EUR"}
 
 
 class DonationDocument(HTMLParser):
@@ -93,7 +94,7 @@ class DonationConfigurationTests(unittest.TestCase):
         page = self.page()
         self.assertEqual(page.donation, {
             "card": {"url": "", "provider": "Stripe", "configured": False},
-            "monthly": {"plans": [], "portal_url": "", "sponsors_url": "", "configured": False},
+            "monthly": {"plans": [], "custom": None, "portal_url": "", "sponsors_url": "", "configured": False},
             "networks": [], "wallets": [],
         })
         self.assertFalse(hasattr(self.page(metadata={"template": "page"}), "donation"))
@@ -123,17 +124,56 @@ class DonationConfigurationTests(unittest.TestCase):
         }).donation["monthly"]
         self.assertEqual(monthly, {
             "plans": [dict(plans[0], amount="5.5"), plans[1], plans[2]],
+            "custom": None,
             "portal_url": PORTAL_URL, "sponsors_url": SPONSORS_URL, "configured": True,
         })
         self.assertEqual(plans, before)
 
     def test_sponsors_only_needs_no_stripe_portal_and_portal_alone_remains_available(self):
         self.assertEqual(self.page({"DONATION_GITHUB_SPONSORS_URL": SPONSORS_URL}).donation["monthly"], {
-            "plans": [], "portal_url": "", "sponsors_url": SPONSORS_URL, "configured": True,
+            "plans": [], "custom": None, "portal_url": "", "sponsors_url": SPONSORS_URL, "configured": True,
         })
         self.assertEqual(self.page({"DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL}).donation["monthly"], {
-            "plans": [], "portal_url": PORTAL_URL, "sponsors_url": "", "configured": False,
+            "plans": [], "custom": None, "portal_url": PORTAL_URL, "sponsors_url": "", "configured": False,
         })
+
+    def test_custom_monthly_is_independent_of_presets_and_preserves_its_input(self):
+        custom = dict(CUSTOM_MONTHLY, unit_amount="001.000")
+        before = deepcopy(custom)
+        monthly = self.page({"DONATION_MONTHLY_CUSTOM": custom, "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL}).donation["monthly"]
+        self.assertTrue(monthly["configured"])
+        self.assertEqual(monthly["plans"], [])
+        self.assertEqual(monthly["custom"], CUSTOM_MONTHLY)
+        self.assertEqual(custom, before)
+
+    def test_custom_monthly_requires_a_portal_and_a_distinct_destination(self):
+        with self.assertRaisesRegex(ValueError, "DONATION_CUSTOMER_PORTAL_URL is required"):
+            self.page({"DONATION_MONTHLY_CUSTOM": CUSTOM_MONTHLY})
+        settings = {"DONATION_MONTHLY_CUSTOM": CUSTOM_MONTHLY, "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL}
+        with self.assertRaisesRegex(ValueError, "one-time"):
+            self.page(dict(settings, DONATION_CARD_URL=CUSTOM_MONTHLY["url"]))
+        with self.assertRaisesRegex(ValueError, "one-time"):
+            self.page(settings, {"donation_url": CUSTOM_MONTHLY["url"]})
+        with self.assertRaisesRegex(ValueError, "fixed monthly"):
+            self.page(dict(settings, DONATION_MONTHLY_PLANS=MONTHLY_PLANS,
+                           DONATION_MONTHLY_CUSTOM=dict(CUSTOM_MONTHLY, url=MONTHLY_PLANS[0]["url"])))
+
+    def test_invalid_custom_monthly_records_fail_before_rendering(self):
+        invalid = (
+            (None, "record"), ([], "record"), (False, "record"),
+            ({"url": ""}, r"\.url"),
+            (dict(CUSTOM_MONTHLY, url="http://checkout.example/custom"), r"\.url"),
+            (dict(CUSTOM_MONTHLY, url="https://user:secret@checkout.example/custom"), r"\.url"),
+            (dict(CUSTOM_MONTHLY, currency="eur"), r"\.currency"),
+            (dict(CUSTOM_MONTHLY, currency="EU1"), r"\.currency"),
+            (dict(CUSTOM_MONTHLY, unit_amount="0"), r"\.unit_amount"),
+            (dict(CUSTOM_MONTHLY, unit_amount=1), r"\.unit_amount"),
+            (dict(CUSTOM_MONTHLY, unit_amount="1e3"), r"\.unit_amount"),
+        )
+        # Each case violates the record, safe URL, currency, or positive unit-price contract.
+        for record, error in invalid:
+            with self.subTest(record=record), self.assertRaisesRegex(ValueError, error):
+                self.page({"DONATION_MONTHLY_CUSTOM": record, "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL})
 
     def test_monthly_plans_require_a_management_portal(self):
         with self.assertRaisesRegex(ValueError, "DONATION_CUSTOMER_PORTAL_URL is required"):
@@ -244,7 +284,7 @@ class DonationConfigurationTests(unittest.TestCase):
 
 
 class DonationIntegrationTests(unittest.TestCase):
-    def assert_monthly_no_javascript_fallback(self, html, configured):
+    def assert_monthly_no_javascript_fallback(self, html, configured, expected_plans=MONTHLY_PLANS):
         document = DonationDocument(html)
         panels = document.with_attribute("data-frequency-panel")
         self.assertEqual([panel["attrs"]["data-frequency-panel"] for panel in panels], ["once", "monthly"])
@@ -252,15 +292,16 @@ class DonationIntegrationTests(unittest.TestCase):
         self.assertTrue(document.is_hidden(document.with_attribute("data-frequency-toggle")[0]))
         if not configured:
             self.assertFalse(document.with_attribute("data-monthly-plan"))
+            self.assertFalse(document.with_attribute("data-monthly-custom"))
             self.assertFalse(document.with_attribute("data-monthly-sponsors"))
             self.assertFalse(document.with_attribute("data-manage-monthly"))
             self.assertIn("Monthly card payments are not available yet.", html)
             return
 
         plans = document.with_attribute("data-monthly-plan")
-        self.assertEqual(len(plans), len(MONTHLY_PLANS))
+        self.assertEqual(len(plans), len(expected_plans))
         # Each rendered amount must keep its own checkout and explicit monthly label.
-        for link, plan in zip(plans, MONTHLY_PLANS):
+        for link, plan in zip(plans, expected_plans):
             self.assertEqual(link["tag"], "a")
             self.assertEqual(link["attrs"]["data-monthly-plan"], plan["id"])
             self.assertEqual(link["attrs"]["href"], plan["url"])
@@ -268,6 +309,15 @@ class DonationIntegrationTests(unittest.TestCase):
             self.assertIn("per month", link["text"])
             self.assertIn(f'{plan["amount"]} {plan["currency"]} per month', link["attrs"]["aria-label"])
             self.assertFalse(document.is_hidden(link))
+        custom = document.with_attribute("data-monthly-custom")
+        self.assertEqual(len(custom), 1)
+        self.assertEqual(custom[0]["attrs"]["href"], CUSTOM_MONTHLY["url"])
+        self.assertIn("Other monthly amount" if expected_plans else "Choose monthly amount", custom[0]["text"])
+        self.assertIn("monthly-custom-help", custom[0]["attrs"]["aria-describedby"])
+        self.assertFalse(document.is_hidden(custom[0]))
+        self.assertIn("Each unit is 1 EUR per month.", html)
+        self.assertNotIn("999999", html)
+        self.assertNotIn("Monthly card payments are not available yet.", html)
         portal = document.with_attribute("data-manage-monthly")
         self.assertEqual(len(portal), 1)
         self.assertEqual(portal[0]["attrs"]["href"], PORTAL_URL)
@@ -293,12 +343,13 @@ class DonationIntegrationTests(unittest.TestCase):
             }
             # Payment destinations must follow current settings across production
             # and two local builds with unchanged content and the real reader cache.
-            for production, configured in ((True, True), (False, True), (False, False)):
-                with self.subTest(production=production, configured=configured):
+            for production, configured, custom_only in ((True, True, False), (False, True, False), (False, True, True), (False, False, False)):
+                with self.subTest(production=production, configured=configured, custom_only=custom_only):
                     overrides.update({
                         "DONATION_CARD_URL": "https://checkout.example/support" if configured else "",
                         "DONATION_WALLETS": WALLETS if configured else (),
-                        "DONATION_MONTHLY_PLANS": MONTHLY_PLANS if configured else (),
+                        "DONATION_MONTHLY_PLANS": MONTHLY_PLANS if configured and not custom_only else (),
+                        "DONATION_MONTHLY_CUSTOM": CUSTOM_MONTHLY if configured else {},
                         "DONATION_CUSTOMER_PORTAL_URL": PORTAL_URL if configured else "",
                         "DONATION_GITHUB_SPONSORS_URL": SPONSORS_URL if configured else "",
                     })
@@ -315,11 +366,12 @@ class DonationIntegrationTests(unittest.TestCase):
                     self.assertEqual("https://checkout.example/support" in html, configured)
                     self.assertEqual(EVM_ADDRESS in html, configured)
                     self.assertEqual(SOL_ADDRESS in html, configured)
-                    self.assertEqual(MONTHLY_PLANS[0]["url"] in html, configured)
-                    self.assertEqual(MONTHLY_PLANS[1]["url"] in html, configured)
+                    self.assertEqual(MONTHLY_PLANS[0]["url"] in html, configured and not custom_only)
+                    self.assertEqual(MONTHLY_PLANS[1]["url"] in html, configured and not custom_only)
+                    self.assertEqual(CUSTOM_MONTHLY["url"] in html, configured)
                     self.assertEqual(PORTAL_URL in html, configured)
                     self.assertEqual(SPONSORS_URL in html, configured)
-                    self.assert_monthly_no_javascript_fallback(html, configured)
+                    self.assert_monthly_no_javascript_fallback(html, configured, () if custom_only else MONTHLY_PLANS)
                     # A hidden donation page must not appear in public navigation,
                     # indexes or feeds, even though its direct URL renders.
                     for path in output.rglob("*"):

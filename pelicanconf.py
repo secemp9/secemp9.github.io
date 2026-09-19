@@ -107,8 +107,12 @@ DONATION_WALLETS = ()
 # Each URL must be a separate monthly Stripe Payment Link matching its amount.
 # Configure the hosted customer portal with cancellation enabled before adding plans.
 DONATION_MONTHLY_PLANS = ()
+# Optional recurring unit-price checkout: url, unit_amount (decimal string), currency.
+# Enable adjustable quantity in Stripe; the blog never creates or changes charges.
+DONATION_MONTHLY_CUSTOM = {}
 DONATION_CUSTOMER_PORTAL_URL = ''
 DONATION_GITHUB_SPONSORS_URL = ''
+DONATION_SANDBOX = False
 
 # Plugins (add as needed)
 PLUGIN_PATHS = ['plugins']

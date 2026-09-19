@@ -138,6 +138,8 @@ Configure payment methods in `pelicanconf.py`:
 - `DONATION_WALLETS`: one receiving address record per network and asset.
 - `DONATION_MONTHLY_PLANS`: fixed monthly Stripe prices with their matching
   Payment Links (see below).
+- `DONATION_MONTHLY_CUSTOM`: optional adjustable-quantity monthly checkout,
+  described by `url`, `unit_amount`, and `currency`.
 - `DONATION_CUSTOMER_PORTAL_URL`: your Stripe customer-portal login link for
   managing and cancelling monthly payments.
 - `DONATION_GITHUB_SPONSORS_URL`: optional `https://github.com/sponsors/ACCOUNT`
@@ -178,6 +180,42 @@ The amounts and currencies here are display labels: they must match the actual
 Stripe prices. Updating these settings does not change an existing subscription
 or cancel it; manage billing in Stripe. Test the chosen monthly amount, currency,
 and cancellation flow using Stripe's test environment before adding live links.
+
+### Choose another monthly amount, without a backend
+
+Create a separate Stripe product with a **1 EUR monthly recurring price**, then
+create its Payment Link with **Let customers adjust quantity** enabled. Set the
+minimum to **1** and maximum to **999999** (Stripe's supported quantity ceiling),
+with an initial quantity of 1. Quantity 17 then means 17 EUR per month. The amount
+repeats until the donor changes or cancels the subscription. Other payment limits
+can still prevent a very large charge; the quantity ceiling is not a payment guarantee.
+
+Configure the actual hosted link, not a server endpoint:
+
+```python
+DONATION_MONTHLY_CUSTOM = {
+    'url': 'YOUR_STRIPE_ADJUSTABLE_MONTHLY_PAYMENT_LINK',
+    'unit_amount': '1',
+    'currency': 'EUR',
+}
+```
+
+The page keeps the fixed amounts and adds **Other monthly amount** with an
+explanation of the unit price. With no fixed amounts it shows **Choose monthly
+amount** instead. The maximum is not printed on the blog; Stripe controls its own
+quantity picker and validation and may reveal the limits there. No API key,
+backend, payment request, or quantity manipulation runs in the static site.
+
+`DONATION_CUSTOMER_PORTAL_URL` is required for this option too. In the portal,
+enable quantity updates for the adjustable product and review proration settings
+so changes do not unexpectedly charge or credit the current billing period. Keep
+the fixed-price shortcuts at quantity 1. Verify checkout, quantity changes, and
+cancellation in a sandbox before configuring live links. These settings describe
+the checkout; they do not verify or change its actual Stripe price or limits.
+
+Leave `DONATION_MONTHLY_CUSTOM = {}` to disable the option. Sandbox previews can
+set `DONATION_SANDBOX = True` to display an explicit test-payment notice; never
+use that flag or test checkout URLs for a live donation page.
 
 ### Crypto payments
 

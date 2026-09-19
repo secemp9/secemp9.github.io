@@ -6,6 +6,8 @@ addresses are available; incomplete records are errors, never payment options.
 DONATION_MONTHLY_PLANS contains id, amount, currency and URL for each hosted
 monthly checkout. Amounts describe the matching checkout; they are never charged
 or converted by this static page. Configure the customer portal for cancellation.
+DONATION_MONTHLY_CUSTOM optionally describes a recurring unit price whose
+quantity the donor chooses on Stripe. Limits are enforced there, not by this site.
 This validates configuration shape, not address ownership, chain compatibility,
 or the amount and billing interval actually configured at a checkout provider.
 """
@@ -133,13 +135,34 @@ def _monthly_methods(settings, card_url):
         urls.add(url)
         plans.append({"id": identifier, "amount": amount, "currency": currency, "url": url})
 
-    if plans and not portal_url:
-        raise ValueError("DONATION_CUSTOMER_PORTAL_URL is required when DONATION_MONTHLY_PLANS are configured, so supporters can manage or cancel")
+    custom = settings.get("DONATION_MONTHLY_CUSTOM", {})
+    if not isinstance(custom, Mapping):
+        raise ValueError("DONATION_MONTHLY_CUSTOM must be a record, or an empty dictionary to disable it")
+    if custom:
+        prefix = "DONATION_MONTHLY_CUSTOM"
+        url = _https_url(custom.get("url"), f"{prefix}.url")
+        if not url:
+            raise ValueError(f"{prefix}.url must be a nonempty monthly checkout URL")
+        if url == card_url:
+            raise ValueError(f"{prefix}.url must differ from the one-time checkout")
+        if url in urls:
+            raise ValueError(f"{prefix}.url must differ from fixed monthly checkouts")
+        unit_amount = _monthly_amount(custom.get("unit_amount"), f"{prefix}.unit_amount")
+        currency = _text(custom.get("currency"), f"{prefix}.currency", limit=3)
+        if not re.fullmatch(r"[A-Z]{3}", currency):
+            raise ValueError(f"{prefix}.currency must be a three-letter uppercase currency code")
+        custom = {"url": url, "unit_amount": unit_amount, "currency": currency}
+    else:
+        custom = None
+
+    if (plans or custom) and not portal_url:
+        raise ValueError("DONATION_CUSTOMER_PORTAL_URL is required when monthly Stripe checkouts are configured, so supporters can manage or cancel")
     return {
         "plans": plans,
+        "custom": custom,
         "portal_url": portal_url,
         "sponsors_url": sponsors_url,
-        "configured": bool(plans or sponsors_url),
+        "configured": bool(plans or custom or sponsors_url),
     }
 
 
