@@ -136,9 +136,9 @@ References: [Pelican hidden posts and drafts](https://docs.getpelican.com/en/lat
 
 ## Donation page
 
-The donation page lives in `content/pages/donate.md` at `/donate/`. It starts
-unlisted and uses the dedicated `donate.html` template. Edit its Markdown to
-change the copy.
+The donation page lives in `content/pages/donate.md` at `/donate/`. It is public,
+linked from the main navigation, and uses the dedicated `donate.html` template.
+Edit its Markdown to change the copy.
 
 Configure payment methods in `pelicanconf.py`:
 
@@ -299,9 +299,9 @@ See [Stripe Payment Links](https://docs.stripe.com/payment-links/create) and
 [Stripe testing](https://docs.stripe.com/testing) for checkout setup. Available
 wallet methods depend on the provider, account settings, and donor's device.
 
-Preview it at [localhost:4002/donate/](http://localhost:4002/donate/). When ready,
-set `Status: published` and deploy; the URL stays `/donate/` and the page joins
-the navigation.
+Preview it at [localhost:4002/donate/](http://localhost:4002/donate/). Its current
+`Status: published` keeps it in navigation. Changing it to `hidden` and deploying
+would remove that listing and add `noindex`, while retaining `/donate/`.
 
 ## Check a build
 

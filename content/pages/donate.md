@@ -1,6 +1,6 @@
 Title: Donate
 Slug: donate
-Status: hidden
+Status: published
 Template: donate
 Summary: A way to help cover the costs of what I release.
 
