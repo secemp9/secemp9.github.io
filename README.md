@@ -145,6 +145,12 @@ Configure payment methods in `pelicanconf.py`:
 - `DONATION_GITHUB_SPONSORS_URL`: optional `https://github.com/sponsors/ACCOUNT`
   profile link. Leave empty until you have a working Sponsors page.
 
+The current production configuration contains **live** Stripe checkout and
+customer-portal links, alongside real crypto receiving addresses. The normal
+and production previews inherit these destinations: submitting a payment there
+would move real money. Use `./serve.sh --sandbox` for payment testing; it replaces
+every Stripe destination with a test link and excludes crypto addresses.
+
 ### Monthly payments
 
 The page starts on **One-time**. **Monthly** shows only configured recurring

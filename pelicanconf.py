@@ -100,7 +100,7 @@ PROJECTS = (
 
 # Donation methods: add only your own hosted checkout URL and receiving addresses.
 # An empty collection leaves the corresponding payment method unavailable.
-DONATION_CARD_URL = ''
+DONATION_CARD_URL = 'https://buy.stripe.com/6oU00j3Bk7Y54bxdHkd3i00'
 DONATION_CARD_PROVIDER = 'Stripe'
 # Public Phantom receiving addresses supplied by the owner on 2026-09-19.
 # Equal EVM addresses do not make networks interchangeable. No private keys.
@@ -127,11 +127,22 @@ DONATION_WALLETS = (
 # Monthly plans: id, amount (decimal string), currency (e.g. EUR), url.
 # Each URL must be a separate monthly Stripe Payment Link matching its amount.
 # Configure the hosted customer portal with cancellation enabled before adding plans.
-DONATION_MONTHLY_PLANS = ()
+DONATION_MONTHLY_PLANS = (
+    {'id': 'eur-5', 'amount': '5', 'currency': 'EUR',
+     'url': 'https://buy.stripe.com/4gM14n2xg3HP9vRfPsd3i03'},
+    {'id': 'eur-10', 'amount': '10', 'currency': 'EUR',
+     'url': 'https://buy.stripe.com/28E8wP1tc1zH37tcDgd3i04'},
+    {'id': 'eur-25', 'amount': '25', 'currency': 'EUR',
+     'url': 'https://buy.stripe.com/8x214ndbU5PXdM79r4d3i01'},
+)
 # Optional recurring unit-price checkout: url, unit_amount (decimal string), currency.
 # Enable adjustable quantity in Stripe; the blog never creates or changes charges.
-DONATION_MONTHLY_CUSTOM = {}
-DONATION_CUSTOMER_PORTAL_URL = ''
+DONATION_MONTHLY_CUSTOM = {
+    'url': 'https://buy.stripe.com/4gM7sLgo6dip5fBdHkd3i02',
+    'unit_amount': '1',
+    'currency': 'EUR',
+}
+DONATION_CUSTOMER_PORTAL_URL = 'https://billing.stripe.com/p/login/6oU00j3Bk7Y54bxdHkd3i00'
 DONATION_GITHUB_SPONSORS_URL = ''
 DONATION_SANDBOX = False
 

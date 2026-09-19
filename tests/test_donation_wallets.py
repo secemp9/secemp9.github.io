@@ -114,7 +114,7 @@ class ReceivingAddressTests(unittest.TestCase):
             for _, label, asset, _ in EXPECTED:
                 self.assertIn(f'Send only <strong>{asset}</strong> on <strong>{label}</strong>.', html)
                 self.assertIn(f'aria-label="Receiving address for {asset} on {label}"', html)
-            self.assertIn('data-default-method="crypto"', html)
+            self.assertIn('data-default-method="card"', html)
             self.assertIn('name="robots" content="noindex, nofollow, noimageindex"', html)
             self.assertNotIn('data-donation-sandbox', html)
             self.assertNotIn('https://buy.stripe.com/test_', html)
