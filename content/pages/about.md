@@ -5,7 +5,9 @@ Summary: an attempt at talking about myself. ML, Rust, research, and "anything c
 
 ![Meme of a man at a computer declaring, "25 is young! anything could work! I swear!", with Vergil motivation posters.](../images/vergil_young.jpeg)
 
-<!-- i'm 29 but that's beside the point -->
+  <div style="text-align: center; font-size: 0.8em; color: #98917f;">
+  i'm 29 but that's beside the point
+  </div>
 
 so in short, i like ML. yeah. i worked on it professionally at [@hud_evals](https://x.com/hud_evals), and before that i was mainly doing sysadmin contracting and SWE odd jobs (i'm pretty goated at data scraping).
 
