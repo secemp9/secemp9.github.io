@@ -1,5 +1,5 @@
 #!/bin/bash
-# Serve either the development build or production settings on localhost.
+# Serve development, production-settings, or Stripe sandbox previews on localhost.
 set -euo pipefail
 
 site_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,13 +8,29 @@ cd "$site_dir"
 settings="pelicanconf.py"
 output="output"
 port="${PORT:-4001}"
+custom_port=false
+if [[ -n "${PORT:-}" ]]; then custom_port=true; fi
 
 # Each supported option consumes itself (and its value), leaving no unchecked arguments.
 while (($#)); do
     case "$1" in
         --production)
+            if [[ "$settings" == "sandboxconf.py" ]]; then
+                printf '%s\n' '--production and --sandbox cannot be combined.' >&2
+                exit 2
+            fi
             settings="publishconf.py"
             output="output-preview"
+            shift
+            ;;
+        --sandbox)
+            if [[ "$settings" == "publishconf.py" ]]; then
+                printf '%s\n' '--production and --sandbox cannot be combined.' >&2
+                exit 2
+            fi
+            settings="sandboxconf.py"
+            output="output-sandbox"
+            if [[ "$custom_port" == false ]]; then port=4003; fi
             shift
             ;;
         --port|-p)
@@ -23,12 +39,14 @@ while (($#)); do
                 exit 2
             fi
             port="$2"
+            custom_port=true
             shift 2
             ;;
         --help|-h)
-            printf '%s\n' 'Usage: ./serve.sh [--production] [--port PORT]' \
+            printf '%s\n' 'Usage: ./serve.sh [--production | --sandbox] [--port PORT]' \
                 'Default: http://localhost:4001 (override with PORT or --port).' \
-                'Production preview uses publishconf.py and output-preview/.'
+                'Production preview uses publishconf.py and output-preview/.' \
+                'Stripe sandbox uses sandboxconf.py and output-sandbox/ on port 4003.'
             exit 0
             ;;
         *)

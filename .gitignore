@@ -1,6 +1,7 @@
 # Pelican
 output/
 output-preview/
+output-sandbox/
 cache/
 __pycache__/
 *.pyc

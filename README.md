@@ -217,6 +217,19 @@ Leave `DONATION_MONTHLY_CUSTOM = {}` to disable the option. Sandbox previews can
 set `DONATION_SANDBOX = True` to display an explicit test-payment notice; never
 use that flag or test checkout URLs for a live donation page.
 
+Run the configured, local-only Stripe sandbox preview with:
+
+```sh
+./serve.sh --sandbox
+```
+
+Open [localhost:4003/donate/](http://localhost:4003/donate/). This explicitly uses
+`sandboxconf.py`, writes only to `output-sandbox/`, and shows a sandbox notice.
+The checked-in URLs are public **test** checkout links, not credentials. This
+config rejects live Stripe URLs and disables crypto and GitHub Sponsors, so a
+future live configuration cannot leak into the test preview. `publishconf.py`
+does not import it. `--port` or `PORT` can override the sandbox preview port.
+
 ### Crypto payments
 
 The wallet record format is:
