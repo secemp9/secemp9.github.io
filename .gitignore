@@ -24,7 +24,7 @@ venv/
 Thumbs.db
 
 # Obsidian symlink
-images
+/images
 
 # Per-machine session state and the retired local Templater installation.
 .obsidian/workspace*.json

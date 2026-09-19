@@ -3,8 +3,10 @@ Slug: about
 Status: published
 Summary: an attempt at talking about myself. ML, Rust, research, and "anything could work".
 
-![](../images/vergil_young.jpeg)
-%% i'm 29 but that's beside the point %%
+![Meme of a man at a computer declaring, "25 is young! anything could work! I swear!", with Vergil motivation posters.](../images/vergil_young.jpeg)
+
+<!-- i'm 29 but that's beside the point -->
+
 so in short, i like ML. yeah. i worked on it professionally at [@hud_evals](https://x.com/hud_evals), and before that i was mainly doing sysadmin contracting and SWE odd jobs (i'm pretty goated at data scraping).
 
 currently i'm at a stealth startup doing Rust SWE for agentic workflows and pipelines, frontend and backend included. mainly TS and Rust, but my favorite stack would be ML / Python / research, i guess.
