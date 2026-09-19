@@ -1,7 +1,11 @@
 """Explicit, local-only Stripe sandbox preview; never imported by production."""
 
+from pathlib import Path as _Path
+import sys as _sys
 from urllib.parse import urlsplit as _urlsplit
 
+# Pelican's console entrypoint does not add this config's directory to sys.path.
+_sys.path.insert(0, str(_Path(__file__).resolve().parent))
 from publishconf import *
 
 SITEURL = 'http://localhost:4003'

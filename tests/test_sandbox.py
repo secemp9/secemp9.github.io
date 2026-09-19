@@ -25,6 +25,18 @@ def load_settings(filename, **overrides):
 
 
 class SandboxTests(unittest.TestCase):
+    def test_console_entrypoint_loads_sandbox_without_pythonpath_help(self):
+        executable = shutil.which('pelican') or str(Path(sys.executable).with_name('pelican'))
+        environment = dict(os.environ)
+        environment.pop('PYTHONPATH', None)
+        result = subprocess.run(
+            [executable, '--settings', str(ROOT / 'sandboxconf.py'), '--print-settings',
+             'DONATION_SANDBOX', 'DONATION_MONTHLY_CUSTOM'],
+            cwd=ROOT, env=environment, capture_output=True, text=True, check=True,
+        )
+        self.assertIn('True', result.stdout)
+        self.assertIn('test_cNi3cvc6IbIxc21777a7C04', result.stdout)
+
     def test_only_explicit_sandbox_settings_enable_test_destinations(self):
         sandbox = load_settings('sandboxconf.py')
         production = load_settings('publishconf.py')
