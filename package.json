@@ -3,7 +3,7 @@
   "private": true,
   "description": "Development-only DOM tests; the published Pelican site uses plain JavaScript.",
   "scripts": {
-    "test": "node --test tests/donation-ui.test.cjs"
+    "test": "node --test tests/*.test.cjs"
   },
   "engines": {
     "node": ">=22"
