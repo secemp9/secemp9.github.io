@@ -11,7 +11,7 @@ so in short, i like ML. yeah. i worked on it professionally at [@hud_evals](http
 
 currently i'm at a stealth startup doing Rust SWE for agentic workflows and pipelines, frontend and backend included. mainly TS and Rust, but my favorite stack would be ML / Python / research, i guess.
 
-i'm also currently doing stuff at @prime_intellect 's RL residency, will release more stuff soon
+i'm also currently doing stuff at [@primeintellect](https://x.com/PrimeIntellect)'s RL residency, will release more stuff soon
 
 let's see. if you know me on twitter and understood the meme above, you've probably noticed i have a weird obsession with motivation, pragmatism, and optimism. yes, but i usually find these to be reductive, and i have yet to fully map out in word space what i think in those cases. i guess you could call me a [meliorist](https://en.wikipedia.org/wiki/Meliorism).
 
