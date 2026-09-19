@@ -7,6 +7,7 @@ from datetime import datetime
 import hashlib
 from io import StringIO
 import json
+import logging
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -247,8 +248,20 @@ def preview_info(value, port=4010, build=False):
     if not note.save_as or output.is_absolute() or ".." in output.parts:
         raise ValueError("This note has no safe local preview output path")
     if build:
-        with redirect_stdout(StringIO()):
-            Pelican(settings).run()
+        problems = []
+        class BuildProblems(logging.Handler):
+            def emit(self, record):
+                problems.append(record.getMessage())
+        handler = BuildProblems(level=logging.WARNING)
+        logger = logging.getLogger("pelican")
+        logger.addHandler(handler)
+        try:
+            with redirect_stdout(StringIO()):
+                Pelican(settings).run()
+        finally:
+            logger.removeHandler(handler)
+        if problems:
+            raise ValueError("Preview build reported problems: " + "; ".join(problems))
         if not (PREVIEW_OUTPUT / str(output)).is_file():
             raise ValueError("The preview build did not generate this note; check its metadata")
     route = str(output).removesuffix("index.html")

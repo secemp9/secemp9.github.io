@@ -5,9 +5,10 @@ A personal site built with Pelican and a custom Jinja theme, deployed to
 
 ## How the site works
 
-- `content/*.md`: articles, written in Markdown with Pelican `Key: Value` metadata.
+- `content/**/*.md`: articles with native Obsidian YAML properties or legacy Pelican headers.
 - `content/pages/*.md`: standalone pages, such as About.
-- `content/images/`: images; the `obsidian_image_links` plugin resolves pasted Obsidian links.
+- `content/images/`: pasted images; note-relative links work from nested folders too.
+- `.obsidian/plugins/secemp-blog/`: the repo-local desktop authoring commands.
 - `themes/secemp/`: templates, CSS, JavaScript, and theme images.
 - `pelicanconf.py`: local settings, menus, project links, and URL patterns.
 - `publishconf.py`: production domain, feeds, clean builds, and draft HTML suppression.
@@ -43,8 +44,13 @@ hosting behavior.
 
 ## Unlisted first, public when ready
 
-Use Pelican's native `Status` metadata. New posts from the CLI and Obsidian
-helpers start with `Status: hidden`.
+Open the repository root as an Obsidian vault and enable its bundled **Blog**
+plugin. **Ctrl/Cmd+Shift+N** creates a post; **Ctrl/Cmd+Shift+P** builds and
+opens a real local preview; **Ctrl/Cmd+Shift+B** edits visibility. See the
+[authoring guide](.obsidian/README.md) for setup and publishing.
+
+Use the `status` property. New posts from both the CLI and Obsidian start
+unlisted with `status: hidden`.
 
 | Status | Deployed HTML | Listed on the site and in feeds | Search indexing |
 | --- | --- | --- | --- |
@@ -52,7 +58,8 @@ helpers start with `Status: hidden`.
 | `published` | Yes, at its normal URL | Yes | Allowed |
 | `draft` | No, in this site's production configuration | No | Local preview only |
 
-Existing articles without `Status` keep Pelican's default of `published`.
+Legacy Pelican-header articles without `Status` keep their historical
+`published` default. YAML notes without `status` default to `hidden`.
 Pelican normally generates draft HTML too; this site explicitly disables that
 HTML output in production. Draft source and copied static assets are still not
 private.
@@ -60,25 +67,29 @@ private.
 Create an unlisted article:
 
 ```sh
-python3 new_post_pelican.py --title "A preview of my next post"
-python3 new_post_pelican.py --list
+.venv/bin/python new_post_pelican.py --title "A preview of my next post"
+.venv/bin/python new_post_pelican.py --list
 ```
 
 Its metadata looks like:
 
-```text
-Title: A preview of my next post
-Date: 2026-09-15 14:30
-Status: hidden
-Slug: a-preview-of-my-next-post
+```yaml
+---
+title: A preview of my next post
+date: 2026-09-15T14:30:00+02:00
+status: hidden
+slug: a-preview-of-my-next-post
+tags: []
+cssclasses: [blog-post]
+---
 
 The article starts here.
 ```
 
 After pushing to `main` and a successful deployment, share
 `https://secemp.blog/2026/09/15/a-preview-of-my-next-post/`. To make it public,
-change just `Status: hidden` to `Status: published`, then commit and push.
-The URL stays the same as long as `Date` and `Slug` stay the same. The next build
+change just `status: hidden` to `status: published`, then commit and push.
+The URL stays the same as long as `date` and `slug` stay the same. The next build
 adds it to listings and feeds and removes `noindex`. Reversing the status removes
 it from those listings again.
 

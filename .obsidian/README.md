@@ -1,111 +1,96 @@
-# Obsidian Vault Configuration for Pelican Blog
+# Writing the blog in Obsidian
 
-This Obsidian vault is configured to work with your Pelican blog structure.
+Open the **repository root** as a desktop Obsidian vault. The bundled **Blog**
+plugin uses the same Python authoring code as the CLI. It does not commit, push,
+or publish automatically.
 
-## Setup Instructions
+## Setup
 
-### 1. Install Templater Plugin
-1. Open Obsidian Settings (gear icon)
-2. Go to **Community plugins**
-3. Click **Browse** and search for "Templater"
-4. Click **Install**, then **Enable**
-5. **IMPORTANT**: Go to Settings → Templater → User Script Functions
-   - Set "User Scripts Folder" to: `scripts`
-   - Reload Obsidian (Ctrl+R or Cmd+R)
+1. Install the Python dependencies using the setup commands in the root README.
+2. Open this folder as a vault. Allow community plugins for this trusted repo
+   and enable **Blog** under Settings → Community plugins.
+3. Reload Obsidian after pulling these changes. Templater is no longer used.
 
-### 2. Creating New Blog Posts
+No plugin download or npm build is needed. The commands require the repo's
+`.venv` Python environment. The live website has no Obsidian dependency.
 
-**✅ AUTOMATIC METHOD - Use Template (Recommended):**
+## Commands
 
-1. Create a new file in `content` folder:
-   - Press `Ctrl+N` (or `Cmd+N` on Mac) to create a new note
-   - Or click "New Note" button
-   - Make sure you're in the `content` folder (or it will be created there automatically)
-2. The file will start as "Untitled" - that's fine!
-3. Apply the template:
-   - Press `Ctrl+Shift+N` (or `Cmd+Shift+N` on Mac)
-   - Or Command Palette → "Templater: Create new note from template"
-   - Select `blog-post` template
-4. Enter your post title when prompted
-5. **The template automatically:**
-   - Renames the file to `YYYY-MM-DD-slug.md` (with today's date)
-   - Fills in proper Pelican metadata with title and date
-   - Adds `Status: hidden`, so the deployed post is unlisted until you publish it
-   - Opens file ready for editing
+| Command | Shortcut |
+| --- | --- |
+| Blog: New post | Ctrl/Cmd+Shift+N |
+| Blog: Preview current note | Ctrl/Cmd+Shift+P |
+| Blog: Set current note visibility | Ctrl/Cmd+Shift+B |
+| Blog: Convert current note to properties | Command palette |
+| Blog: Show/hide generated folders | Command palette |
 
-**Example:**
-- You create "Untitled" file
-- Apply template, enter: "My Awesome Post"
-- File automatically renamed to: `2025-11-07-my-awesome-post.md` ✅
+**New post** asks for a title before creating anything, then opens an empty
+post in `content/`. Cancelling leaves no placeholder note. Repeated titles get
+distinct filenames **and slugs**. Ctrl/Cmd+N remains Obsidian's ordinary blank
+note command.
 
-**Alternative: Pre-name the file with date**
+Edit the title, date, tags, and status through the note's Properties panel.
+The slug is assigned once: changing a title or renaming a note does not change
+its public URL. Keep `date` and `slug` stable after sharing a link.
 
-1. Create a new file in `content` folder
-2. Name it: `YYYY-MM-DD-your-title.md` (e.g., `2025-11-07-my-post.md`)
-3. Apply the template (Ctrl+Shift+N → select blog-post)
-4. The template will extract the date from filename and prompt for title
+Existing Pelican-header posts still build unchanged. **Convert current note
+to properties** changes only the header when you explicitly invoke it; it
+preserves the body, date, slug, and publication status.
 
-## Quick Reference
+## Links and images
 
-| Method | Steps | Date Auto-Added? |
-|--------|-------|------------------|
-| Template (Recommended) | Create file → Apply template → Enter title | ✅ Yes |
-| Pre-named file | Name file with date → Apply template | ✅ Yes (extracted from filename) |
+Paste images normally. They are stored in `content/images/`, and Obsidian
+inserts ordinary relative Markdown links. Nested posts and pages are supported.
 
-## Configuration Details
+Use the normal link picker to link to another note. The vault is configured
+to generate Markdown links, for example `[Another post](other-post.md)`, not
+Wikilinks. The build resolves these to the destination's real blog URL.
+Links to ordinary headings work too. External and site-root links are preserved.
 
-- **New files default location**: `content/` folder
-- **Template location**: `Templates/blog-post.md`
-- **Script location**: `scripts/create-blog-post.js` (at vault root)
-- **Attachment folder**: `content/images/`
-- **Date format**: `YYYY-MM-DD` (matches Pelican convention)
+Obsidian-only block references and note transclusions are not converted.
+A real site preview is the authority for the published appearance.
 
-## Pelican Metadata Format
+## Preview
 
-Pelican uses Key: Value format (NOT YAML):
+**Preview current note** saves the editor, builds a fresh Pelican preview in
+`.preview/obsidian/`, and opens that note in the browser on localhost:4010.
+No terminal server setup is needed. Run the command again after edits to rebuild.
+The loopback-only server stops when the plugin unloads. It serves generated
+files only, not the repository or your notes.
 
-```
-Title: My Post Title
-Date: 2025-01-26 14:30
-Status: hidden
-Tags: python, web
-Slug: my-post-title
+The existing `./serve.sh` workflow is also available for automatic rebuilds
+while editing. See the root README for its production/sandbox modes.
 
-Your content here...
-```
+Preview pages contain the configured **real payment links and crypto addresses**.
+Do not submit test payments there; use `./serve.sh --sandbox` for Stripe testing.
 
-## Preview and Publish
+## Visibility and publishing
 
-Both the template and `scripts/create-blog-post.js` create posts with
-`Status: hidden`. They are generated at their regular URL when you push to
-`main`, but do not appear in the blog listings, feeds, or page navigation, and
-include `noindex` for search engines.
+| Status | After a successful deployment |
+| --- | --- |
+| `hidden` | Shareable at its regular URL, absent from listings, noindex |
+| `draft` | Local preview only; no deployed HTML |
+| `published` | Listed on the site and in feeds |
 
-1. Preview locally with `./serve.sh`, or `./serve.sh --production --port 4002`
-   to check production settings on localhost.
-2. Commit and push the hidden post to `main`; after deployment, share its URL.
-3. When ready, change `Status: hidden` to `Status: published`, commit, and push.
-   Keep the date and slug unchanged to preserve the shared URL.
+New posts and YAML notes without a status default to `hidden`.
+Legacy Pelican headers without a status retain their historical public default.
 
-Use `Status: draft` for a local draft: this site's production settings suppress
-draft HTML. Unlisted posts and drafts are not confidential: a public GitHub
-repository still exposes committed source, images, and history. `noindex` is a
-search instruction, not a password, and removing an already indexed URL takes a
-recrawl. See [the site README](../README.md#what-unlisted-means) for the limits.
+Changing visibility edits the note locally. To deploy:
 
-## Troubleshooting
+1. Preview the note and review `git diff -- content/`.
+2. Stage the intended Markdown and attachments, then commit.
+3. Push to `main` and check the GitHub Pages workflow.
 
-**Template not renaming file?**
-1. Make sure you're applying the template to a file (not creating from template)
-2. The file should be in `content/` folder
-3. If filename is already correct (has date prefix), it won't rename
+Do not commit confidential notes or attachments: the GitHub repository is
+public, regardless of a note's status. Unlisted is not private.
 
-**Date not in filename?**
-- Make sure you're applying the template AFTER creating the file
-- The template will automatically rename "Untitled" files
-- If you pre-name the file with a date, it will use that date
+## Vault housekeeping
 
-**Template not appearing?**
-1. Check Settings → Templater → Template folder location
-2. Verify it's set to: `Templates`
-3. Reload Obsidian (Ctrl+R)
+The writing snippet leaves Obsidian's native light/dark theme, controls, and
+settings dialogs alone. Generated folders are hidden from the explorer by
+default; the Show/hide command reveals them without deleting anything.
+
+Workspace/session files are local and ignored by Git. The retired Templater
+installation is retained locally but disabled and untracked. The old duplicate
+template and its unused configuration have been removed; Git history retains
+them. No existing article or page is automatically migrated.

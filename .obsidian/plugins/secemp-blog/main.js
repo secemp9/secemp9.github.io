@@ -104,8 +104,9 @@ module.exports = class BlogPlugin extends Plugin {
     return file;
   }
 
-  async transform(file, args) {
+  async transform(file, args, cancelled = () => false) {
     const result = await this.bridge.runAuthoring([...args, '--dry-run'], this.root);
+    if (cancelled() || this.unloaded) return false;
     await this.app.vault.process(file, (current) => {
       const hash = createHash('sha256').update(current, 'utf8').digest('hex');
       if (hash !== result.original_sha256) {
@@ -113,6 +114,7 @@ module.exports = class BlogPlugin extends Plugin {
       }
       return result.content;
     });
+    return true;
   }
 
   async visibility() {
@@ -121,9 +123,9 @@ module.exports = class BlogPlugin extends Plugin {
     const modal = new FormModal(this.app, 'Note visibility', (container) => {
       container.innerHTML = '<label>Status<select name="status"><option value="hidden">Unlisted — shareable URL after deployment</option><option value="draft">Draft — local preview only</option><option value="published">Published — listed on the site</option></select></label><p>This edits metadata only. Review, commit, and push separately to deploy. Source committed to the public repository is never private.</p>';
       container.querySelector('select').value = info.status;
-    }, async (form) => {
-      await this.transform(file, ['--set-status', file.path, '--status', form.querySelector('select').value]);
-      new Notice('Visibility saved locally. Review, commit, and push when ready to deploy.');
+    }, async (form, cancelled) => {
+      const saved = await this.transform(file, ['--set-status', file.path, '--status', form.querySelector('select').value], cancelled);
+      if (saved) new Notice('Visibility saved locally. Review, commit, and push when ready to deploy.');
     });
     modal.open();
     return modal;

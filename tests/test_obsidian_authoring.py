@@ -71,6 +71,13 @@ class AuthoringTests(unittest.TestCase):
         self.write('nested/renamed.md', serialize_document({'title': 'Old', 'date': now, 'slug': 'new-name'}))
         self.assertEqual(authoring.prepare_post('New name')['slug'], 'new-name-2')
 
+    def test_yaml_without_status_stays_unlisted_when_converted_or_listed(self):
+        path = self.write('native.md', serialize_document({'title': 'Native', 'date': '2026-01-02'}))
+        self.assertEqual(authoring.preview_info(path)['status'], 'hidden')
+        self.assertEqual(authoring.list_posts()[0]['status'], 'hidden')
+        result = authoring.transform_note(path, properties=True)
+        self.assertEqual(split_document(result['content'])[0]['status'], 'hidden')
+
     def test_blank_titles_and_control_characters_cannot_create_files(self):
         # Each input violates the required nonempty, single-line title contract.
         for value in ('', '  ', 'Title\nStatus: published', 'bad\x00title'):

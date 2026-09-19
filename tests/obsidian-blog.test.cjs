@@ -172,6 +172,19 @@ test('preview saves the editor, builds once, and reuses only its own server', as
   assert.deepEqual(ui.urls, ['http://localhost:4010/note/', 'http://localhost:4010/note/']);
 });
 
+test('cancelling a pending visibility edit does not apply metadata changes', async t => {
+  const ui = boot(t);
+  const modal = await ui.plugin.visibility();
+  let resolve;
+  ui.plugin.bridge.runAuthoring = () => new Promise(done => { resolve = done; });
+  submit(ui, modal);
+  modal.close();
+  resolve({ original_sha256: digest(ui.current()), content: 'cancelled edit' });
+  await settle();
+  assert.equal(ui.current(), 'original note');
+  assert.equal(ui.notices.length, 0);
+});
+
 test('unloading during a build does not open a browser or leave a server running', async t => {
   const ui = boot(t);
   let resolve;
