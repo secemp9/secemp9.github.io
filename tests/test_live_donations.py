@@ -84,8 +84,8 @@ class LiveDonationTests(unittest.TestCase):
             self.assertIn('Refund requests are reviewed individually.', html)
             self.assertIn('Cancelling a monthly contribution stops future payments but does not automatically refund previous payments.', html)
             self.assertIn('Any applicable statutory rights remain unaffected.', html)
-            self.assertIn('name="robots" content="noindex, nofollow, noimageindex"', html)
-            self.assertNotIn('/donate/', (directory / 'output/index.html').read_text(encoding='utf-8'))
+            self.assertNotIn('name="robots" content="noindex', html)
+            self.assertIn('href="https://secemp.blog/donate/"', (directory / 'output/index.html').read_text(encoding='utf-8'))
             # Live HTML must not leak test checkouts, a sandbox notice, secrets, or a charge form.
             for forbidden in ('buy.stripe.com/test_', 'billing.stripe.com/p/login/test_',
                               'data-donation-sandbox', '999999', 'sk_live_', 'sk_test_', '<form'):

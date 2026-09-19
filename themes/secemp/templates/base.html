@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  {% if unlisted %}
+  {% if unlisted or DONATION_SANDBOX %}
   <meta name="robots" content="noindex, nofollow, noimageindex">
   <meta name="referrer" content="no-referrer">
   {% endif %}
