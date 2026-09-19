@@ -148,10 +148,8 @@ DONATION_SANDBOX = False
 
 # Plugins (add as needed)
 PLUGIN_PATHS = ['plugins']
-# obsidian_image_links rewrites Obsidian-pasted relative image links
-# (e.g. ![](images/Pasted%20image%20....png)) to {static}/images/... so
-# the same markdown renders in Obsidian and on the published site.
-PLUGINS = ['obsidian_image_links', 'donation_methods']
+# Native Obsidian properties and source-relative links; legacy posts still work.
+PLUGINS = ['obsidian_metadata', 'obsidian_image_links', 'donation_methods']
 
 # Cache for faster rebuilds
 CACHE_CONTENT = True
