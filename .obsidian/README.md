@@ -108,6 +108,10 @@ the body) collapses it again. Source mode always shows the original Markdown.
 Hidden metadata is protected against accidental Backspace from the first prose
 line. No article, filename, date, slug, or publication status is migrated.
 
+Completely empty scratch notes are skipped by previews and production builds;
+they are never turned into posts automatically. Notes containing writing still
+need valid post properties before they can build.
+
 Generated and development folders are hidden from the explorer by
 default; the Show/hide command reveals them without deleting anything.
 

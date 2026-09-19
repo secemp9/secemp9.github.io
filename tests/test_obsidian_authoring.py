@@ -86,6 +86,21 @@ class AuthoringTests(unittest.TestCase):
         self.assertEqual(list(self.content.iterdir()), [])
         self.assertEqual(authoring.prepare_post('你好')['slug'], 'post')
 
+    def test_empty_scratch_notes_are_skipped_without_becoming_posts(self):
+        from pelican.contents import Article, SkipStub
+        from pelican.readers import Readers
+        settings = deepcopy(DEFAULT_CONFIG)
+        reader = Readers(settings)
+        reader.reader_classes['md'] = ObsidianMarkdownReader
+        # Neither a zero-byte note nor whitespace has content or metadata to publish.
+        for text in ('', ' \n\t\n'):
+            with self.subTest(text=text):
+                path = self.write('Untitled.md', text)
+                result = reader.read_file(base_path=str(self.content), path=path.name,
+                                          content_class=Article)
+                self.assertIsInstance(result, SkipStub)
+                self.assertEqual(path.read_text(), text)
+
     def test_exclusive_creation_does_not_overwrite_a_racing_writer(self):
         plan = authoring.prepare_post('Race')
         path = self.directory / plan['path']

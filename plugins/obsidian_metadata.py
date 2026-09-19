@@ -111,6 +111,9 @@ def serialize_document(metadata, body=''):
 class ObsidianMarkdownReader(MarkdownReader):
     def read(self, source_path):
         text = Path(source_path).read_text(encoding='utf-8-sig')
+        # Obsidian can create an empty scratch note before any post metadata exists.
+        if not text.strip():
+            return '', {'status': 'skip'}
         # Legacy posts keep the exact original Pelican reader and metadata semantics.
         if not text.startswith('---\n') and not text.startswith('---\r\n'):
             return super().read(source_path)
