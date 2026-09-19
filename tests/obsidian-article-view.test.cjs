@@ -111,10 +111,11 @@ test('YAML reading mode inserts a title after frontmatter and blank lines only o
   const dom = new JSDOM('<section><p id="body">Body stays intact.</p></section>');
   const section = dom.window.document.querySelector('section');
   const body = section.querySelector('#body');
-  renderReading(section, yaml, { lineStart: 7, lineEnd: 7 });
+  assert.equal(readHeader(yaml, parseYaml).bodyLine, 6);
+  renderReading(section, yaml, { lineStart: 6, lineEnd: 6 });
   assert.equal(section.querySelector('h1').textContent, 'A real title');
   assert.equal(section.querySelector('#body'), body);
-  renderReading(section, yaml, { lineStart: 7, lineEnd: 7 });
+  renderReading(section, yaml, { lineStart: 6, lineEnd: 6 });
   assert.equal(section.querySelectorAll('h1').length, 1);
   dom.window.close();
 });
