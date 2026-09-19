@@ -12,6 +12,7 @@ from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 from markdown.extensions.toc import slugify
 from pelican import signals
+from pelican.contents import Static
 from pelican.generators import Generator
 
 
@@ -66,6 +67,14 @@ def _rewrite_url(content, url, image):
 
 
 def process_content(content):
+    if isinstance(content, Static):
+        # A literal percent/hash/query character belongs to the filename, not
+        # the browser URL syntax. Preserve old ordinary URLs byte-for-byte.
+        if not getattr(content, 'override_url', None):
+            url = content.get_url_setting('url')
+            if re.search(r'''[%#?&<>"']''', url):
+                content.override_url = quote(url, safe='/ ,')
+        return
     html = getattr(content, '_content', None)
     if not isinstance(html, str) or not getattr(content, 'source_path', None):
         return
