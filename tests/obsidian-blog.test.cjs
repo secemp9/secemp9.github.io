@@ -18,6 +18,16 @@ function boot(t) {
   t.after(() => dom.window.close());
   const notices = [], created = [], opened = [], calls = [], urls = [];
   const document = dom.window.document;
+  const fonts = new Set();
+  Object.defineProperty(document, 'fonts', { value: fonts });
+  dom.window.FontFace = class {
+    constructor(family, bytes, options) {
+      this.family = family;
+      this.options = options;
+      assert.equal(bytes.readUInt32BE(0), 0x00010000, 'bundled file is a TrueType font');
+    }
+    async load() { return this; }
+  };
   dom.window.open = url => urls.push(url);
   class Plugin {
     constructor(app) { this.app = app; this.commands = []; }
@@ -235,10 +245,46 @@ test('local preview server serves only generated files and rejects traversal and
   await post.text();
 });
 
-test('writing stylesheet stays small and does not force application-wide colors', () => {
+test('writing stylesheet matches the blog palette and widens both editor modes', () => {
   const css = fs.readFileSync(path.join(ROOT, '.obsidian/snippets/blog-theme.css'), 'utf8');
-  assert.ok(css.split('\n').length < 80);
+  const site = fs.readFileSync(path.join(ROOT, 'themes/secemp/static/css/style.css'), 'utf8');
+  const appearance = JSON.parse(fs.readFileSync(path.join(ROOT, '.obsidian/appearance.json')));
+  assert.ok(css.split('\n').length < 220);
   assert.ok(!css.includes('!important'));
-  assert.ok(!css.includes('--background-primary'));
-  assert.ok(!css.includes('.modal,'));
+  const tokens = [['background', 'bg-color'], ['text', 'text-color'], ['muted', 'text-muted'],
+                  ['brass', 'primary-color'], ['accent', 'accent-color'], ['border', 'border-color']];
+  // The editor uses the exact existing blog palette, not a parallel near-match.
+  for (const [editor, published] of tokens) {
+    const actual = css.match(new RegExp('--blog-' + editor + ':\\s*(#[0-9a-f]+)', 'i'))[1];
+    const expected = site.match(new RegExp('--' + published + ':\\s*(#[0-9a-f]+)', 'i'))[1];
+    assert.equal(actual.toLowerCase(), expected.toLowerCase());
+  }
+  assert.match(css, /--file-line-width: 64rem/);
+  assert.match(css, /--font-text-theme: var\(--blog-serif\)/);
+  assert.match(css, /--font-monospace-theme: var\(--blog-mono\)/);
+  assert.match(css, /--line-height-normal: 1\.78/);
+  assert.match(css, /\.cm-line\.HyperMD-header-2/);
+  assert.equal(appearance.theme, 'obsidian');
+  assert.equal(appearance.baseFontSize, 20);
+  assert.equal(appearance.accentColor, '#d4af37');
+});
+
+test('blog registers four bundled font faces offline and removes them on unload', async t => {
+  const ui = boot(t);
+  await ui.plugin.fontsReady;
+  assert.equal(ui.document.fonts.size, 4);
+  assert.deepEqual(Array.from(ui.document.fonts, face => [face.family, face.options.style, face.options.weight]), [
+    ['Newsreader', 'normal', '200 800'], ['Newsreader', 'italic', '200 800'],
+    ['IBM Plex Mono', 'normal', '400'], ['IBM Plex Mono', 'normal', '500'],
+  ]);
+  assert.equal(ui.notices.length, 0);
+  ui.plugin.onunload();
+  assert.equal(ui.document.fonts.size, 0);
+});
+
+test('unloading before font loading finishes cannot register stale font faces', async t => {
+  const ui = boot(t);
+  ui.plugin.onunload();
+  await ui.plugin.fontsReady;
+  assert.equal(ui.document.fonts.size, 0);
 });

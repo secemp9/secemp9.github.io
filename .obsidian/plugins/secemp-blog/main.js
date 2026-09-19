@@ -1,5 +1,6 @@
 const { Plugin, Modal, Notice, MarkdownView } = require('obsidian');
 const path = require('node:path');
+const fs = require('node:fs');
 const { createHash } = require('node:crypto');
 
 class FormModal extends Modal {
@@ -54,6 +55,8 @@ module.exports = class BlogPlugin extends Plugin {
     this.root = adapter.getBasePath();
     this.bridge = require(path.join(this.root, 'scripts/create-blog-post.js'));
     this.document = document;
+    this.blogFonts = [];
+    this.fontsReady = this.loadFonts();
     this.document.body.classList.add('secemp-blog-vault', 'secemp-blog-focus');
     this.addCommand({ id: 'new-post', name: 'New post', callback: () => this.newPost() });
     this.addCommand({ id: 'preview-note', name: 'Preview current note', callback: () => this.run(() => this.preview()) });
@@ -72,7 +75,31 @@ module.exports = class BlogPlugin extends Plugin {
   onunload() {
     this.unloaded = true;
     this.previewServer?.close();
+    // Every registered bundled face belongs to this plugin and is removed on unload.
+    for (const font of this.blogFonts || []) this.document.fonts.delete(font);
     this.document?.body.classList.remove('secemp-blog-vault', 'secemp-blog-focus');
+  }
+
+  async loadFonts() {
+    const faces = [
+      ['Newsreader', 'Newsreader-Regular.ttf', 'normal', '200 800'],
+      ['Newsreader', 'Newsreader-Italic.ttf', 'italic', '200 800'],
+      ['IBM Plex Mono', 'IBMPlexMono-Regular.ttf', 'normal', '400'],
+      ['IBM Plex Mono', 'IBMPlexMono-Medium.ttf', 'normal', '500'],
+    ];
+    try {
+      const loaded = await Promise.all(faces.map(async ([family, file, style, weight]) => {
+        const bytes = await fs.promises.readFile(path.join(this.root, '.obsidian/plugins/secemp-blog/fonts', file));
+        const font = new this.document.defaultView.FontFace(family, bytes, { style, weight, display: 'swap' });
+        return font.load();
+      }));
+      if (this.unloaded) return;
+      this.blogFonts = loaded;
+      // All four faces load from the vault, without a network request or system font install.
+      for (const font of loaded) this.document.fonts.add(font);
+    } catch (error) {
+      if (!this.unloaded) new Notice('Blog fonts could not load; using fallback fonts. ' + error.message, 10000);
+    }
   }
 
   async run(action) {

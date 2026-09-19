@@ -1,7 +1,7 @@
 {
-  "theme": "moonstone",
-  "baseFontSize": 16,
-  "accentColor": "#ffea00",
+  "theme": "obsidian",
+  "baseFontSize": 20,
+  "accentColor": "#d4af37",
   "cssTheme": "",
   "enabledCssSnippets": [
     "blog-theme"

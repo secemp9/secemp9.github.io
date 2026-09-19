@@ -86,8 +86,21 @@ public, regardless of a note's status. Unlisted is not private.
 
 ## Vault housekeeping
 
-The writing snippet leaves Obsidian's native light/dark theme, controls, and
-settings dialogs alone. Generated folders are hidden from the explorer by
+The vault uses the blog's warm charcoal, bone, and brass palette throughout,
+with Newsreader for prose/headings and IBM Plex Mono for code. The Blog plugin
+loads the bundled fonts offline; no system font installation or Google Fonts
+connection is needed. Live Preview and reading mode share the typography,
+heading rules, links, blockquotes, and code colors. Native controls keep their
+normal layout and behavior, with the blog palette instead of white surfaces.
+
+The writing column is **64rem (1024px)** at full size, versus the old 42rem,
+and shrinks with its pane. Text starts at **20px**; change it under Settings →
+Appearance → Font size. The public site's narrower reading measure is unchanged;
+use Blog: Preview current note for its exact layout. Reload the vault once after
+updating so the bundled fonts load. The `blog-theme` snippet must be enabled
+under Appearance → CSS snippets.
+
+Generated folders are hidden from the explorer by
 default; the Show/hide command reveals them without deleting anything.
 
 Workspace/session files are local and ignored by Git. The retired Templater
