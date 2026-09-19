@@ -52,7 +52,7 @@ def normalize_properties(properties):
         if isinstance(value, dict) or (isinstance(value, list) and
                                       any(not isinstance(item, str) for item in value)):
             raise ValueError(f'Property {key!r} must be a scalar or a list of strings')
-        if key in {'title', 'date', 'modified', 'status', 'slug', 'url', 'save_as', 'image'}:
+        if key in {'title', 'date', 'modified', 'status', 'slug', 'url', 'save_as', 'image', 'author', 'category', 'lang'}:
             if not isinstance(value, str):
                 raise ValueError(f'Property {key!r} must be text or an ISO date')
             if key == 'status' and value not in {'hidden', 'published', 'draft'}:
@@ -115,6 +115,7 @@ class ObsidianMarkdownReader(MarkdownReader):
         if not text.startswith('---\n') and not text.startswith('---\r\n'):
             return super().read(source_path)
         raw, body, _ = split_document(text)
+        raw.setdefault('status', 'hidden')
         parser = Markdown(**self.settings['MARKDOWN'])
         parser.preprocessors.deregister('meta')
         html = parser.convert(body)

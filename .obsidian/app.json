@@ -22,6 +22,6 @@
   "trashOption": "local",
   "userIgnoreFilters": [
     "output/", "output-preview/", "output-sandbox/", "cache/",
-    "node_modules/", "venv/", "_site/", "_posts/", "images/"
+    "node_modules/", "venv/", "_site/", "_posts/"
   ]
 }

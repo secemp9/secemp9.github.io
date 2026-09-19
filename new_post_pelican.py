@@ -51,6 +51,11 @@ def _title(text):
     return text.strip()
 
 
+def _read_note(path):
+    with Path(path).open(encoding="utf-8", newline="") as source:
+        return source.read()
+
+
 def _note_path(value):
     path = Path(value)
     if not path.is_absolute():
@@ -69,7 +74,7 @@ def _note_records():
         relative = path.relative_to(CONTENT_DIR)
         if relative.parts[0] in {"images", "extra"}:
             continue
-        metadata, _, _ = split_document(path.read_text(encoding="utf-8"))
+        metadata, _, _ = split_document(_read_note(path))
         yield path, metadata
 
 
@@ -136,7 +141,7 @@ def create_post(title, tags=None, category=None, status="hidden"):
 
 def import_post(src_path, title=None, status=None):
     source = Path(src_path)
-    metadata, body, _ = split_document(source.read_text(encoding="utf-8"))
+    metadata, body, _ = split_document(_read_note(source))
     match = re.match(r"(\d{4}-\d{2}-\d{2})-(.+)", source.stem)
     title = title or metadata.get("title") or (match[2].replace("-", " ") if match else source.stem)
     if match:
@@ -147,7 +152,7 @@ def import_post(src_path, title=None, status=None):
 
 def transform_note(value, status=None, properties=False):
     path = _note_path(value)
-    original = path.read_text(encoding="utf-8")
+    original = _read_note(path)
     metadata, body, format_name = split_document(original)
     if not metadata.get("title"):
         raise ValueError("This note has no title metadata; create a blog post or add its properties first")
@@ -247,7 +252,7 @@ def preview_info(value, port=4010, build=False):
     from urllib.parse import quote
     return {"path": path.relative_to(CONTENT_DIR.parent).as_posix(),
             "url": f"{site}/{quote(route, safe='/')}",
-            "directory": str(PREVIEW_OUTPUT), "port": port}
+            "directory": str(PREVIEW_OUTPUT), "port": port, "status": note.status}
 
 
 def main():
