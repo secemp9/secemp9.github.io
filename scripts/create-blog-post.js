@@ -1,99 +1,91 @@
-// Templater User Script: Create Blog Post with Auto-Date (Pelican)
-// This version works WITHOUT requiring an active editor
-// Usage: Run via Command Palette -> "Templater: Run templater user script" -> select "create-blog-post"
+// Shared desktop bridge. All post/metadata rules live in new_post_pelican.py.
+const fs = require('node:fs');
+const path = require('node:path');
+const http = require('node:http');
+const { execFile } = require('node:child_process');
+const { promisify } = require('node:util');
 
-module.exports = async function(tp) {
+const execFileAsync = promisify(execFile);
+const ROOT = path.resolve(__dirname, '..');
+
+async function runAuthoring(args, root = ROOT) {
+  const python = path.join(root, '.venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python');
+  if (!fs.existsSync(python)) {
+    throw new Error('Set up .venv and install requirements.txt first; see the repository README.');
+  }
+  let stdout;
   try {
-    // Access app - try multiple methods
-    let app;
-    if (tp && tp.app) {
-      app = tp.app;
-    } else if (typeof window !== 'undefined' && window.app) {
-      app = window.app;
-    } else if (this && this.app) {
-      app = this.app;
-    }
+    ({ stdout } = await execFileAsync(python, [
+      path.join(root, 'new_post_pelican.py'), ...args, '--json',
+    ], { cwd: root, timeout: 30000, maxBuffer: 4 * 1024 * 1024, windowsHide: true }));
+  } catch (error) {
+    let result;
+    try { result = JSON.parse(error.stdout || '{}'); } catch {}
+    throw new Error(result?.error || error.stderr?.trim() || error.message);
+  }
+  const result = JSON.parse(stdout);
+  if (result.error) throw new Error(result.error);
+  return result;
+}
 
-    if (!app) {
-      new Notice("Error: Could not access Obsidian app. Please open any file first.");
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8', '.json': 'application/json',
+  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp',
+  '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2',
+  '.pdf': 'application/pdf', '.xml': 'application/xml; charset=utf-8',
+};
+
+async function startPreviewServer(directory, port = 4010) {
+  const root = await fs.promises.realpath(directory);
+  const server = http.createServer(async (request, response) => {
+    if (!['GET', 'HEAD'].includes(request.method)) {
+      response.writeHead(405, { Allow: 'GET, HEAD' }).end();
       return;
     }
-
-    const vault = app.vault;
-    const workspace = app.workspace;
-    const postsFolder = "content";
-
-    const titleInput = await tp.system.prompt("Post title");
-    const title = titleInput ? titleInput.trim() : "";
-    if (!title) {
-      new Notice("Post creation cancelled: title required.");
-      return;
-    }
-
-    function slugify(text) {
-      return text
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-    }
-
-    const datePrefix = tp.date.now("YYYY-MM-DD");
-    const timeStr = tp.date.now("HH:mm");
-    const rawSlug = slugify(title);
-    const baseSlug = rawSlug || "post";
-    let filename = `${datePrefix}-${baseSlug}`;
-    let filepath = `${postsFolder}/${filename}.md`;
-
-    // Ensure posts folder exists
-    const folderExists = await vault.adapter.exists(postsFolder);
-    if (!folderExists) {
-      await vault.createFolder(postsFolder);
-    }
-
-    // Handle existing file conflicts
-    let suffix = 2;
-    while (await vault.adapter.exists(filepath)) {
-      const choice = await tp.system.suggester(
-        ["Cancel", `Use ${filename}-${suffix}.md`],
-        [null, `${suffix}`],
-        false,
-        `A post named ${filename}.md already exists.`
-      );
-      if (!choice) {
-        new Notice("Post creation cancelled: file already exists.");
+    try {
+      const url = new URL(request.url, 'http://localhost');
+      const pathname = decodeURIComponent(url.pathname);
+      const target = path.resolve(root, '.' + pathname, pathname.endsWith('/') ? 'index.html' : '');
+      const relative = path.relative(root, target);
+      if (relative.startsWith('..') || path.isAbsolute(relative)) {
+        response.writeHead(403).end();
         return;
       }
-      filename = `${datePrefix}-${baseSlug}-${choice}`;
-      filepath = `${postsFolder}/${filename}.md`;
-      suffix += 1;
+      const real = await fs.promises.realpath(target);
+      const realRelative = path.relative(root, real);
+      if (realRelative.startsWith('..') || path.isAbsolute(realRelative)) {
+        response.writeHead(403).end();
+        return;
+      }
+      const body = await fs.promises.readFile(real);
+      response.writeHead(200, {
+        'Content-Type': MIME[path.extname(real).toLowerCase()] || 'application/octet-stream',
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      response.end(request.method === 'HEAD' ? undefined : body);
+    } catch (error) {
+      response.writeHead(error instanceof URIError ? 400 : 404).end('Not found');
     }
+  });
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, '127.0.0.1', resolve);
+  });
+  return server;
+}
 
-    // Pelican metadata format (Key: Value, no YAML delimiters)
-    const content = `Title: ${title}
-Date: ${datePrefix} ${timeStr}
-Status: hidden
-Tags:
-Slug: ${baseSlug}
-
-Write your post content here in markdown!
-
-Paste images directly in Obsidian: they are saved to content/images/ and
-embedded as \`![](images/file.png)\`, which renders both here and on the
-published site. For a hero image at the top of the post, add a metadata
-line above (no blank lines before it): \`Image: images/file.png\`
-`;
-
-    const file = await vault.create(filepath, content);
-
-    // Open file in a new leaf (works without active editor)
-    const leaf = workspace.getLeaf(true);
-    await leaf.openFile(file);
-
-    new Notice(`Created ${filename}.md in ${postsFolder}/`);
-  } catch (error) {
-    new Notice(`Error creating post: ${error.message}`);
-    console.error("Blog post creation error:", error);
-  }
+// Retain the old user-script entry point for existing personal templates.
+// The checked-in vault now uses the Blog plugin, not automatic Templater events.
+module.exports = async function createBlogPost(tp) {
+  const title = await tp.system.prompt('Post title');
+  if (!title?.trim()) return;
+  const plan = await runAuthoring(['--prepare-post', '--title', title]);
+  const file = await tp.app.vault.create(plan.path, plan.content);
+  await tp.app.workspace.getLeaf('tab').openFile(file);
+  return file;
 };
+module.exports.runAuthoring = runAuthoring;
+module.exports.startPreviewServer = startPreviewServer;
