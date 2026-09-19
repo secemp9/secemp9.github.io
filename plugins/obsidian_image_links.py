@@ -1,60 +1,86 @@
-"""Make Obsidian-pasted image links work on the published Pelican site.
+"""Resolve Markdown note links and attachments relative to their source note.
 
-This repo doubles as an Obsidian vault. With the vault settings in
-.obsidian/app.json (attachmentFolderPath: "content/images", markdown links,
-relative link format), pasting an image into a post in content/ produces:
-
-    ![](images/Pasted%20image%2020260101123456.png)
-
-That renders in Obsidian (relative to the note), but Pelican would copy it
-verbatim into article pages at /YYYY/MM/DD/slug/, where the relative path is
-broken. This plugin rewrites relative <img> srcs to Pelican's {static}
-syntax before intrasite link substitution runs, so Pelican resolves them
-against content/images/ (and warns if the file does not exist):
-
-    images/foo.png          -> {static}/images/foo.png
-    content/images/foo.png  -> {static}/images/foo.png
-    foo.png (bare filename) -> {static}/images/foo.png
-
-Absolute (/images/...), external (http...), {static}/{attach}/{filename},
-anchor, and data: URLs are left untouched.
+Local notes become Pelican {filename} references; attachments become {static}.
+Existing Pelican references, external URLs and site-root URLs stay unchanged.
+Resolved files must remain inside content/, including through symbolic links.
 """
-import re
 
+from html import escape, unescape
+from pathlib import Path
+import re
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
+
+from markdown.extensions.toc import slugify
 from pelican import signals
 
-_IMG_TAG = re.compile(r"<img\b[^>]*>", re.IGNORECASE)
-_SRC_ATTR = re.compile(r"(\bsrc\s*=\s*)([\"'])(.*?)\2", re.IGNORECASE)
 
-# Leave these alone: scheme:, protocol-relative, site-absolute, Pelican
-# placeholders ({static}, {attach}, {filename}, ...), anchors, queries.
-_SKIP = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.\-]*:|//|/|\{|#|\?)")
-
-
-def _rewrite_src(match):
-    prefix, quote, path = match.groups()
-    if not path or _SKIP.match(path):
-        return match.group(0)
-    if path.startswith("./"):
-        path = path[2:]
-    if path.startswith("content/"):
-        path = path[len("content/"):]
-    if not path.startswith("images/"):
-        # Bare filename (Obsidian "shortest" link format): attachments
-        # always land in content/images/.
-        path = "images/" + path
-    return "{}{}{{static}}/{}{}".format(prefix, quote, path, quote)
+_TAG = re.compile(r'''<(?P<tag>img|a)\b(?:"[^"]*"|'[^']*'|[^'">])*>''', re.I)
+_ATTR = re.compile(r'''(?P<prefix>\s+(?P<attr>src|href)\s*=\s*)(?P<quote>["'])(?P<url>.*?)(?P=quote)''', re.I)
+_SKIP = re.compile(r'^(?:[A-Za-z][A-Za-z0-9+.\-]*:|//|/|\{|\?)')
+_MARKDOWN = {'.md', '.markdown', '.mkd', '.mdown'}
 
 
-def _rewrite_img_tag(match):
-    return _SRC_ATTR.sub(_rewrite_src, match.group(0))
+def resolve_source_path(content, path, image=False):
+    root = Path(content.settings['PATH']).resolve()
+    source = Path(content.source_path).resolve()
+    path = unquote(path)
+    if '\\' in path or '\x00' in path:
+        raise ValueError(f'Invalid attachment or note path: {path!r}')
+    if path.startswith('content/'):
+        candidate = root / path[len('content/'):]
+    else:
+        candidate = source.parent / path
+        # Historical root-image and bare-filename links remain supported.
+        if image and not candidate.exists():
+            if path.startswith('images/'):
+                candidate = root / path
+            elif '/' not in path:
+                candidate = root / 'images' / path
+    candidate = candidate.resolve()
+    if not candidate.is_relative_to(root):
+        raise ValueError(f'Link escapes content/: {path!r} in {content.source_path}')
+    return candidate.relative_to(root).as_posix()
+
+
+def _rewrite_url(content, url, image):
+    decoded = unescape(url)
+    if not decoded or _SKIP.match(decoded):
+        return url
+    parts = urlsplit(decoded)
+    if not parts.path:
+        if parts.fragment and not parts.fragment.startswith('^'):
+            return '#' + slugify(unquote(parts.fragment), '-')
+        return url
+    suffix = Path(unquote(parts.path)).suffix.lower()
+    if not image and not suffix:
+        return url  # Extensionless web routes are not note filenames.
+    path = resolve_source_path(content, parts.path, image=image)
+    kind = 'filename' if suffix in _MARKDOWN and not image else 'static'
+    fragment = parts.fragment
+    if kind == 'filename' and fragment and not fragment.startswith('^'):
+        fragment = slugify(unquote(fragment), '-')
+    target = urlunsplit(('', '', '{' + kind + '}/' + quote(path, safe='/'),
+                        parts.query, fragment))
+    return escape(target, quote=True)
 
 
 def process_content(content):
-    html = getattr(content, "_content", None)
-    if not isinstance(html, str) or "<img" not in html:
+    html = getattr(content, '_content', None)
+    if not isinstance(html, str) or not getattr(content, 'source_path', None):
         return
-    content._content = _IMG_TAG.sub(_rewrite_img_tag, html)
+
+    def rewrite_tag(tag):
+        image = tag.group('tag').lower() == 'img'
+
+        def rewrite_attribute(attribute):
+            if attribute.group('attr').lower() != ('src' if image else 'href'):
+                return attribute.group(0)
+            url = _rewrite_url(content, attribute.group('url'), image)
+            return attribute.group('prefix') + attribute.group('quote') + url + attribute.group('quote')
+
+        return _ATTR.sub(rewrite_attribute, tag.group(0))
+
+    content._content = _TAG.sub(rewrite_tag, html)
 
 
 def register():
