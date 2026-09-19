@@ -142,13 +142,18 @@ body.secemp-blog-vault .markdown-source-view.is-live-preview .cm-line:has(> br:o
   line-height: 1.15;
 }
 
+body.secemp-blog-vault .markdown-source-view.is-live-preview:has(.secemp-article-header[data-editing="false"]) .metadata-container,
+body.secemp-blog-vault .markdown-preview-view:has(.secemp-article-header) .metadata-container {
+  display: none;
+}
+
 body.secemp-blog-vault :is(.markdown-preview-view, .markdown-source-view) img {
   max-width: 100%;
   height: auto;
   border: 1px solid var(--blog-border);
 }
 
-/* Generated folders stay on disk. Blog: Show/hide generated folders reveals them. */
+/* Project folders stay on disk. Blog: Show/hide project files reveals them. */
 body.secemp-blog-focus .nav-folder:has(> .nav-folder-title:is(
   [data-path="output"],
   [data-path="output-preview"],
@@ -159,9 +164,12 @@ body.secemp-blog-focus .nav-folder:has(> .nav-folder-title:is(
   [data-path="__pycache__"],
   [data-path="_site"],
   [data-path="_posts"],
-  [data-path="images"]
-  , [data-path="plugins"], [data-path="scripts"], [data-path="tests"]
-  , [data-path="themes"], [data-path="Templates"]
+  [data-path="images"],
+  [data-path="plugins"],
+  [data-path="scripts"],
+  [data-path="tests"],
+  [data-path="themes"],
+  [data-path="Templates"]
 )) {
   display: none;
 }

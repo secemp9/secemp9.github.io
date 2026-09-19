@@ -24,7 +24,9 @@ function readHeader(text, parseYaml) {
   if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
   metadata = Object.fromEntries(Object.entries(metadata).map(([key, value]) => [key.toLowerCase(), value]));
   if (typeof metadata.title !== 'string' || !metadata.title.trim()) return null;
-  const date = metadata.date?.toISOString?.() || String(metadata.date || '');
+  const date = metadata.date instanceof Date && !Number.isNaN(metadata.date.getTime())
+    ? metadata.date.toISOString() : String(metadata.date || '');
+  end += text.slice(end).match(/^(?:[ \t]*\r?\n)*/)[0].length;
   const bodyLine = text.slice(0, end).split('\n').length - 1;
   return { title: metadata.title, date: date.slice(0, 10),
            status: metadata.status || (format === 'yaml' ? 'hidden' : 'published'),
@@ -34,6 +36,7 @@ function readHeader(text, parseYaml) {
 function headerElement(document, header, onToggle, editing = false) {
   const element = document.createElement('header');
   element.className = 'secemp-article-header';
+  element.dataset.editing = String(editing);
   const meta = document.createElement('div');
   meta.className = 'secemp-article-meta';
   const date = document.createElement('span');
@@ -74,7 +77,7 @@ function createArticleView(api) {
   function presentation(state, editing = false) {
     if (!isPost(state) || !state.field(editorLivePreviewField, false)) return { header: null, editing: false, decorations: Decoration.none };
     const header = readHeader(state.doc.toString(), parseYaml);
-    if (!header) return { header: null, editing: false, decorations: Decoration.none };
+    if (!header) return { header: null, editing, decorations: Decoration.none };
     const widget = new ArticleHeader(header, editing);
     const decoration = editing
       ? Decoration.widget({ widget, block: true, side: -1 }).range(0)
@@ -98,6 +101,8 @@ function createArticleView(api) {
   const protectMetadata = EditorState.transactionFilter.of(transaction => {
     const current = transaction.startState.field(field, false);
     if (!transaction.docChanged || !current?.header || current.editing) return transaction;
+    // File reloads, native property edits, undo and other programmatic updates must flow through.
+    if (!transaction.isUserEvent('delete') && !transaction.isUserEvent('input')) return transaction;
     let touchesHeader = false;
     // A Backspace at the start of prose must not erase hidden publication metadata.
     transaction.changes.iterChangedRanges(from => { if (from < current.header.end) touchesHeader = true; });
