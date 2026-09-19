@@ -46,7 +46,7 @@ class LiveDonationTests(unittest.TestCase):
             self.assertNotIn(url, repr(sandbox))
         self.assertNotIn(PORTAL, repr(sandbox))
 
-    def test_actual_live_render_keeps_links_static_and_the_page_unlisted(self):
+    def test_actual_live_render_keeps_links_static_and_the_page_public(self):
         with tempfile.TemporaryDirectory(prefix='secemp-live-') as temporary:
             directory = Path(temporary)
             pages = directory / 'content/pages'
@@ -85,6 +85,7 @@ class LiveDonationTests(unittest.TestCase):
             self.assertIn('Cancelling a monthly contribution stops future payments but does not automatically refund previous payments.', html)
             self.assertIn('Any applicable statutory rights remain unaffected.', html)
             self.assertNotIn('name="robots" content="noindex', html)
+            self.assertIn('href="https://secemp.blog/donate/" class="active" aria-current="page">Donate</a>', html)
             self.assertIn('href="https://secemp.blog/donate/"', (directory / 'output/index.html').read_text(encoding='utf-8'))
             # Live HTML must not leak test checkouts, a sandbox notice, secrets, or a charge form.
             for forbidden in ('buy.stripe.com/test_', 'billing.stripe.com/p/login/test_',
