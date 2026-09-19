@@ -22,7 +22,7 @@ No plugin download or npm build is needed. The commands require the repo's
 | Blog: Preview current note | Ctrl/Cmd+Shift+P |
 | Blog: Set current note visibility | Ctrl/Cmd+Shift+B |
 | Blog: Convert current note to properties | Command palette |
-| Blog: Show/hide generated folders | Command palette |
+| Blog: Show/hide project files | Command palette |
 
 **New post** asks for a title before creating anything, then opens an empty
 post in `content/`. Cancelling leaves no placeholder note. Repeated titles get
@@ -93,14 +93,22 @@ connection is needed. Live Preview and reading mode share the typography,
 heading rules, links, blockquotes, and code colors. Native controls keep their
 normal layout and behavior, with the blog palette instead of white surfaces.
 
-The writing column is **64rem (1024px)** at full size, versus the old 42rem,
+The writing column is **52rem (832px)** at full size, versus the original 42rem,
 and shrinks with its pane. Text starts at **20px**; change it under Settings →
 Appearance → Font size. The public site's narrower reading measure is unchanged;
 use Blog: Preview current note for its exact layout. Reload the vault once after
 updating so the bundled fonts load. The `blog-theme` snippet must be enabled
 under Appearance → CSS snippets.
 
-Generated folders are hidden from the explorer by
+Line numbers, indentation guides, and the filename-as-title are off. In Live
+Preview, the Blog plugin presents the real metadata title and date as a compact
+article header, without rewriting either legacy headers or YAML properties.
+**Edit details** reveals metadata; **Back to writing** (or moving the cursor into
+the body) collapses it again. Source mode always shows the original Markdown.
+Hidden metadata is protected against accidental Backspace from the first prose
+line. No article, filename, date, slug, or publication status is migrated.
+
+Generated and development folders are hidden from the explorer by
 default; the Show/hide command reveals them without deleting anything.
 
 Workspace/session files are local and ignored by Git. The retired Templater

@@ -1,4 +1,6 @@
-const { Plugin, Modal, Notice, MarkdownView } = require('obsidian');
+const { Plugin, Modal, Notice, MarkdownView, parseYaml, editorInfoField, editorLivePreviewField } = require('obsidian');
+const { StateField, StateEffect, EditorState, Prec } = require('@codemirror/state');
+const { EditorView, Decoration, WidgetType } = require('@codemirror/view');
 const path = require('node:path');
 const fs = require('node:fs');
 const { createHash } = require('node:crypto');
@@ -58,6 +60,17 @@ module.exports = class BlogPlugin extends Plugin {
     this.blogFonts = [];
     this.fontsReady = this.loadFonts();
     this.document.body.classList.add('secemp-blog-vault', 'secemp-blog-focus');
+    const { createArticleView } = require(path.join(this.root, '.obsidian/plugins/secemp-blog/article-view.js'));
+    this.articleView = createArticleView({ StateField, StateEffect, EditorState, Prec, EditorView,
+      Decoration, WidgetType, parseYaml, editorInfoField, editorLivePreviewField });
+    this.registerEditorExtension(this.articleView.extension);
+    this.registerMarkdownPostProcessor(async (element, context) => {
+      if (!/^content\/(?!images\/|extra\/).+\.md$/i.test(context.sourcePath)) return;
+      const file = this.app.vault.getAbstractFileByPath(context.sourcePath);
+      if (!file) return;
+      const text = await this.app.vault.cachedRead(file);
+      if (!this.unloaded) this.articleView.renderReading(element, text, context.getSectionInfo(element));
+    });
     this.addCommand({ id: 'new-post', name: 'New post', callback: () => this.newPost() });
     this.addCommand({ id: 'preview-note', name: 'Preview current note', callback: () => this.run(() => this.preview()) });
     this.addCommand({ id: 'set-visibility', name: 'Set current note visibility', callback: () => this.run(() => this.visibility()) });
@@ -66,7 +79,7 @@ module.exports = class BlogPlugin extends Plugin {
       await this.transform(file, ['--convert', file.path]);
       new Notice('Properties converted. The body and publication status are unchanged.');
     }) });
-    this.addCommand({ id: 'toggle-generated-files', name: 'Show/hide generated folders', callback: () => {
+    this.addCommand({ id: 'toggle-generated-files', name: 'Show/hide project files', callback: () => {
       this.document.body.classList.toggle('secemp-blog-focus');
     } });
     this.addRibbonIcon('file-plus', 'New blog post', () => this.newPost());
@@ -115,7 +128,10 @@ module.exports = class BlogPlugin extends Plugin {
       const plan = await this.bridge.runAuthoring(['--prepare-post', '--title', title], this.root);
       if (cancelled() || this.unloaded) return;
       const file = await this.app.vault.create(plan.path, plan.content);
-      await this.app.workspace.getLeaf('tab').openFile(file);
+      const leaf = this.app.workspace.getLeaf('tab');
+      await leaf.openFile(file);
+      const editor = leaf.view?.editor;
+      if (editor) editor.setCursor(editor.lastLine(), 0);
     });
     modal.open();
     return modal;

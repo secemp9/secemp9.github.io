@@ -7,6 +7,9 @@ const { createHash } = require('node:crypto');
 const test = require('node:test');
 const { JSDOM } = require('jsdom');
 const bridge = require('../scripts/create-blog-post.js');
+const { StateField } = require('@codemirror/state');
+const editorInfoField = StateField.define({ create: () => ({ file: { path: 'content/note.md' } }), update: value => value });
+const editorLivePreviewField = StateField.define({ create: () => true, update: value => value });
 
 const ROOT = path.resolve(__dirname, '..');
 const PLUGIN = path.join(ROOT, '.obsidian/plugins/secemp-blog/main.js');
@@ -33,6 +36,8 @@ function boot(t) {
     constructor(app) { this.app = app; this.commands = []; }
     addCommand(command) { this.commands.push(command); }
     addRibbonIcon(icon, label, action) { this.ribbon = { icon, label, action }; }
+    registerEditorExtension(extension) { this.editorExtension = extension; }
+    registerMarkdownPostProcessor(processor) { this.processor = processor; }
   }
   class Modal {
     constructor(app) {
@@ -66,7 +71,8 @@ function boot(t) {
     },
   };
   const module = { exports: {} };
-  const requireStub = name => name === 'obsidian' ? { Plugin, Modal, Notice, MarkdownView } : require(name);
+  const requireStub = name => name === 'obsidian' ? { Plugin, Modal, Notice, MarkdownView,
+    editorInfoField, editorLivePreviewField, parseYaml: require('js-yaml').load } : require(name);
   vm.runInNewContext('(function(require,module,exports){' + fs.readFileSync(PLUGIN, 'utf8') + '\n})',
                      { document, window: dom.window })(requireStub, module, module.exports);
   const plugin = new module.exports(app);
@@ -259,7 +265,7 @@ test('writing stylesheet matches the blog palette and widens both editor modes',
     const expected = site.match(new RegExp('--' + published + ':\\s*(#[0-9a-f]+)', 'i'))[1];
     assert.equal(actual.toLowerCase(), expected.toLowerCase());
   }
-  assert.match(css, /--file-line-width: 64rem/);
+  assert.match(css, /--file-line-width: 52rem/);
   assert.match(css, /--font-text-theme: var\(--blog-serif\)/);
   assert.match(css, /--font-monospace-theme: var\(--blog-mono\)/);
   assert.match(css, /--line-height-normal: 1\.78/);
@@ -267,6 +273,10 @@ test('writing stylesheet matches the blog palette and widens both editor modes',
   assert.equal(appearance.theme, 'obsidian');
   assert.equal(appearance.baseFontSize, 20);
   assert.equal(appearance.accentColor, '#d4af37');
+  const app = JSON.parse(fs.readFileSync(path.join(ROOT, '.obsidian/app.json')));
+  assert.equal(app.showLineNumber, false);
+  assert.equal(app.showInlineTitle, false);
+  assert.equal(app.showIndentGuide, false);
 });
 
 test('blog registers four bundled font faces offline and removes them on unload', async t => {
