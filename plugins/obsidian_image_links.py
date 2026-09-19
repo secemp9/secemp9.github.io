@@ -12,6 +12,7 @@ from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 from markdown.extensions.toc import slugify
 from pelican import signals
+from pelican.generators import Generator
 
 
 _TAG = re.compile(r'''<(?P<tag>img|a)\b(?:"[^"]*"|'[^']*'|[^'">])*>''', re.I)
@@ -83,15 +84,19 @@ def process_content(content):
     content._content = _TAG.sub(rewrite_tag, html)
 
 
-def normalize_static_links(generator):
-    # Pelican 4.12 decodes only %20 when collecting static paths, although its
-    # URL resolver decodes every escape. Match the resolver before files load.
-    generator.context['static_links'] = {
-        unquote(unescape(path)) for path in generator.context['static_links']
-    }
+class DecodeStaticLinks(Generator):
+    def generate_context(self):
+        # Pelican 4.12 only decodes %20 while collecting static paths. Decode
+        # once after every article/page and before StaticGenerator runs last.
+        self.context['static_links'] = {
+            unquote(unescape(path)) for path in self.context['static_links']
+        }
+
+
+def get_generators(pelican):
+    return DecodeStaticLinks
 
 
 def register():
     signals.content_object_init.connect(process_content)
-    signals.article_generator_finalized.connect(normalize_static_links)
-    signals.page_generator_finalized.connect(normalize_static_links)
+    signals.get_generators.connect(get_generators)
