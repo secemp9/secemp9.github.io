@@ -46,6 +46,7 @@ class FormModal extends Modal {
 
 module.exports = class BlogPlugin extends Plugin {
   onload() {
+    this.unloaded = false;
     const adapter = this.app.vault.adapter;
     if (typeof adapter.getBasePath !== 'function') {
       throw new Error('Blog commands require the repository opened as a desktop vault.');
@@ -69,6 +70,7 @@ module.exports = class BlogPlugin extends Plugin {
   }
 
   onunload() {
+    this.unloaded = true;
     this.previewServer?.close();
     this.document?.body.classList.remove('secemp-blog-vault', 'secemp-blog-focus');
   }
@@ -84,7 +86,7 @@ module.exports = class BlogPlugin extends Plugin {
       const title = form.querySelector('[name=title]').value.trim();
       if (!title) throw new Error('Enter a title.');
       const plan = await this.bridge.runAuthoring(['--prepare-post', '--title', title], this.root);
-      if (cancelled()) return;
+      if (cancelled() || this.unloaded) return;
       const file = await this.app.vault.create(plan.path, plan.content);
       await this.app.workspace.getLeaf('tab').openFile(file);
     });
@@ -133,8 +135,13 @@ module.exports = class BlogPlugin extends Plugin {
     try {
       const file = await this.activeNote();
       const result = await this.bridge.runAuthoring(['--preview', file.path], this.root);
+      if (this.unloaded) return;
       if (!this.previewServer) {
         this.previewServer = await this.bridge.startPreviewServer(result.directory, result.port);
+      }
+      if (this.unloaded) {
+        this.previewServer.close();
+        return;
       }
       window.open(result.url, '_blank', 'noopener');
     } finally {

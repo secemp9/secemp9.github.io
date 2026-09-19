@@ -74,7 +74,9 @@ def _note_records():
         relative = path.relative_to(CONTENT_DIR)
         if relative.parts[0] in {"images", "extra"}:
             continue
-        metadata, _, _ = split_document(_read_note(path))
+        metadata, _, format_name = split_document(_read_note(path))
+        if format_name == "yaml":
+            metadata.setdefault("status", "hidden")
         yield path, metadata
 
 
@@ -159,8 +161,9 @@ def transform_note(value, status=None, properties=False):
     if status is not None and status not in STATUSES:
         raise ValueError("status must be hidden, published, or draft")
     if properties or format_name == "yaml":
-        # Existing posts without a status were public; converting never hides them implicitly.
-        metadata["status"] = status or metadata.get("status", "published")
+        # Legacy headers defaulted to public; native YAML notes default to unlisted.
+        default_status = "hidden" if format_name == "yaml" else "published"
+        metadata["status"] = status or metadata.get("status", default_status)
         if "tags" in metadata:
             metadata["tags"] = ensure_metadata_list(metadata["tags"])
         if "authors" in metadata:
