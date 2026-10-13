@@ -1,14 +1,14 @@
 ---
 title: 'Towards a hardware-invariant NVFP4 for GPUs without FP4: progress report 1'
 date: 2026-10-13T15:59+02:00
-status: hidden
+status: published
 slug: hardware-invariant-nvfp4-progress-report-1
 tags: []
 cssclasses:
 - blog-post
 summary: 4-bit weights on the INT8 tensor cores every NVIDIA GPU from Ampere to Blackwell has, how the format got here, and where the evaluation is right now.
 ---
-*Progress report 1, with numbers as of 5 October 2026. The whole-model evaluation on the 3090 is still running, so there's no final quality or speed table in here yet, and the code isn't public yet either. Both come with report 2, once the evals are done, and after that the plan is a paper.*
+*Progress report 1, with numbers as of 5 October 2026. The whole-model evaluation on the 3090 is still running, so there's no final quality or speed table in here yet. The repo this post is based on stays private until I finish those evals for report 2, the second and final report, and the final numbers and the code both come with it. After that the plan is a paper.*
 
 NVFP4 is NVIDIA's 4-bit floating-point format. Each weight is E2M1, a 4-bit float with two exponent bits and one mantissa bit, so the largest value it can hold is 6. Every block of 16 weights shares an 8-bit E4M3 scale, and the whole tensor gets one FP32 scale on top, which works out to 4.5 bits per weight. Blackwell's tensor cores [run it natively](https://developer.nvidia.com/blog/introducing-nvfp4-for-efficient-and-accurate-low-precision-inference/).
 
