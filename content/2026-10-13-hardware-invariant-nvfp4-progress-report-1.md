@@ -36,7 +36,7 @@ Without rotation, NVINT4 lost to NVFP4 on all twelve models they tested, and wit
 
 Do I emulate, and pay for a decode before every multiply, or go integer and trust that the instructions I need exist on every card I care about?
 
-Integer also fit the other thing I wanted, PTX that lowers to the same native instruction on every target. One kernel family, no `if ampere / elif ada / elif hopper` branches, and no per-generation copies slowly drifting apart. If that works it should be fast, and it's a lot less to maintain. I started calling that hardware-invariant, which is where the H in HINT4 comes from.
+Integer also fit the other thing I wanted, PTX that lowers to the same native instruction on every target. I didn't want an `if ampere / elif ada / elif hopper` in every kernel, or a copy of each kernel per generation that slowly drifts away from the others. If that works it should be fast, and it's a lot less to maintain. I started calling that hardware-invariant, which is where the H in HINT4 comes from.
 
 ## Which integer mma?
 
@@ -55,7 +55,7 @@ Hopper doesn't have one. In these kernels ptxas splits each 4-bit MMA into two 8
 ![Excerpt of NVIDIA's Table 33](images/hint4-progress-report-1/fig03_table33.png)
 *Excerpt from Table 33 of NVIDIA's CUDA programming guide.*
 
-Everything builds on the 8-bit `mma` instead, `mma.sync.aligned.m16n8k32` with signed bytes, which is native on every target I compile for, sm_80 through sm_120. The weights stay 4-bit in memory and get widened to signed bytes in registers right before the multiply, which is more or less what ptxas was doing on Hopper behind my back anyway. I'd rather do it on purpose, in the source, where the instruction stream is the same on every target.
+Everything builds on the 8-bit `mma` instead. It's `mma.sync.aligned.m16n8k32` with signed bytes, and it's native on every target I compile for, sm_80 through sm_120. The weights stay 4-bit in memory and get widened to signed bytes in registers right before the multiply, which is more or less what ptxas was doing on Hopper behind my back anyway. I'd rather do it on purpose, in the source, where the instruction stream is the same on every target.
 
 Nine days after the first commit, the README title went from Hardware-Invariant Native INT4 Microscaling to Hardware-Invariant Native Integer-Tensor-Core 4-bit Microscaling, which is a mouthful, but it stopped promising 4-bit math.
 
@@ -64,7 +64,7 @@ Nine days after the first commit, the README title went from Hardware-Invariant 
 
 I'd mostly taken NVIDIA's table at its word after that. This month I finally read the whole PTX ISA, the 9.3 manual and the 8.7 one that shipped with CUDA 12.8, to see whether anything newer brings 4-bit integer math back.
 
-Nothing does. Hopper's `wgmma` takes 8-bit integers plus a 1-bit mode, and no 4-bit. Blackwell's `tcgen05` has exactly one integer kind, `i8`, and even that is only listed for sm_100a and sm_110a. The new `mma` kinds on consumer Blackwell are all floating point, FP4 included. The 8.7 manual even labels 4-bit `wmma` a preview feature with "no guarantees of backward compatibility on future PTX ISA versions or SM architectures", and the 9.3 manual drops the label.
+Nothing does. Hopper's `wgmma` takes 8-bit integers plus a 1-bit mode, and no 4-bit. Blackwell's `tcgen05` has one integer kind, `i8`, and even that is only listed for sm_100a and sm_110a. The new `mma` kinds on consumer Blackwell are all floating point, FP4 included. The 8.7 manual even labels 4-bit `wmma` a preview feature with "no guarantees of backward compatibility on future PTX ISA versions or SM architectures", and the 9.3 manual drops the label.
 
 ![What the PTX manual offers per target](images/hint4-progress-report-1/fig05_ptx_targets.png)
 *Per target, from the PTX ISA 9.3 manual, plus what I saw in SASS on sm_90.*
@@ -86,7 +86,7 @@ Decode is a different shape. At batch one M is 1, and an `mma` tile wants 16 row
 
 The block scales are still E4M3, same as NVFP4, and Ampere has no FP8 either. The `cvt` forms that convert E4M3 [need sm_89](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cvt) or newer, so on the 3090 the compiler inlines a software decode instead, around forty instructions for every scale byte where Ada does it in one. One of my older kernels did that decode inside the K loop, which is about the worst place it could be.
 
-I moved the decode out of the kernels. The scales get decoded once, before inference, and the prepared kernels read them already decoded, without ever converting an FP8 byte.
+I moved the decode out of the kernels. The scales get decoded once, before inference, and the prepared kernels never touch an FP8 byte.
 
 ![FP8 scale decode cost on Ampere](images/hint4-progress-report-1/fig07_fp8_decode.png)
 *The same older kernel compiled for sm_86 and sm_89, and where the E4M3 conversions sat in each kernel family before the decode moved out.*
@@ -106,7 +106,7 @@ Rotation takes the few huge values that set a block's scale and spreads them acr
 
 But why would it hurt, instead of just doing nothing? Reconstruction SNR with and without rotation came out within a few hundredths of a dB, and perplexity and KL both got worse anyway. My guess is the error moved somewhere the model is more sensitive to, but I haven't checked where.
 
-Chen et al. quantize every forward GEMM, activations included, and rotate both sides of each one. These runs kept activations in BF16, so whether rotation helped came down to the geometry of the weights alone.
+Chen et al. quantize every forward GEMM, activations included, and rotate both sides of each one. These runs kept activations in BF16, so I think whether rotation helped came down to the geometry of the weights alone.
 
 GPTQ actually helped. It closed about a third of the gap to BF16, which was most of what the full stack managed. An older report of mine said "about 80%" here and mixed up those two denominators, so don't trust that number if you've seen it. GPTQ also needed 128 calibration sequences of 2048 tokens and a bit over two hours on the 8×H100 to build.
 
@@ -118,7 +118,7 @@ The old 4-bit MMA kernels, the floating-point comparison kernels and an experime
 
 ## What's left to tune
 
-Absmax isn't the lowest-error scale for a block, so the packer tries candidate scales and keeps whichever gives the lowest squared error, using nothing but the weights. E4M3 also rounds the scale itself, and if it rounds down, the block's largest weight gets clipped, so the encoder rounds up when that would happen.
+Absmax isn't the lowest-error scale for a block, so the packer tries candidate scales and keeps whichever gives the lowest squared error, using nothing but the weights. E4M3 also rounds the scale itself. If it rounds down, the block's largest weight gets clipped, and the encoder rounds up instead when that would happen.
 
 Some blocks fit an evenly spaced INT4 grid better and some fit FP4's uneven one, and it turns out I don't have to pick. Double every E2M1 magnitude and you get 0, 1, 2, 3, 4, 6, 8 and 12, which are just integers, so an FP4 block can go through the same INT8 `mma`, exactly, with a different lookup when the nibbles get widened. E4M3 scales are always positive, so their sign bit is free, and I use it to record which grid each block came from. I call that dual grid.
 
@@ -132,41 +132,41 @@ I started swapping things back. Put the BF16 weights back into one group of modu
 ![Logical deduction swap runs](images/hint4-progress-report-1/fig10_logical_deduction.png)
 *Putting one group of Kimi's modules back in BF16 at a time, then the fused kernel before and after the 8-bit output projection.*
 
-Smaller groups also mean lower error, which is why NVFP4 uses 16, but the 8-bit `mma` takes K in chunks of 32, so a scale every 16 weights means splitting every multiply in two.
+Smaller groups also mean lower error, which is why NVFP4 uses 16. The 8-bit `mma` takes K in chunks of 32, though, so a scale every 16 weights means splitting every multiply in two.
 
 TL is my way around that. Each pair of 16-weight groups shares one E4M3 scale, and each group gets its own small integer multiplier, one through eight, which gets folded straight into the weight bytes before the multiply. A 4-bit weight times eight still fits in a signed byte, so the math stays exact and one `mma` covers both groups, at the same 4.5 bits per weight as plain group-16. A zero multiplier is reserved to mark an FP4 block, so dual grid still works inside TL.
 
 ![TL scale layout](images/hint4-progress-report-1/fig11_tl_layout.png)
 *Two 16-weight groups under one shared scale.*
 
-The scales themselves can be compressed too. Classic DQ quantizes the group scales with a small palette plus a second level of scales, which gets classic E4M3 under 4.5 bits. TL-DQ is a different thing despite the name. It's a dictionary over the final TL scale words, and expanding it gives back the exact TL scale stream, byte for byte, so it's lossless with respect to TL while TL itself is still lossy with respect to the model. On Kimi it matched TL exactly with a checkpoint about a gigabyte smaller.
+The scales themselves can be compressed too. Classic DQ quantizes the group scales with a small palette plus a second level of scales, which gets classic E4M3 under 4.5 bits. TL-DQ is a different thing despite the name. It's a dictionary over the final TL scale words, and expanding it gives back the exact TL scale stream, byte for byte, so it adds no error on top of TL. On Kimi it matched TL exactly, with a checkpoint about a gigabyte smaller.
 
 ![Stored bits per weight by format](images/hint4-progress-report-1/fig12_bits_per_weight.png)
 *Stored bits per weight by format and group size. The diamonds are prepared DQ once it's sitting in GPU memory.*
 
 ## Downstream tasks
 
-Up to here I'd been scoring formats on reconstruction error and perplexity, and after logical deduction I didn't trust that much. In August I ran Llama-3.2-1B-Instruct through 19 tasks on an RTX A6000, with four arms: BF16, TL-DQ, classic, and NVFP4A16, the weight-only NVFP4 path. These were August's all-4-bit configurations, from before the current mixed precision policy.
+Up to here I'd been scoring formats on reconstruction error and perplexity, and after logical deduction I didn't trust that much. In August I ran Llama-3.2-1B-Instruct through 19 tasks on an RTX A6000, with four arms: BF16, TL-DQ, classic, and NVFP4A16, the weight-only NVFP4 path. Every layer was 4-bit in those runs, which isn't true of the current default anymore.
 
 ![Llama-3.2-1B four-arm evaluation](images/hint4-progress-report-1/fig13_llama_tasks.png)
 *Llama-3.2-1B-Instruct on an A6000, 17 August, with four of the 19 tasks broken out.*
 
 All three quantized arms landed below BF16, and NVFP4A16 had the best quantized average, a third of a point above TL-DQ. Most of that lead comes from IFEval, whose scorer turned out to be nondeterministic when it was rerun, and without IFEval the gap is under a tenth of a point. Per task it goes both ways. TL-DQ was ahead on ARC-Challenge, HellaSwag, BoolQ and GSM8K.
 
-The weird part is the reconstruction numbers. On this model every classic tensor reconstructed better than every NVFP4 tensor, NVFP4's best one was below classic's worst, and NVFP4A16 still beat classic on the average and on six separate downstream measurements across three harnesses. I still rank variants inside one codec family by reconstruction error, but I've stopped trusting it across families.
+The weird part is the reconstruction numbers. On this model NVFP4's best-reconstructed tensor was worse than classic's worst, and NVFP4A16 beat classic anyway, on the average and on six separate downstream measurements across three harnesses. I still rank variants inside one codec family by reconstruction error, but I've stopped trusting it across families.
 
-I don't have paired significance tests for any of this. The aggregate result files survived, and recomputing the means from them matches the report to four decimals, but the per-item outputs didn't.
+I can't do paired significance tests on any of this, because only the aggregate result files survived, not the per-item outputs.
 
 ## Is it faster?
 
-The A6000 shares the 3090's architecture, but I wanted speed numbers from the card this is actually for, so in September I timed 144 isolated matrix multiplies on the 3090 itself, three layer shapes at six values of M for eight methods. At M=1, TL-DQ was about twice as fast as FP16 on all three shapes, which is the decode case.
+The A6000 shares the 3090's architecture, but I wanted speed numbers from the card this is actually for. In September I timed 144 isolated matrix multiplies on the 3090, three layer shapes at six values of M for eight methods. At M=1, the decode case, TL-DQ was about twice as fast as FP16 on all three shapes.
 
 ![FP16 time over TL-DQ time on the 3090](images/hint4-progress-report-1/fig14_dense_heatmap.png)
 *FP16 time over TL-DQ time on the 3090. Green means TL-DQ was faster.*
 
-The rest of the table is less fun. At M=8 TL-DQ lost to FP16 on all three shapes, from 32 to 512 it depends on the shape, and by 1024 it's roughly even. Why does M=8 fall below FP16 everywhere when M=1 is twice as fast? I haven't pinned that down. My read on the overall shape is that batch one is waiting on memory, so moving about a quarter of the weight bytes pays off, and past that FP16 on a 3090 is a strong baseline while my kernel still has to unpack weights and quantize activations.
+The rest of the table is less fun. At M=8 TL-DQ lost to FP16 on all three shapes, from 32 to 512 it depends on the shape, and by 1024 it's roughly even. Why does M=8 fall below FP16 everywhere when M=1 is twice as fast? I haven't pinned that down. My guess is that batch one is waiting on memory, so moving about a quarter of the weight bytes pays off. Past that, FP16 on a 3090 is a strong baseline, and my kernel has to unpack weights and quantize activations on top.
 
-It also looks worse against my own earlier build, where every non-DQ decode cell got slower, by up to 44 percent. Those came from separate campaigns instead of one paired run, so I can't tell you which change did it.
+Against my own earlier build it's worse too. Every non-DQ decode cell got slower, by up to 44 percent, and the two builds were timed in separate campaigns rather than one paired run, so I can't tell you which change did it.
 
 And a matrix multiply benchmark has no attention, KV cache or scheduler in it, so the real answer has to come from the whole-model run.
 
@@ -196,9 +196,9 @@ The older mutable API can't just hold a snapshot, because it still has to track 
 
 The next change I kept was much smaller, one rounding decision in the M=1 GEMV.
 
-Quantizing an activation means computing 127·v/s and rounding to an integer. The kernel does that with a fast reciprocal estimate and a multiply, which can land on the wrong side of a midpoint. In this caller the inputs are FP16 and the scales are ordinary positive FP16 values, and the midpoint that matters has a simple test: if 2·|v| equals s, the exact value is 63.5, round-to-nearest-even gives 64, and the helper now checks for exactly that case.
+Quantizing an activation means computing 127·v/s and rounding to an integer. The kernel does that with a fast reciprocal estimate and a multiply, which can land on the wrong side of a midpoint. In this caller the inputs are FP16 and the scales are ordinary positive FP16 values, and the midpoint that matters has a simple test: if 2·|v| equals s, the exact value is 63.5, round-to-nearest-even gives 64, and the helper now checks for that case.
 
-The change is a few lines. Most of the work was checking it. On the CPU I proved it over every FP16 encoding, and on the GPU I compared the new helper with the old one almost a million times, about a third of those against an FP64 reference, without a single mismatch.
+The fix itself is a few lines, and most of the time went into checking it. On the CPU I proved it over every FP16 encoding, and on the GPU I compared the new helper with the old one almost a million times, about a third of those against an FP64 reference, without a single mismatch.
 
 ![Midpoint helper timing](images/hint4-progress-report-1/fig17_midpoint.png)
 *The midpoint helper on four decode cases. The red markers are the host timing flags that stayed.*
@@ -216,7 +216,7 @@ For the midpoint build, four entries per target changed, the four I meant to cha
 ![Six-target census](images/hint4-progress-report-1/fig18_census.png)
 *The 10 September build on all six targets.*
 
-The census only reads the binaries. The only GPU that has actually run and timed this build is the 3090, and on Blackwell all I have is cubins with the right instructions in them.
+The census just reads binaries. The 3090 is the only GPU that has run and timed this build, and on Blackwell all I have is cubins with the right instructions in them.
 
 I also wanted outputs to match across GPUs, and the instructions alone don't get you that. I made activation rounding exact, pinned the dense schedule to one reference profile that matches the 3090 so a GPU with more SMs can't pick a different K split or reduction order, and fixed the order MoE outputs get combined in. SiLU still goes through the hardware's approximate exponential, though, so I can't promise bit-identical whole-model outputs across GPUs.
 
@@ -238,15 +238,13 @@ The W8 version never even got timed. It changed instructions in dozens of kernel
 
 ## Where the numbers come from
 
-I've been burned by my own numbers on this project. An earlier report of mine republished old results as if I'd just measured them, and the instruction counts in the docs once drifted away from the binary they described.
-
-Every number in this post comes from a saved result file, and the timing tables keep the slow cells next to the build that produced them.
+I've been burned by my own numbers on this project. An earlier report of mine republished old results as if I'd just measured them, and the instruction counts in the docs once drifted away from the binary they described. Everything measured in this post comes from a saved result file, slow cells included.
 
 ## The evaluator
 
 The 3090 is shared with other jobs, so before a whole-model run can mean anything it needs the card to itself. I started from apaz's [gpumutex](https://github.com/apaz-cli/libgpumutex), which intercepts CUDA initialization and makes processes wait in line for a GPU, and I keep a pinned fork of it that gives up after a bounded wait and checks that its lock files are set up correctly before anything starts. That only keeps well-behaved processes off the card, so the evaluator also holds its own lease on the GPU, and the run goes by that lease.
 
-Each task epoch loads one model and runs the same frozen requests through it twice, as two separately supervised passes. A shard only gets written as a read-only checkpoint once both passes are complete and check out against each other, and scoring happens later, on the CPU, by replaying the task's scorer over the saved responses. If a worker dies, the next epoch checks the chain of checkpoints and picks up after the last complete shard, so anything after that point gets redone but nothing before it ever needs the GPU again. It also means the campaign's progress counter can sit still while checkpointed GPU work piles up underneath it.
+Each task epoch loads one model and runs the same frozen requests through it twice, in two separately supervised passes, and a shard only gets checkpointed once both passes finish and agree. Scoring happens later, on the CPU, by replaying the task's scorer over the saved responses. When a worker dies, the next epoch picks up after the last complete shard, so nothing before that point ever needs the GPU again. The catch is that the campaign's progress counter can sit still while checkpointed GPU work piles up underneath it.
 
 ![Evaluator flow](images/hint4-progress-report-1/fig19_evaluator_flow.png)
 *How a shard becomes a score, and where a crashed run picks back up.*
@@ -267,7 +265,7 @@ The plan has 17 configurations, three Llama-3.1-8B-Instruct arms and fourteen Ll
 ![Campaign progress snapshot](images/hint4-progress-report-1/fig20_progress.png)
 *Accepted work per stage of the plan.*
 
-The 1B TL-DQ default arm has finished both passes on every shard, the 8B BF16 arm is about 40 percent through, and CPU scoring has accepted exactly one shard. Full perplexity, performance, memory and the final comparison haven't run yet.
+The 1B TL-DQ default arm has finished both passes on every shard, the 8B BF16 arm is about 40 percent through, and CPU scoring has accepted one shard so far. Full perplexity, performance, memory and the final comparison haven't run yet.
 
 DQ can only be evaluated as a whole model through Hugging Face directly for now, since vLLM can't load it yet. Kimi doesn't fit in 24 GiB at all, so it's not in the same-card comparison.
 
