@@ -16,11 +16,11 @@
   <meta property="og:description" content="{% block og_description %}{{ SITESUBTITLE }}{% endblock %}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ SITEURL }}/{% block og_url %}{% endblock %}">
-  <meta property="og:image" content="{{ OG_IMAGE }}">
+  <meta property="og:image" content="{% block og_image %}{{ OG_IMAGE }}{% endblock %}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{% block twitter_title %}{{ SITENAME }}{% endblock %}">
   <meta name="twitter:description" content="{% block twitter_description %}{{ SITESUBTITLE }}{% endblock %}">
-  <meta name="twitter:image" content="{{ OG_IMAGE }}">
+  <meta name="twitter:image" content="{% block twitter_image %}{{ OG_IMAGE }}{% endblock %}">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   {% if FEED_ALL_ATOM %}<link rel="alternate" type="application/atom+xml" title="{{ SITENAME }}" href="{{ SITEURL }}/{{ FEED_ALL_ATOM }}">{% endif %}
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">

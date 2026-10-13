@@ -8,6 +8,8 @@
 {% block og_url %}{{ article.url }}{% endblock %}
 {% block twitter_title %}{{ article.title|striptags|e }}{% endblock %}
 {% block twitter_description %}{{ article.summary|striptags|truncate(160)|e }}{% endblock %}
+{% block og_image %}{% if article.og_image %}{{ SITEURL }}/{{ article.og_image }}{% else %}{{ OG_IMAGE }}{% endif %}{% endblock %}
+{% block twitter_image %}{% if article.og_image %}{{ SITEURL }}/{{ article.og_image }}{% else %}{{ OG_IMAGE }}{% endif %}{% endblock %}
 
 {% block body_class %} class="post-page"{% endblock %}
 

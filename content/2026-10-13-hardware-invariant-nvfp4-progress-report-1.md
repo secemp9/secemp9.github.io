@@ -7,6 +7,8 @@ tags: []
 cssclasses:
 - blog-post
 summary: 4-bit weights on the INT8 tensor cores every NVIDIA GPU from Ampere to Blackwell has, how the format got here, and where the evaluation is right now.
+image: images/hint4-progress-report-1/cover-ink-curve-discrete-steps.png
+og_image: images/hint4-progress-report-1/cover-ink-curve-discrete-steps.png
 ---
 *Progress report 1, with numbers as of 5 October 2026. The whole-model evaluation on the 3090 is still running, so there's no final quality or speed table in here yet. The repo this post is based on stays private until I finish those evals for report 2, the second and final report, and the final numbers and the code both come with it. After that the plan is a paper.*
 

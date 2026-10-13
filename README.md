@@ -86,6 +86,13 @@ cssclasses: [blog-post]
 The article starts here.
 ```
 
+Two optional properties control images. `image` puts a cover image at the top
+of the post, and `og_image` sets the image link previews use on X, Discord and
+similar sites, through `og:image` and `twitter:image`. Both take a path under
+`content/`, such as `images/my-post/cover.png`. Posts without `og_image` keep
+the site-wide `OG_IMAGE` from `pelicanconf.py`, and the preview title is
+always the post title.
+
 After pushing to `main` and a successful deployment, share
 `https://secemp.blog/2026/09/15/a-preview-of-my-next-post/`. To make it public,
 change just `status: hidden` to `status: published`, then commit and push.
